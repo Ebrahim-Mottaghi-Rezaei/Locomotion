@@ -1,0 +1,13 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{CCB0F54C-44C3-2DDA-0B22-61BA1B71C037}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "Junks",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
