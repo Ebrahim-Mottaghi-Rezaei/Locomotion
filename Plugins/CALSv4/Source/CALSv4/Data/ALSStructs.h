@@ -9,7 +9,7 @@ class UCurveVector;
 class UAnimMontage;
 class UAnimSequenceBase;
 
-USTRUCT(BlueprintType, Category = "C++ ALS")
+USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
 struct FALSComponentAndTransform {
 	GENERATED_BODY()
 
@@ -24,7 +24,7 @@ struct FALSComponentAndTransform {
 	}
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS")
+USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
 struct FALSCameraSettings {
 	GENERATED_BODY()
 
@@ -40,7 +40,7 @@ struct FALSCameraSettings {
 		bool DoCollisionTest;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS")
+USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
 struct FALSCameraSettingsGait {
 	GENERATED_BODY()
 
@@ -55,7 +55,7 @@ struct FALSCameraSettingsGait {
 };
 
 
-USTRUCT(BlueprintType, Category = "C++ ALS")
+USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
 struct FALSCameraSettingsState {
 	GENERATED_BODY()
 
@@ -69,7 +69,7 @@ struct FALSCameraSettingsState {
 		FALSCameraSettingsGait Aiming;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS")
+USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
 struct FALSDynamicMontageParams {
 	GENERATED_BODY()
 
@@ -86,7 +86,7 @@ struct FALSDynamicMontageParams {
 		float StartTime;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS")
+USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
 struct FALSLeanAmount {
 	GENERATED_BODY()
 
@@ -96,7 +96,7 @@ struct FALSLeanAmount {
 		float LeftRight;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS")
+USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
 struct FALSMantleAsset {
 	GENERATED_BODY()
 
@@ -120,7 +120,7 @@ struct FALSMantleAsset {
 		float HighStartPosition;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS")
+USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
 struct FALSMantleParams {
 	GENERATED_BODY()
 
@@ -137,7 +137,7 @@ struct FALSMantleParams {
 };
 
 
-USTRUCT(BlueprintType, Category = "C++ ALS")
+USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
 struct FALSMantleTraceSettings {
 	GENERATED_BODY()
 
@@ -153,7 +153,7 @@ struct FALSMantleTraceSettings {
 		float DownwardTraceRadius;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS")
+USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
 struct FALSMovementSettings {
 	GENERATED_BODY()
 
@@ -169,7 +169,7 @@ struct FALSMovementSettings {
 		UCurveVector* RotationRateCurve;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS")
+USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
 struct FALSMovementSettingsStance {
 	GENERATED_BODY()
 
@@ -179,7 +179,7 @@ struct FALSMovementSettingsStance {
 		FALSMovementSettings Crouching;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS")
+USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
 struct FALSMovementSettingsState {
 	GENERATED_BODY()
 
@@ -191,7 +191,7 @@ struct FALSMovementSettingsState {
 		FALSMovementSettingsStance Aiming;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS")
+USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
 struct FALSRotateInPlaceAsset {
 	GENERATED_BODY()
 
@@ -209,7 +209,7 @@ struct FALSRotateInPlaceAsset {
 		float FastPlayRate;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS")
+USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
 struct FALSTurnInPlaceAsset {
 	GENERATED_BODY()
 
@@ -225,7 +225,7 @@ struct FALSTurnInPlaceAsset {
 		float ScaleTurnAngle;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS")
+USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
 struct FALSVelocityBlend {
 	GENERATED_BODY()
 
