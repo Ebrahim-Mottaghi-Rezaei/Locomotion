@@ -1,13 +1,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Animation/AnimSequenceBase.h"
+#include "ALSEnums.h"
+#include "Engine/EngineTypes.h"
+
 #include "ALSStructs.generated.h"
 
 class UPrimitiveComponent;
 class UCurveVector;
 class UAnimMontage;
 class UAnimSequenceBase;
+class ACharacter;
 
 USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
 struct FALSComponentAndTransform {
@@ -18,10 +21,8 @@ struct FALSComponentAndTransform {
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		FTransform Transform;
 
-	FALSComponentAndTransform() {
-		Component = nullptr;
-		Transform = FTransform();
-	}
+	FALSComponentAndTransform();
+	FALSComponentAndTransform(FTransform transform, UPrimitiveComponent* component);
 };
 
 USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
@@ -84,6 +85,9 @@ struct FALSDynamicMontageParams {
 		float PlayRate;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float StartTime;
+
+	FALSDynamicMontageParams();
+	FALSDynamicMontageParams(UAnimSequenceBase* animation, float blendInTime, float blendOutTime, float playRate, float startTime);
 };
 
 USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
@@ -94,6 +98,9 @@ struct FALSLeanAmount {
 		float FrontBack;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float LeftRight;
+
+	FALSLeanAmount();
+	FALSLeanAmount(float FB, float LR);
 };
 
 USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
@@ -118,6 +125,9 @@ struct FALSMantleAsset {
 		float HighPlayRate;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float HighStartPosition;
+
+	FALSMantleAsset();
+	FALSMantleAsset(UAnimMontage* AnimMontage, UCurveVector* PositionCorrectionCurve, FVector StartingOffset, float LowHeight, float LowPlayRate, float LowStartPosition, float HighHeight, float HighPlayRate, float HighStartPosition);
 };
 
 USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
@@ -129,11 +139,14 @@ struct FALSMantleParams {
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UCurveVector* PositionCorrectionCurve;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		FVector StartingPosition;
+		float StartingPosition;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		float PlayRate;
+		float PlayRate = 1.0f;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		float StartingOffset;
+		FVector StartingOffset;
+
+	FALSMantleParams();
+	FALSMantleParams(UAnimMontage* animMontage, UCurveVector* positionCorrectionCurve, float startingPosition, FVector startingOffset, float playRate = 1.0);
 };
 
 
@@ -166,7 +179,7 @@ struct FALSMovementSettings {
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UCurveVector* MovementCurve;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		UCurveVector* RotationRateCurve;
+		UCurveFloat* RotationRateCurve;
 };
 
 USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
@@ -222,7 +235,7 @@ struct FALSTurnInPlaceAsset {
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float PlayRate;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		float ScaleTurnAngle;
+		bool ScaleTurnAngle;
 };
 
 USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
@@ -237,9 +250,13 @@ struct FALSVelocityBlend {
 		float L;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float R;
+
+	FALSVelocityBlend();
+	FALSVelocityBlend(float f, float b, float l, float r);
+
 };
 
-///Animation Modifiers Structures.
+//Animation Modifiers Structures.
 USTRUCT(BlueprintType, Category = "C++ ALS|Animation Modifiers")
 struct FAnimCurveCreationData {
 	GENERATED_BODY()
@@ -261,4 +278,134 @@ struct FALSAnimCurveCreationParams {
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TArray<FAnimCurveCreationData> Keys;
+};
+
+USTRUCT(BlueprintType, Category = "C++ ALS|Character Information")
+struct FALSCurrentState {
+	GENERATED_BODY()
+
+		UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TEnumAsByte<EMovementMode> PawnMovementMode;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		EALSMovementState MovementState;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		EALSMovementState PrevMovementState;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		EALSMovementAction MovementAction;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		EALSRotationMode RotationMode;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		EALSGait ActualGait;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		EALSStance ActualStance;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		EALSViewMode ViewMode;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		EALSOverlayState OverlayState;
+
+	FALSCurrentState();
+};
+
+USTRUCT(BlueprintType, Category = "C++ ALS|Character Information")
+struct FALSEssentialValues {
+	GENERATED_BODY()
+
+		UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FVector Velocity;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FVector Acceleration;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FVector MovementInput;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bIsMoving;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bHasMovementInput;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float Speed;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float MovementInputAmount;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FRotator AimingRotation;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float AimYawRate;
+};
+
+USTRUCT(BlueprintType, Category = "C++ ALS|Debug")
+struct FDebugInfo {
+	GENERATED_BODY()
+
+		UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		ACharacter* DebugFocusCharacter;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bDebugView;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bShowHUD;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bShowTraces;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bShowDebugShapes;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bShowLayerColors;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bSlomo;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bShowCharacterInfo;
+
+	FDebugInfo() {
+		DebugFocusCharacter = nullptr;
+	}
+};
+
+USTRUCT(BlueprintType, Category = "C++ ALS|Camera System")
+struct FALSCameraParameters {
+	GENERATED_BODY()
+
+		UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float TP_FOV;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float FP_FOV;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bRightShoulder;
+	FALSCameraParameters();
+};
+
+USTRUCT(BlueprintType, Category = "C++ ALS|Camera System")
+struct FALSTraceParams {
+	GENERATED_BODY()
+
+		UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TEnumAsByte<ETraceTypeQuery> TraceChannel;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FVector TraceOrigin;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float TraceRadius;
+
+	FALSTraceParams();
+};
+
+USTRUCT(BlueprintType, Category = "C++ ALS|Camera System")
+struct FALSCameraBehaviourResult {
+	GENERATED_BODY()
+
+		UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FVector Location;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FRotator Rotation;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float FOV;
+
+	FALSCameraBehaviourResult();
+
+	FALSCameraBehaviourResult(FVector location, FRotator rotation, float fov);
+};
+
+//Function Return Value Types
+struct FALSControlVectors {
+	FVector Forward;
+	FVector Right;
+};
+
+struct FALSHitResult {
+	bool bHit;
+	FHitResult SweepHitResult;
 };

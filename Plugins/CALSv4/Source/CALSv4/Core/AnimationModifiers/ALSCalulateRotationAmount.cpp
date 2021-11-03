@@ -15,7 +15,7 @@ UALSCalulateRotationAmount::UALSCalulateRotationAmount() {
 /// <param name="AnimationSequence"></param>
 void UALSCalulateRotationAmount::OnApply_Implementation(UAnimSequence* AnimationSequence) {
 	AnimSequence = AnimationSequence;
-	bool curveExists = UAnimationBlueprintLibrary::DoesCurveExist(this->AnimSequence, CurveName, ERawCurveTrackTypes::RCT_Float);
+	const bool curveExists = UAnimationBlueprintLibrary::DoesCurveExist(this->AnimSequence, CurveName, ERawCurveTrackTypes::RCT_Float);
 
 	if (curveExists) {
 		UAnimationBlueprintLibrary::RemoveCurve(AnimSequence, CurveName, false);

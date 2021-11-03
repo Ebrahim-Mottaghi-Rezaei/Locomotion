@@ -10,7 +10,7 @@ UALSCopyCurves::UALSCopyCurves() {
 			TEXT("Layering_Arm_R_LS") ,TEXT("Layering_Hand_L") ,TEXT("Layering_Hand_R") ,TEXT("Layering_Head") ,TEXT("Layering_Head_Add") ,TEXT("Layering_Legs") ,
 			TEXT("Layering_Pelvis") ,TEXT("Layering_Spine") ,TEXT("Layering_Spine_Add") ,TEXT("Mask_AimOffset") ,TEXT("Mask_FootstepSound") ,TEXT("Mask_LandPrediction") ,
 			TEXT("Mask_Lean") ,TEXT("RotationAmount") ,TEXT("Feet_Position") ,TEXT("Weight_Falling") ,TEXT("Weight_Gait"),TEXT("YawOffset") };
-	AllCurves.Append(curves, ARRAY_COUNT(curves));
+	AllCurves.Append(curves, UE_ARRAY_COUNT(curves));
 }
 
 void UALSCopyCurves::OnApply_Implementation(UAnimSequence* AnimationSequence) {
@@ -20,8 +20,8 @@ void UALSCopyCurves::OnApply_Implementation(UAnimSequence* AnimationSequence) {
 	TArray<float> values;
 	TArray<FName> selectedCurves = CopyAllCurves ? AllCurves : CurvesToCopy;
 
-	for (FName curve : selectedCurves) {
-		bool bCurveExists = UAnimationBlueprintLibrary::DoesCurveExist(AnimToCopyFrom, curve, ERawCurveTrackTypes::RCT_Float);
+	for (const FName curve : selectedCurves) {
+		const bool bCurveExists = UAnimationBlueprintLibrary::DoesCurveExist(AnimToCopyFrom, curve, ERawCurveTrackTypes::RCT_Float);
 		if (bCurveExists) {
 			UAnimationBlueprintLibrary::RemoveCurve(AnimSequence, curve, false);
 		}

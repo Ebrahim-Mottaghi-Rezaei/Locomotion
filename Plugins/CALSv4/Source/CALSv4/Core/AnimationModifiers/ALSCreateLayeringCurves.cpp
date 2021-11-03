@@ -6,14 +6,14 @@ UALSCreateLayeringCurves::UALSCreateLayeringCurves() {
 		TEXT("Layering_Arm_L") ,TEXT("Layering_Arm_L_Add") ,TEXT("Layering_Arm_L_LS") ,TEXT("Layering_Arm_R") ,
 		TEXT("Layering_Arm_R_Add") ,TEXT("Layering_Arm_R_LS") ,TEXT("Layering_Hand_L") ,TEXT("Layering_Hand_R") ,
 		TEXT("Layering_Head") ,TEXT("Layering_Head_Add") ,TEXT("Layering_Legs") ,TEXT("Layering_Pelvis") ,TEXT("Layering_Spine") ,TEXT("Layering_Spine_Add") };
-	CurvesToCreate.Append(curves, ARRAY_COUNT(curves));
+	CurvesToCreate.Append(curves, UE_ARRAY_COUNT(curves));
 	DefaultValue = 1.0f;
 	KeyEachFrame = true;
 }
 
 void UALSCreateLayeringCurves::OnApply_Implementation(UAnimSequence* AnimationSequence) {
-	for (auto curve : CurvesToCreate) {
-		bool bCurveExists = UAnimationBlueprintLibrary::DoesCurveExist(AnimationSequence, curve, ERawCurveTrackTypes::RCT_Float);
+	for (const auto curve : CurvesToCreate) {
+		const bool bCurveExists = UAnimationBlueprintLibrary::DoesCurveExist(AnimationSequence, curve, ERawCurveTrackTypes::RCT_Float);
 		if (bCurveExists) {
 			UAnimationBlueprintLibrary::RemoveCurve(AnimationSequence, curve, false);
 		}

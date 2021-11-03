@@ -2,53 +2,49 @@
 
 using UnrealBuildTool;
 
-public class CALSv4 : ModuleRules
-{
-	public CALSv4(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		
-		PublicIncludePaths.AddRange(
-			new string[] {
-				// ... add public include paths required here ...
-			}
-			);
-				
-		
-		PrivateIncludePaths.AddRange(
-			new string[] {
-				// ... add other private include paths required here ...
-			}
-			);
-			
-		
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"Core",
-				"AnimationModifiers",
-				// ... add other public dependencies that you statically link with here ...
-			}
-			);
-			
-		
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"CoreUObject",
-				"Engine",
-				"Slate",
-				"SlateCore",
-				// ... add private dependencies that you statically link with here ...	
-			}
-			);
-		
-		
-		DynamicallyLoadedModuleNames.AddRange(
-			new string[]
-			{
-				// ... add any modules that your module loads dynamically here ...
-			}
-			);
-	}
+public class CALSv4 : ModuleRules {
+    public CALSv4(ReadOnlyTargetRules Target) : base(Target) {
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        PublicIncludePaths.AddRange(
+            new string[] {
+                // ... add public include paths required here ...
+            });
+
+
+        PrivateIncludePaths.AddRange(
+            new string[] {
+                // ... add other private include paths required here ...
+            });
+
+
+        PublicDependencyModuleNames.AddRange(
+            new[]{
+                "Core",
+                "InputCore",
+                "AnimationModifiers",
+                "Engine",
+                "UMG",
+                "Slate",
+                "SlateCore",
+                "AnimGraphRuntime",
+                // ... add other public dependencies that you statically link with here ...
+            });
+
+
+        PrivateDependencyModuleNames.AddRange(
+            new[]{
+                "CoreUObject",
+                "Engine",
+                "Slate",
+                "SlateCore",
+                // ... add private dependencies that you statically link with here ...	
+            });
+
+
+        DynamicallyLoadedModuleNames.AddRange(
+            new string[] {
+                // ... add any modules that your module loads dynamically here ...
+            });
+    }
 }

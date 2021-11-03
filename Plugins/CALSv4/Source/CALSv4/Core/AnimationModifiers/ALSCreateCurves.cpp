@@ -2,7 +2,7 @@
 
 void UALSCreateCurves::OnApply_Implementation(UAnimSequence* AnimationSequence) {
 	for (auto curve : CurvesToCreate) {
-		bool bCurveExists = UAnimationBlueprintLibrary::DoesCurveExist(AnimationSequence, curve.CurveName, ERawCurveTrackTypes::RCT_Float);
+		const bool bCurveExists = UAnimationBlueprintLibrary::DoesCurveExist(AnimationSequence, curve.CurveName, ERawCurveTrackTypes::RCT_Float);
 		if (bCurveExists) {
 			UAnimationBlueprintLibrary::RemoveCurve(AnimationSequence, curve.CurveName, false);
 		}
