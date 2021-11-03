@@ -55,11 +55,88 @@ UALSAnimInstance::UALSAnimInstance() {
 	N_TurnIP_L90.SlotName = TEXT("(N) Turn/Rotate");
 	N_TurnIP_L90.ScaleTurnAngle = true;
 
-	static ConstructorHelpers::FObjectFinder<UAnimSequence> ALS_N_TurnIP_L90(TEXT("AnimSequence'/MannequinSkeleton/AnimationExamples/Base/TurnInPlace/ALS_N_TurnIP_L90.ALS_N_TurnIP_L90'"));
+	const ConstructorHelpers::FObjectFinder<UAnimSequence> ALS_N_TurnIP_L90(TEXT("AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/TurnInPlace/ALS_N_TurnIP_L90.ALS_N_TurnIP_L90'"));
 	if (IsValid(ALS_N_TurnIP_L90.Object) && ALS_N_TurnIP_L90.Succeeded())
 		N_TurnIP_L90.Animation = ALS_N_TurnIP_L90.Object;
 	else
 		ALSDebug::LogError(TEXT("Animation not found: ALS_N_TurnIP_L90"));
+
+	N_TurnIP_R90 = FALSTurnInPlaceAsset();
+	N_TurnIP_R90.PlayRate = 1.2f;
+	N_TurnIP_R90.AnimatedAngle = 90.0f;
+	N_TurnIP_R90.SlotName = TEXT("(N) Turn/Rotate");
+	N_TurnIP_R90.ScaleTurnAngle = true;
+	const ConstructorHelpers::FObjectFinder<UAnimSequence> ALS_N_TurnIP_R90(TEXT("AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/TurnInPlace/ALS_N_TurnIP_R90.ALS_N_TurnIP_R90'"));
+	if (IsValid(ALS_N_TurnIP_R90.Object) && ALS_N_TurnIP_R90.Succeeded())
+		N_TurnIP_R90.Animation = ALS_N_TurnIP_R90.Object;
+	else
+		ALSDebug::LogError(TEXT("Animation not found: ALS_N_TurnIP_R90"));
+
+	N_TurnIP_L180 = FALSTurnInPlaceAsset();
+	N_TurnIP_L180.PlayRate = 1.2f;
+	N_TurnIP_L180.AnimatedAngle = -180.0f;
+	N_TurnIP_L180.SlotName = TEXT("(N) Turn/Rotate");
+	N_TurnIP_L180.ScaleTurnAngle = true;
+	const ConstructorHelpers::FObjectFinder<UAnimSequence> ALS_N_TurnIP_L180(TEXT("AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/TurnInPlace/ALS_N_TurnIP_L180.ALS_N_TurnIP_L180'"));
+	if (IsValid(ALS_N_TurnIP_L180.Object) && ALS_N_TurnIP_L180.Succeeded())
+		N_TurnIP_L180.Animation = ALS_N_TurnIP_L180.Object;
+	else
+		ALSDebug::LogError(TEXT("Animation not found: ALS_N_TurnIP_L180"));
+
+	N_TurnIP_R180 = FALSTurnInPlaceAsset();
+	N_TurnIP_R180.PlayRate = 1.2f;
+	N_TurnIP_R180.AnimatedAngle = 180.0f;
+	N_TurnIP_R180.SlotName = TEXT("(N) Turn/Rotate");
+	N_TurnIP_R180.ScaleTurnAngle = true;
+	const ConstructorHelpers::FObjectFinder<UAnimSequence> ALS_N_TurnIP_R180(TEXT("AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/TurnInPlace/ALS_N_TurnIP_R180.ALS_N_TurnIP_R180'"));
+	if (IsValid(ALS_N_TurnIP_R180.Object) && ALS_N_TurnIP_R180.Succeeded())
+		N_TurnIP_R180.Animation = ALS_N_TurnIP_R180.Object;
+	else
+		ALSDebug::LogError(TEXT("Animation not found: ALS_N_TurnIP_R180"));
+
+	CLF_TurnIP_L90 = FALSTurnInPlaceAsset();
+	CLF_TurnIP_L90.AnimatedAngle = -90.0f;
+	CLF_TurnIP_L90.PlayRate = 1.2f;
+	CLF_TurnIP_L90.SlotName = TEXT("(CLF) Turn/Rotate");
+	CLF_TurnIP_L90.ScaleTurnAngle = false;
+	const ConstructorHelpers::FObjectFinder<UAnimSequence> ALS_CLF_TurnIP_L90(TEXT("AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/TurnInPlace/ALS_CLF_TurnIP_L90.ALS_CLF_TurnIP_L90'"));
+	if (IsValid(ALS_CLF_TurnIP_L90.Object) && ALS_CLF_TurnIP_L90.Succeeded())
+		CLF_TurnIP_L90.Animation = ALS_CLF_TurnIP_L90.Object;
+	else
+		ALSDebug::LogError(TEXT("Animation not found: ALS_CLF_TurnIP_L90"));
+
+	CLF_TurnIP_R90 = FALSTurnInPlaceAsset();
+	CLF_TurnIP_R90.AnimatedAngle = 90.0f;
+	CLF_TurnIP_R90.PlayRate = 1.2f;
+	CLF_TurnIP_R90.SlotName = TEXT("(CLF) Turn/Rotate");
+	CLF_TurnIP_R90.ScaleTurnAngle = false;
+	const ConstructorHelpers::FObjectFinder<UAnimSequence> ALS_CLF_TurnIP_R90(TEXT("AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/TurnInPlace/ALS_CLF_TurnIP_R90.ALS_CLF_TurnIP_R90'"));
+	if (IsValid(ALS_CLF_TurnIP_R90.Object) && ALS_CLF_TurnIP_R90.Succeeded())
+		CLF_TurnIP_R90.Animation = ALS_CLF_TurnIP_R90.Object;
+	else
+		ALSDebug::LogError(TEXT("Animation not found: ALS_CLF_TurnIP_R90"));
+
+	CLF_TurnIP_L180 = FALSTurnInPlaceAsset();
+	CLF_TurnIP_L180.AnimatedAngle = 180.0f;
+	CLF_TurnIP_L180.PlayRate = 1.2f;
+	CLF_TurnIP_L180.SlotName = TEXT("(CLF) Turn/Rotate");
+	CLF_TurnIP_L180.ScaleTurnAngle = false;
+	const ConstructorHelpers::FObjectFinder<UAnimSequence> ALS_CLF_TurnIP_L180(TEXT("AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/TurnInPlace/ALS_CLF_TurnIP_L180.ALS_CLF_TurnIP_L180'"));
+	if (IsValid(ALS_CLF_TurnIP_L180.Object) && ALS_CLF_TurnIP_L180.Succeeded())
+		CLF_TurnIP_L180.Animation = ALS_CLF_TurnIP_L180.Object;
+	else
+		ALSDebug::LogError(TEXT("Animation not found: ALS_CLF_TurnIP_L180"));
+
+	CLF_TurnIP_R180 = FALSTurnInPlaceAsset();
+	CLF_TurnIP_R180.AnimatedAngle = 180.0f;
+	CLF_TurnIP_R180.PlayRate = 1.2f;
+	CLF_TurnIP_R180.SlotName = TEXT("(CLF) Turn/Rotate");
+	CLF_TurnIP_R180.ScaleTurnAngle = false;
+	const ConstructorHelpers::FObjectFinder<UAnimSequence> ALS_CLF_TurnIP_R180(TEXT("AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/TurnInPlace/ALS_CLF_TurnIP_R180.ALS_CLF_TurnIP_R180'"));
+	if (IsValid(ALS_CLF_TurnIP_R180.Object) && ALS_CLF_TurnIP_R180.Succeeded())
+		CLF_TurnIP_R180.Animation = ALS_CLF_TurnIP_R180.Object;
+	else
+		ALSDebug::LogError(TEXT("Animation not found: ALS_CLF_TurnIP_R180"));
 
 	RotateMinThreshold = -50.0f;
 	RotateMaxThreshold = 50.0f;
@@ -89,8 +166,53 @@ UALSAnimInstance::UALSAnimInstance() {
 	EnableHandIK_R = 1.0f;
 	EnableHandIK_L = 1.0f;
 
+	const ConstructorHelpers::FObjectFinder<UCurveFloat> _DiagonalScaleAmountCurve(TEXT("CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/DiagonalScaleAmount.DiagonalScaleAmount'"));
+	if (IsValid(_DiagonalScaleAmountCurve.Object) && _DiagonalScaleAmountCurve.Succeeded())
+		DiagonalScaleAmountCurve = _DiagonalScaleAmountCurve.Object;
+	else
+		ALSDebug::LogError(TEXT("Curve not found: DiagonalScaleAmount"));
 
+	const ConstructorHelpers::FObjectFinder<UCurveFloat> _StrideBlend_N_Walk(TEXT("CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/StrideBlend_N_Walk.StrideBlend_N_Walk'"));
+	if (IsValid(_StrideBlend_N_Walk.Object) && _StrideBlend_N_Walk.Succeeded())
+		StrideBlend_N_Walk = _StrideBlend_N_Walk.Object;
+	else
+		ALSDebug::LogError(TEXT("Curve not found: StrideBlend_N_Walk"));
 
+	const ConstructorHelpers::FObjectFinder<UCurveFloat> _StrideBlend_N_Run(TEXT("CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/StrideBlend_N_Run.StrideBlend_N_Run'"));
+	if (IsValid(_StrideBlend_N_Run.Object) && _StrideBlend_N_Run.Succeeded())
+		StrideBlend_N_Run = _StrideBlend_N_Run.Object;
+	else
+		ALSDebug::LogError(TEXT("Curve not found: StrideBlend_N_Run"));
+
+	const ConstructorHelpers::FObjectFinder<UCurveFloat> _StrideBlend_C_Walk(TEXT("CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/StrideBlend_N_Walk.StrideBlend_N_Walk'"));
+	if (IsValid(_StrideBlend_C_Walk.Object) && _StrideBlend_C_Walk.Succeeded())
+		StrideBlend_C_Walk = _StrideBlend_C_Walk.Object;
+	else
+		ALSDebug::LogError(TEXT("Curve not found: StrideBlend_C_Walk"));
+
+	const ConstructorHelpers::FObjectFinder<UCurveFloat> _LandPredictionCurve(TEXT("CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/LandPredictionBlend.LandPredictionBlend'"));
+	if (IsValid(_LandPredictionCurve.Object) && _LandPredictionCurve.Succeeded())
+		LandPredictionCurve = _LandPredictionCurve.Object;
+	else
+		ALSDebug::LogError(TEXT("Curve not found: LandPredictionCurve"));
+
+	const ConstructorHelpers::FObjectFinder<UCurveFloat> _LeanInAirAmount(TEXT("CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/LeanInAirAmount.LeanInAirAmount'"));
+	if (IsValid(_LeanInAirAmount.Object) && _LeanInAirAmount.Succeeded())
+		LeanInAirCurve = _LeanInAirAmount.Object;
+	else
+		ALSDebug::LogError(TEXT("Curve not found: LeanInAirCurve"));
+
+	const ConstructorHelpers::FObjectFinder<UCurveVector> _YawOffset_FB(TEXT("CurveVector'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/YawOffset_FB.YawOffset_FB'"));
+	if (IsValid(_YawOffset_FB.Object) && _YawOffset_FB.Succeeded())
+		YawOffset_FB = _YawOffset_FB.Object;
+	else
+		ALSDebug::LogError(TEXT("Curve not found: YawOffset_FB"));
+
+	const ConstructorHelpers::FObjectFinder<UCurveVector> _YawOffset_LR(TEXT("CurveVector'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/YawOffset_LR.YawOffset_LR'"));
+	if (IsValid(_YawOffset_LR.Object) && _YawOffset_LR.Succeeded())
+		YawOffset_LR = _YawOffset_LR.Object;
+	else
+		ALSDebug::LogError(TEXT("Curve not found: YawOffset_LR"));
 }
 
 void UALSAnimInstance::NativeInitializeAnimation() {

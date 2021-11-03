@@ -13,7 +13,7 @@ AALSPlayerCameraManager::AALSPlayerCameraManager() {
 	CameraBehaviour->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	CameraBehaviour->SetAnimInstanceClass(UALSPlayerCameraBehaviour::StaticClass());
 
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CameraMesh(TEXT("SkeletalMesh'/CameraSystem/Camera.Camera'"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CameraMesh(TEXT("SkeletalMesh'/Game/AdvancedLocomotionV4/Blueprints/CameraSystem/Camera.Camera'"));
 	if (IsValid(CameraMesh.Object) && CameraMesh.Succeeded())
 		CameraBehaviour->SetSkeletalMesh(CameraMesh.Object);
 	else
