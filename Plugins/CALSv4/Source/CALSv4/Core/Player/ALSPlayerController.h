@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "CALSv4/Core/Interfaces/ALSControllerInterface.h"
-#include "CALSv4/Widgets/ALSHudWidget.h"
 #include "CALSv4/Widgets/ALSOverlayStateSwitcherWidget.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Character.h"
@@ -12,67 +11,78 @@
 UCLASS()
 class CALSV4_API AALSPlayerController : public APlayerController, public IALSControllerInterface {
 	GENERATED_BODY()
+public:
+	AALSPlayerController();
 protected:
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "C++ ALS|HUD")
-		TSubclassOf<UALSHudWidget> ALSHudWidget;
-
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "C++ ALS|Debug")
-		ACharacter* DebugFocusCharacter;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "C++ ALS|Debug")
-		TArray<ACharacter*> AvailableDebugCharacters;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "C++ ALS|Debug")
-		bool bShowHud;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "C++ ALS|Debug")
-		bool bDebugView;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "C++ ALS|Debug")
-		bool bShowTraces;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "C++ ALS|Debug")
-		bool bShowDebugShapes;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "C++ ALS|Debug")
-		bool bShowLayerColors;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "C++ ALS|Debug")
-		bool bShowCharacterInfo;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "C++ ALS|Debug")
-		bool bSlowMotion;
-
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "C++ ALS|Debug")
-		USoundBase* ClickSound;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "C++ ALS|HUD")
-		UALSHudWidget* ALSHud;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "C++ ALS|HUD")
-		UALSOverlayStateSwitcherWidget* OverlaySwitcher;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "C++ ALS|HUD")
+	//Changing this value requires UE to restart.
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Input")
+		bool bBindDefaultInputEvents = true;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Input")
+		USoundWave* ClickSound;
+	UPROPERTY(BlueprintReadWrite, Category = "Advanced Locomotion System|HUD")
 		bool bOverlayMenuOpen;
+	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|HUD")
+		UALSOverlayStateSwitcherWidget* OverlaySwitcher;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|HUD")
+		TSubclassOf<UALSOverlayStateSwitcherWidget> ALSOverlayStateSwitcherTemplate;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|HUD")
+		TSubclassOf<UUserWidget> ALSHudTemplate;
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Debug")
+		ACharacter* DebugFocusCharacter;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Debug")
+		TArray<ACharacter*> AvailableDebugCharacters;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Debug")
+		bool bShowHud;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Debug")
+		bool bDebugView;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Debug")
+		bool bShowTraces;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Debug")
+		bool bShowDebugShapes;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Debug")
+		bool bShowLayerColors;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Debug")
+		bool bShowCharacterInfo;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Debug")
+		bool bSlowMotion;
 
 	virtual void BeginPlay() override;
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void SetupInputComponent() override;
 
 	//Debug functions
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|HUD")
 		virtual void ToggleShowHud();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Debug")
 		virtual void ToggleDebugView();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Debug")
 		virtual void ToggleShowTraces();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Debug")
 		virtual void ToggleShowDebugShapes();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Debug")
 		virtual void ToggleShowLayerColors();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Debug")
 		virtual void ToggleShowCharacterInfo();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Debug")
 		virtual void ToggleSlowMotion();
-	UFUNCTION()
-		virtual void SelectPrevItem();
-	UFUNCTION()
-		virtual void SelectNextItem();
-	UFUNCTION()
+
+	virtual void SelectPrevItem();
+
+	virtual void SelectNextItem();
+
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|HUD")
 		virtual void OpenOverlayMenu();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|HUD")
 		virtual void CloseOverlayMenu();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|HUD")
 		virtual void CycleOverlayUp();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|HUD")
 		virtual void CycleOverlayDown();
+
+	uint8 SelectedOverlayIndex;
+	
+public:
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Debug")
+		virtual FALSDebugInfo GetDebugInfo_Implementation() override;
 };

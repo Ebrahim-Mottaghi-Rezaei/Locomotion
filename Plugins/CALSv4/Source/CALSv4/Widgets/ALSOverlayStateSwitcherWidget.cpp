@@ -40,7 +40,7 @@ void UALSOverlayStateSwitcherWidget::CreateButtons() {
 	//ALS_Barrel is the last element in the EALSOverlayState enum. if any other states added
 	for (const EALSOverlayState value : TEnumRange<EALSOverlayState>()) {
 		const auto button = static_cast<UALSOverlayStateButtonWidget*>(CreateWidget(GetOwningPlayer(), UALSOverlayStateButtonWidget::StaticClass()));
-		button->Text->SetText(FText::FromString(*UEnum::GetValueAsString(value)));
+		button->GetText()->SetText(FText::FromString(*UEnum::GetValueAsString(value)));
 		VerticalBox->AddChildToVerticalBox(button);
 		OverlayStateButtons.Add(FALSOverlayStateParams(button, value));
 	}
@@ -53,6 +53,10 @@ void UALSOverlayStateSwitcherWidget::UpdateButtonFocus() {
 			element.Widget->SetVisualParameters(element.State == NewOverlayState);
 		}
 	}
+}
+
+void UALSOverlayStateSwitcherWidget::SetVerticalBox(UVerticalBox* verticalBox) {
+	VerticalBox = verticalBox;
 }
 
 void UALSOverlayStateSwitcherWidget::CycleState(bool bUp) {

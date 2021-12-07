@@ -8,10 +8,12 @@
 #include <GameFramework/Character.h>
 #include <Kismet/GameplayStatics.h>
 
+#include "CALSv4/Core/Player/ALSPlayerController.h"
+
 void UALSHudWidget::NativeTick(const FGeometry& MovieSceneBlends, float InDeltaTime) {
 	Super::NativeTick(MovieSceneBlends, InDeltaTime);
 
-	const auto pc = GetOwningPlayer();
+	const auto pc = static_cast<AALSPlayerController*>(GetOwningPlayer());
 	if (pc->GetClass()->ImplementsInterface(UALSControllerInterface::StaticClass())) {
 		const auto info = IALSControllerInterface::Execute_GetDebugInfo(pc);
 		DebugFocusCharacter = info.DebugFocusCharacter;
@@ -20,7 +22,7 @@ void UALSHudWidget::NativeTick(const FGeometry& MovieSceneBlends, float InDeltaT
 		bShowTraces = info.bShowTraces;
 		bShowDebugShapes = info.bShowDebugShapes;
 		bShowLayerColors = info.bShowLayerColors;
-		bSlowMotion = info.bSlomo;
+		bSlowMotion = info.bSlowMotion;
 		bShowCharacterInfo = info.bShowCharacterInfo;
 	}
 
@@ -31,9 +33,13 @@ void UALSHudWidget::NativeTick(const FGeometry& MovieSceneBlends, float InDeltaT
 
 			FVector2D screenpos;
 			UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(pc, transform.GetLocation() + FVector(0, 0, 100), screenpos, false);
-			UWidgetLayoutLibrary::SlotAsCanvasSlot(MovablePanels)->SetPosition(screenpos);
+			UWidgetLayoutLibrary::SlotAsCanvasSlot(MovingPanel)->SetPosition(screenpos);
 		}
 	}
+}
+
+void UALSHudWidget::SetMovingPanel(UCanvasPanel* Panel) {
+	MovingPanel = Panel;
 }
 
 ESlateVisibility UALSHudWidget::GetHudVisibility() const {
@@ -44,31 +50,31 @@ ESlateVisibility UALSHudWidget::GetCharacterInfoVisibility() const {
 	return IsValid(DebugFocusCharacter) || !bShowCharacterInfo ? ESlateVisibility::Hidden : ESlateVisibility::Visible;
 }
 
-FSlateColor UALSHudWidget::GetShowHudColor() {
+FSlateColor UALSHudWidget::GetShowHudColor() const {
 	return  bShowHUD ? EnabledColor : DisabledColor;
 }
 
-FSlateColor UALSHudWidget::GetSlowMotionColor() {
+FSlateColor UALSHudWidget::GetSlowMotionColor() const {
 	return  bSlowMotion ? EnabledColor : DisabledColor;
 }
 
-FSlateColor UALSHudWidget::GetDebugViewColor() {
+FSlateColor UALSHudWidget::GetDebugViewColor() const {
 	return  bDebugView ? EnabledColor : DisabledColor;
 }
 
-FSlateColor UALSHudWidget::GetShowTracesColor() {
+FSlateColor UALSHudWidget::GetShowTracesColor() const {
 	return  bShowTraces ? EnabledColor : DisabledColor;
 }
 
-FSlateColor UALSHudWidget::GetShowDebugShapesColor() {
+FSlateColor UALSHudWidget::GetShowDebugShapesColor() const {
 	return bShowDebugShapes ? EnabledColor : DisabledColor;
 }
 
-FSlateColor UALSHudWidget::GetShowLayerShapesColor() {
+FSlateColor UALSHudWidget::GetShowLayerShapesColor() const {
 	return bShowLayerColors ? EnabledColor : DisabledColor;
 }
 
-FSlateColor UALSHudWidget::GetCharacterInfoColor() {
+FSlateColor UALSHudWidget::GetShowCharacterInfoColor() const {
 	return bShowCharacterInfo ? EnabledColor : DisabledColor;
 }
 

@@ -14,299 +14,304 @@
 UCLASS(Transient, Blueprintable, BlueprintType, hideCategories = (AnimInstance))
 class CALSV4_API UALSAnimInstance : public UAnimInstance, public IALSAnimationInterface {
 	GENERATED_BODY()
-public:
+	public:
 	UALSAnimInstance();
-protected:
+	protected:
 #pragma region Variables
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 		AALSBaseCharacter* Character;
-	float DeltaTimeX;
+	volatile float DeltaTimeX = 0.0f;
 	//Character Information
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		FRotator AimingRotation;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		FVector Velocity;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		FVector RelativeVelocityDirection;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		FVector Acceleration;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		FVector MovementInput;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		bool bIsMoving;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		bool bHasMovementInput;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		float Speed;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		float MovementInputAmount;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		float AimYawRate;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		float ZoomAmount;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		EALSMovementState MovementState;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		EALSMovementState PrevMovementState;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		EALSMovementAction MovementAction;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		EALSRotationMode RotationMode;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		EALSGait Gait;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		EALSStance Stance;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		EALSViewMode ViewMode;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Character Information")
-		EALSOverlayState OverlayState;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		FRotator AimingRotation = FRotator::ZeroRotator;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		FVector Velocity = FVector::ZeroVector;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		FVector RelativeVelocityDirection = FVector::ZeroVector;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		FVector Acceleration = FVector::ZeroVector;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		FVector MovementInput = FVector::ZeroVector;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		bool bIsMoving = false;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		bool bHasMovementInput = false;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		float Speed = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		float MovementInputAmount = 0.0f;;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		float AimYawRate = 0.0f;;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		float ZoomAmount = 0.0f;;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		EALSMovementState MovementState = EALSMovementState::ALS_None;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		EALSMovementState PrevMovementState = EALSMovementState::ALS_None;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		EALSMovementAction MovementAction = EALSMovementAction::ALS_LowMantle;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		EALSRotationMode RotationMode = EALSRotationMode::ALS_VelocityDirection;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		EALSGait Gait = EALSGait::ALS_Walking;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		EALSStance Stance = EALSStance::ALS_Standing;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		EALSViewMode ViewMode = EALSViewMode::ALS_TPS;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Character Information")
+		EALSOverlayState OverlayState = EALSOverlayState::ALS_Default;
 	//Anim Graph - Grounded State
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		EALSGroundedEntryState GroundedEntryState;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		EALSMovementDirection MovementDirection;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		EALSHipsDirection TrackedHipsDirection;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		FVector RelativeAccelerationAmount;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		bool bShouldMove;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		bool bRotateL;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		bool bRotateR;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		bool bPivot;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		float RotateRate;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		float RotationScale;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		float DiagonalScaleAmount;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		float WalkRunBlend;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		float StandingPlayRate;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		float CrouchingPlayRate;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		float StrideBlend;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		FALSVelocityBlend VelocityBlend;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		FALSLeanAmount LeanAmount;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		float FYaw;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		float BYaw;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		float RYaw;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Grounded State")
-		float LYaw;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		EALSGroundedEntryState GroundedEntryState = EALSGroundedEntryState::ALS_None;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		EALSMovementDirection MovementDirection = EALSMovementDirection::ALS_Forward;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		EALSHipsDirection TrackedHipsDirection = EALSHipsDirection::ALS_F;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		FVector RelativeAccelerationAmount = FVector::ZeroVector;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		bool bShouldMove = false;;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		bool bRotateL = false;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		bool bRotateR = false;;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		bool bPivot = false;;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		float RotateRate = 1.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		float RotationScale = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		float DiagonalScaleAmount = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		float WalkRunBlend = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		float StandingPlayRate = 1.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		float CrouchingPlayRate = 1.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		float StrideBlend = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		FALSVelocityBlend VelocityBlend = FALSVelocityBlend();
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		FALSLeanAmount LeanAmount = FALSLeanAmount();
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		float FYaw = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		float BYaw = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		float RYaw = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Grounded State")
+		float LYaw = 0.0f;
 	//Anim Graph - In Air
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - In Air")
-		bool bJumped;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - In Air")
-		float JumpPlayRate;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - In Air")
-		float FallSpeed;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - In Air")
-		float LandPrediction;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - In Air")
+		bool bJumped = false;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - In Air")
+		float JumpPlayRate = 1.2f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - In Air")
+		float FallSpeed = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - In Air")
+		float LandPrediction = 1.0f;
 	//Anim Graph - Aiming Values
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Aiming Values")
-		FRotator SmoothAimingRotation;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Aiming Values")
-		FRotator SpineRotation;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Aiming Values")
-		FVector2D AimingAngle;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Aiming Values")
-		FVector2D SmoothedAimingAngle;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Aiming Values")
-		float AimSweepTime;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Aiming Values")
-		float InputYawOffsetTime;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Aiming Values")
-		float ForwardYawTime;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Aiming Values")
-		float LeftYawTime;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Aiming Values")
-		float RightYawTime;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Aiming Values")
+		FRotator SmoothAimingRotation = FRotator::ZeroRotator;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Aiming Values")
+		FRotator SpineRotation = FRotator::ZeroRotator;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Aiming Values")
+		FVector2D AimingAngle = FVector2D::ZeroVector;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Aiming Values")
+		FVector2D SmoothedAimingAngle = FVector2D::ZeroVector;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Aiming Values")
+		float AimSweepTime = 0.5f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Aiming Values")
+		float InputYawOffsetTime = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Aiming Values")
+		float ForwardYawTime = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Aiming Values")
+		float LeftYawTime = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Aiming Values")
+		float RightYawTime = 0.0f;
 
 	//Rag-doll
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Rag-doll")
-		float FlailRate;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Rag-doll")
+		float FlailRate = 0.0f;
 	//Anim Graph - LayerBlending
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		int OverlayOverrideState;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float EnableAimOffset;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float BasePose_N;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float BasePose_CLF;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Arm_L;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Arm_L_Add;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Arm_L_LS;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Arm_L_MS;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Arm_R;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Arm_R_Add;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Arm_R_LS;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Arm_R_MS;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Hand_L;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Hand_R;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Legs;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Legs_Add;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Pelvis;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Pelvis_Add;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Spine;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Spine_Add;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Head;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float Head_Add;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float EnableHandIK_L;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - LayerBlending")
-		float EnableHandIK_R;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		int OverlayOverrideState = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float EnableAimOffset = 1.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float BasePose_N = 1.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float BasePose_CLF = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Arm_L = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Arm_L_Add = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Arm_L_LS = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Arm_L_MS = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Arm_R = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Arm_R_Add = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Arm_R_LS = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Arm_R_MS = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Hand_L = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Hand_R = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Legs = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Legs_Add = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Pelvis = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Pelvis_Add = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Spine = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Spine_Add = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Head = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float Head_Add = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float EnableHandIK_L = 1.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - LayerBlending")
+		float EnableHandIK_R = 1.0f;
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Transitions")
+		UAnimSequence* ALS_N_Transition_R;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Transitions")
+		UAnimSequence* ALS_N_Transition_L;
 
 	//Anim Graph - Foot IK
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Foot IK")
-		float FootLock_L_Alpha;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Foot IK")
-		float FootLock_R_Alpha;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Foot IK")
-		FVector FootLock_L_Location;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Foot IK")
-		FVector FootLock_R_Location;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Foot IK")
-		FRotator FootLock_L_Rotation;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Foot IK")
-		FRotator FootLock_R_Rotation;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Foot IK")
-		FVector FootOffset_L_Location;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Foot IK")
-		FVector FootOffset_R_Location;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Foot IK")
-		FRotator FootOffset_L_Rotation;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Foot IK")
-		FRotator FootOffset_R_Rotation;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Foot IK")
-		FVector PelvisOffset;
-	UPROPERTY(BlueprintReadOnly, Category = "ALS AnimInstance|Anim Graph - Foot IK")
-		float PelvisAlpha;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Foot IK")
+		float FootLock_L_Alpha = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Foot IK")
+		float FootLock_R_Alpha = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Foot IK")
+		FVector FootLock_L_Location = FVector::ZeroVector;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Foot IK")
+		FVector FootLock_R_Location = FVector::ZeroVector;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Foot IK")
+		FRotator FootLock_L_Rotation = FRotator::ZeroRotator;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Foot IK")
+		FRotator FootLock_R_Rotation = FRotator::ZeroRotator;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Foot IK")
+		FVector FootOffset_L_Location = FVector::ZeroVector;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Foot IK")
+		FVector FootOffset_R_Location = FVector::ZeroVector;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Foot IK")
+		FRotator FootOffset_L_Rotation = FRotator::ZeroRotator;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Foot IK")
+		FRotator FootOffset_R_Rotation = FRotator::ZeroRotator;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Foot IK")
+		FVector PelvisOffset = FVector::ZeroVector;
+	UPROPERTY(BlueprintReadOnly, Category = "ALS Anim Instance|Anim Graph - Foot IK")
+		float PelvisAlpha = 0.0f;
 	//Turn In Place
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Turn In Place|Setup")
-		float TurnCheckMinAngle;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Turn In Place|Setup")
-		float Turn180Threshold;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Turn In Place|Setup")
-		float AimYawRateLimit;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Turn In Place|Setup")
-		float ElapsedDelayTime;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Turn In Place|Setup")
-		float MinAngleDelay;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Turn In Place|Setup")
-		float MaxAngleDelay;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Turn In Place|Assets")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Turn In Place|Setup")
+		float TurnCheckMinAngle = 45.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Turn In Place|Setup")
+		float Turn180Threshold = 130.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Turn In Place|Setup")
+		float AimYawRateLimit = 50.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Turn In Place|Setup")
+		float ElapsedDelayTime = 0.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Turn In Place|Setup")
+		float MinAngleDelay = 0.75f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Turn In Place|Setup")
+		float MaxAngleDelay = 0.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Turn In Place|Assets")
 		FALSTurnInPlaceAsset N_TurnIP_L90;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Turn In Place|Assets")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Turn In Place|Assets")
 		FALSTurnInPlaceAsset N_TurnIP_R90;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Turn In Place|Assets")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Turn In Place|Assets")
 		FALSTurnInPlaceAsset N_TurnIP_L180;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Turn In Place|Assets")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Turn In Place|Assets")
 		FALSTurnInPlaceAsset N_TurnIP_R180;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Turn In Place|Assets")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Turn In Place|Assets")
 		FALSTurnInPlaceAsset CLF_TurnIP_L90;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Turn In Place|Assets")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Turn In Place|Assets")
 		FALSTurnInPlaceAsset CLF_TurnIP_R90;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Turn In Place|Assets")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Turn In Place|Assets")
 		FALSTurnInPlaceAsset CLF_TurnIP_L180;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Turn In Place|Assets")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Turn In Place|Assets")
 		FALSTurnInPlaceAsset CLF_TurnIP_R180;
 	//Rotate in Place
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Rotate in Place")
-		float RotateMinThreshold;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Rotate in Place")
-		float RotateMaxThreshold;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Rotate in Place")
-		float AimYawRateMinRange;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Rotate in Place")
-		float AimYawRateMaxRange;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Rotate in Place")
-		float MinPlayRate;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Rotate in Place")
-		float MaxPlayRate;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Rotate in Place")
+		float RotateMinThreshold = -50.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Rotate in Place")
+		float RotateMaxThreshold = 50.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Rotate in Place")
+		float AimYawRateMinRange = 90.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Rotate in Place")
+		float AimYawRateMaxRange = 270.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Rotate in Place")
+		float MinPlayRate = 1.15f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Rotate in Place")
+		float MaxPlayRate = 3.0f;
 	//Blend curves
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Blend Curves")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Blend Curves")
 		UCurveFloat* DiagonalScaleAmountCurve;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Blend Curves")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Blend Curves")
 		UCurveFloat* StrideBlend_N_Walk;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Blend Curves")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Blend Curves")
 		UCurveFloat* StrideBlend_N_Run;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Blend Curves")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Blend Curves")
 		UCurveFloat* StrideBlend_C_Walk;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Blend Curves")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Blend Curves")
 		UCurveFloat* LandPredictionCurve;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Blend Curves")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Blend Curves")
 		UCurveFloat* LeanInAirCurve;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Blend Curves")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Blend Curves")
 		UCurveVector* YawOffset_FB;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Blend Curves")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Blend Curves")
 		UCurveVector* YawOffset_LR;
 	//Config
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Config")
-		float AnimatedWalkSpeed;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Config")
-		float AnimatedRunSpeed;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Config")
-		float AnimatedSprintSpeed;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Config")
-		float AnimatedCrouchSpeed;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Config")
-		float VelocityBlendInterpSpeed;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Config")
-		float GroundedLeanInterpSpeed;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Config")
-		float InAirLeanInterpSpeed;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Config")
-		float SmoothedAimingRotationInterpSpeed;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Config")
-		float InputYawOffsetInterpSpeed;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Config")
-		float TriggerPivotSpeedLimit;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Config")
-		float FootHeight;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Config")
-		float IK_TraceDistanceAboveFoot;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS AnimInstance|Config")
-		float IK_TraceDistanceBelowFoot;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Config")
+		float AnimatedWalkSpeed = 150.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Config")
+		float AnimatedRunSpeed = 350.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Config")
+		float AnimatedSprintSpeed = 600.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Config")
+		float AnimatedCrouchSpeed = 150.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Config")
+		float VelocityBlendInterpSpeed = 12.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Config")
+		float GroundedLeanInterpSpeed = 4.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Config")
+		float InAirLeanInterpSpeed = 4.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Config")
+		float SmoothedAimingRotationInterpSpeed = 10.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Config")
+		float InputYawOffsetInterpSpeed = 8.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Config")
+		float TriggerPivotSpeedLimit = 200.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Config")
+		float FootHeight = 13.5f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Config")
+		float IK_TraceDistanceAboveFoot = 50.0f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "ALS Anim Instance|Config")
+		float IK_TraceDistanceBelowFoot = 45.0f;
 
 	//used in code
 	TArray<AActor*> IgnoredActors;
 #pragma endregion
 
 
-public:
+	public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
-protected:
+	protected:
 	//Macros
 	UFUNCTION(BlueprintPure)
 		virtual float GetAnimCurveClamped(FName Name, float Bias, float ClampMin, float ClampMax);
@@ -314,104 +319,115 @@ protected:
 	//Global Scope
 	virtual void ResetIKOffsets();
 	//Update Values
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Update Values")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Update Values")
 		virtual void UpdateCharacterInfo();
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Update Values")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Update Values")
 		virtual void UpdateAimingValues();
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Update Values")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Update Values")
 		virtual void UpdateLayerValues();
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Update Values")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Update Values")
 		virtual void UpdateFootIK();
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Update Values")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Update Values")
 		virtual void UpdateMovementValues();
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Update Values")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Update Values")
 		virtual void UpdateRotationValues();
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Update Values")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Update Values")
 		virtual void UpdateInAirValues();
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Update Values")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Update Values")
 		virtual void UpdateRagdollValues();
 	//Grounded
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Grounded")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Grounded")
 		virtual bool ShouldMoveCheck();
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Grounded")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Grounded")
 		virtual bool CanTurnInPlace();
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Grounded")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Grounded")
 		virtual bool CanRotateInPlace();
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Grounded")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Grounded")
 		virtual bool CanDynamicTransition();
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Grounded")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Grounded")
 		virtual bool CanOverlayTransition();
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Grounded")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Grounded")
 		virtual void TurnInPlace(FRotator TargetRotation, float PlayRateScale, float StartTime, bool bOverrideCurrent);
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Grounded")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Grounded")
 		virtual void TurnInPlaceCheck();
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Grounded")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Grounded")
 		virtual void RotateInPlaceCheck();
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Grounded")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Grounded")
 		virtual void DynamicTransitionCheck();
 	//Movement
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Movement")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Movement")
 		virtual FALSVelocityBlend CalculateVelocityBlend();
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Movement")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Movement")
 		virtual float CalculateDiagonalScaleAmount();
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Movement")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Movement")
 		virtual FVector CalculateRelativeAccelerationAmount();
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Movement")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Movement")
 		virtual float CalculateWalkRunBlend();
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Movement")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Movement")
 		virtual float CalculateStrideBlend();
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Movement")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Movement")
 		virtual float CalculateStandingPlayRate();
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Movement")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Movement")
 		virtual float CalculateCrouchingPlayRate();
 	//In Air
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|In Air")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|In Air")
 		virtual float CalculateLandPrediction();
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|In Air")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|In Air")
 		virtual FALSLeanAmount CalculateInAirLeanAmount();
 	//Foot IK
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Foot IK")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Foot IK")
 		virtual void SetFootOffsets(FName EnableFootIKCurve, FName IKFootBone, FName RootBone, FVector& CurrentLocationTarget, FVector& CurrentLocationOffset, FRotator& CurrentRotationOffset);
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Foot IK")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Foot IK")
 		virtual void SetPelvisIKOffset(FVector FootOffset_L_Target, FVector FootOffset_R_Target);
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Foot IK")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Foot IK")
 		virtual void SetFootLocking(FName Enable_FootIK_Curve, FName FootLockCurve, FName IKFootBone, float& CurrentFootLockAlpha, FVector& CurrentFootLockLocation, FRotator& CurrentFootLockRotation);
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Foot IK")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Foot IK")
 		virtual void SetFootLockOffsets(FVector& LocalLocation, FRotator& LocalRotation);
 	//Rotation
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Rotation")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Rotation")
 		virtual EALSMovementDirection CalculateMovementDirection();
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Rotation")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Rotation")
 		virtual EALSMovementDirection CalculateQuadrant(EALSMovementDirection Current, float FR_Threshold, float FL_Threshold, float BR_Threshold, float BL_Threshold, float buffer, float angle);
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Rotation")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Rotation")
 		virtual bool AngleInRange(float angle, float minAngle, float maxAngle, float buffer, bool IncreaseBuffer);
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Rotation")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Rotation")
 		virtual FALSVelocityBlend InterpVelocityBlend(FALSVelocityBlend current, FALSVelocityBlend target, float interpSpeed, float deltaTime);
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Rotation")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Rotation")
 		virtual FALSLeanAmount InterpLeanAmount(FALSLeanAmount current, FALSLeanAmount target, float interpSpeed, float deltaTime);
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Notify Events")
+		void AnimNotifyPivot();
 	//Debug
-	UFUNCTION(BlueprintPure, Category = "ALS AnimInstance|Debug")
+	UFUNCTION(BlueprintPure, Category = "Advanced Locomotion System|Anim Instance|Debug")
 		virtual TEnumAsByte<EDrawDebugTrace::Type> GetDebugTraceType(TEnumAsByte<EDrawDebugTrace::Type> ShowTraceType);
 
 	//Custom Events
 	bool bDynamicTransitionFlag;
+	FTimerHandle AnimNotifyPivotHandle;
 	FTimerHandle DynamicTransitionHandle;
 	FTimerDelegate DynamicTransitionDel;
 	FTimerHandle JumpedHandle;
 
 	//Play Additive Transition Animation
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Custom Events")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Custom Events")
 		void PlayTransition(FALSDynamicMontageParams params);
 	//Play Dynamic Additive Transition Animation
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Custom Events")
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Custom Events")
 		void PlayDynamicTransition(float ReTriggerDelay, FALSDynamicMontageParams Parameters);
-	UFUNCTION()
-		void PlayDynamicTransitionDo(FALSDynamicMontageParams Params);
 	//Interface Events
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Interface Calls")
-		virtual void Jumped_Implementation() override;
-	UFUNCTION(BlueprintCallable, Category = "ALS AnimInstance|Interface Calls")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Anim Instance|Interface Calls")
+		void Jumped();
+	virtual void Jumped_Implementation() override;
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Anim Instance|Interface Calls")
 		void JumpedReset();
-	virtual void SetGroundedEntryState_Implementation(EALSGroundedEntryState groundedEntryState) override;
-	virtual void SetOverlayOverrideState_Implementation(int OverlayOverrideState) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Anim Instance|Interface Calls")
+		void SetGroundedEntryState(EALSGroundedEntryState NewState);
+	virtual void SetGroundedEntryState_Implementation(EALSGroundedEntryState NewState) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Anim Instance|Interface Calls")
+		void SetOverlayOverrideState(int NewState);
+	virtual void SetOverlayOverrideState_Implementation(int NewState) override;
+
+	private:
+	bool bShouldMove_Last;
 };

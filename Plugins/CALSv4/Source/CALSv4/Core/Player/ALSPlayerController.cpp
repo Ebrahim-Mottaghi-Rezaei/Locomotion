@@ -1,26 +1,40 @@
 #include "ALSPlayerController.h"
 #include "ALSBaseCharacter.h"
-#include "GameFramework/Character.h"
-#include "Components/InputComponent.h"
 #include "InputCoreTypes.h"
 #include "Blueprint/UserWidget.h"
 #include "CALSv4/Core/CameraSystem/ALSPlayerCameraManager.h"
-#include <CALSv4/Core/Utilities/ALSDebug.h>
-#include <CALSv4/Core/Utilities/ALSHelpers.h>
+#include "CALSv4/Core/Utilities/ALSHelpers.h"
+#include "Components/InputComponent.h"
+#include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
+
+AALSPlayerController::AALSPlayerController() {
+	static ConstructorHelpers::FObjectFinder<USoundWave> clickSound(TEXT("SoundWave'/Game/AdvancedLocomotionV4/Audio/UI/Click.Click'"));
+	if (clickSound.Succeeded())
+		ClickSound = clickSound.Object;
+	else
+		UALSLogger::LogError("ClickSound not found.");
+
+	InputYawScale = 2.0f;
+	InputPitchScale = -2.0f;
+}
 
 void AALSPlayerController::BeginPlay() {
 	Super::BeginPlay();
 
-	auto* hudWidget = static_cast<UALSHudWidget*>(CreateWidget(this, ALSHudWidget));
-	hudWidget->AddToViewport();
-
 	DebugFocusCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
+
+	PlayerCameraManagerClass = AALSPlayerCameraManager::StaticClass();
+
+	if (ALSHudTemplate)
+		CreateWidget(this, ALSHudTemplate)->AddToViewport();
+	else
+		UALSLogger::LogError(TEXT("ALS HUD Template is null. Please set it in PlayerController blueprint."));
 
 	//Search for all ALS Characters and populate array.
 	//Used to switch target character when viewing character info in the HUD
 	TArray<AActor*> alsCharacters;
-	UGameplayStatics::GetAllActorsOfClass(this, AALSBaseCharacter::StaticClass(), alsCharacters);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AALSBaseCharacter::StaticClass(), alsCharacters);
 	for (AActor* c : alsCharacters)
 		AvailableDebugCharacters.Add(static_cast<AALSBaseCharacter*>(c));
 }
@@ -32,7 +46,7 @@ void AALSPlayerController::OnPossess(APawn* InPawn) {
 	if (IsValid(cameraManager)) {
 		cameraManager->OnPossess(InPawn);
 	} else {
-		ALSDebug::LogError(FString::Printf(TEXT("Camera Manager is invalid.")));
+		UALSLogger::LogError(FString::Printf(TEXT("Camera Manager is invalid.")));
 	}
 }
 
@@ -40,21 +54,23 @@ void AALSPlayerController::SetupInputComponent() {
 	Super::SetupInputComponent();
 
 	// Attaching Debug Keys to the game.
-	InputComponent->BindKey(EKeys::Tab, IE_Pressed, this, &AALSPlayerController::ToggleShowHud);
-	InputComponent->BindKey(EKeys::V, IE_Pressed, this, &AALSPlayerController::ToggleDebugView);
-	InputComponent->BindKey(EKeys::T, IE_Pressed, this, &AALSPlayerController::ToggleShowTraces);
-	InputComponent->BindKey(EKeys::Y, IE_Pressed, this, &AALSPlayerController::ToggleShowDebugShapes);
-	InputComponent->BindKey(EKeys::U, IE_Pressed, this, &AALSPlayerController::ToggleShowLayerColors);
-	InputComponent->BindKey(EKeys::I, IE_Pressed, this, &AALSPlayerController::ToggleShowCharacterInfo);
-	InputComponent->BindKey(EKeys::Z, IE_Pressed, this, &AALSPlayerController::ToggleSlowMotion);
-	InputComponent->BindKey(EKeys::Comma, IE_Pressed, this, &AALSPlayerController::SelectPrevItem);
-	InputComponent->BindKey(EKeys::Period, IE_Pressed, this, &AALSPlayerController::SelectNextItem);
+	if (bBindDefaultInputEvents) {
+		InputComponent->BindKey(EKeys::Tab, IE_Pressed, this, &AALSPlayerController::ToggleShowHud);
+		InputComponent->BindKey(EKeys::V, IE_Pressed, this, &AALSPlayerController::ToggleDebugView);
+		InputComponent->BindKey(EKeys::T, IE_Pressed, this, &AALSPlayerController::ToggleShowTraces);
+		InputComponent->BindKey(EKeys::Y, IE_Pressed, this, &AALSPlayerController::ToggleShowDebugShapes);
+		InputComponent->BindKey(EKeys::U, IE_Pressed, this, &AALSPlayerController::ToggleShowLayerColors);
+		InputComponent->BindKey(EKeys::I, IE_Pressed, this, &AALSPlayerController::ToggleShowCharacterInfo);
+		InputComponent->BindKey(EKeys::Z, IE_Pressed, this, &AALSPlayerController::ToggleSlowMotion);
+		InputComponent->BindKey(EKeys::Comma, IE_Pressed, this, &AALSPlayerController::SelectPrevItem);
+		InputComponent->BindKey(EKeys::Period, IE_Pressed, this, &AALSPlayerController::SelectNextItem);
 
-	InputComponent->BindAction(TEXT("OpenOverlayMenu"), IE_Pressed, this, &AALSPlayerController::OpenOverlayMenu);
-	InputComponent->BindAction(TEXT("CloseOverlayMenu"), IE_Released, this, &AALSPlayerController::CloseOverlayMenu);
+		InputComponent->BindAction(TEXT("OpenOverlayMenu"), IE_Pressed, this, &AALSPlayerController::OpenOverlayMenu);
+		InputComponent->BindAction(TEXT("CloseOverlayMenu"), IE_Released, this, &AALSPlayerController::CloseOverlayMenu);
 
-	InputComponent->BindAction(TEXT("CycleOverlayUp"), IE_Pressed, this, &AALSPlayerController::OpenOverlayMenu);
-	InputComponent->BindAction(TEXT("CycleOverlayDown"), IE_Released, this, &AALSPlayerController::CloseOverlayMenu);
+		InputComponent->BindAction(TEXT("CycleOverlayUp"), IE_Pressed, this, &AALSPlayerController::OpenOverlayMenu);
+		InputComponent->BindAction(TEXT("CycleOverlayDown"), IE_Released, this, &AALSPlayerController::CloseOverlayMenu);
+	}
 }
 
 void AALSPlayerController::ToggleShowHud() {
@@ -87,11 +103,13 @@ void AALSPlayerController::ToggleSlowMotion() {
 }
 
 void AALSPlayerController::SelectPrevItem() {
-	//DebugFocusCharacter = TALSHelpers<ACharacter*>::GetItemInArray(AvailableDebugCharacters, DebugFocusCharacter, false);
+	SelectedOverlayIndex = SelectedOverlayIndex - 1 >= 0 ? SelectedOverlayIndex - 1 : AvailableDebugCharacters.Num() - 1;
+	DebugFocusCharacter = AvailableDebugCharacters[SelectedOverlayIndex];
 }
 
 void AALSPlayerController::SelectNextItem() {
-	//DebugFocusCharacter = TALSHelpers<ACharacter*>::GetItemInArray(AvailableDebugCharacters, DebugFocusCharacter, true);
+	SelectedOverlayIndex = SelectedOverlayIndex + 1 < AvailableDebugCharacters.Num() ? SelectedOverlayIndex + 1 : 0;
+	DebugFocusCharacter = AvailableDebugCharacters[SelectedOverlayIndex];
 }
 
 void AALSPlayerController::OpenOverlayMenu() {
@@ -100,7 +118,7 @@ void AALSPlayerController::OpenOverlayMenu() {
 	if (!bSlowMotion)
 		UGameplayStatics::SetGlobalTimeDilation(this, 0.35f);
 
-	OverlaySwitcher = (UALSOverlayStateSwitcherWidget*)CreateWidget(this, UALSOverlayStateSwitcherWidget::StaticClass());
+	OverlaySwitcher = static_cast<UALSOverlayStateSwitcherWidget*>(CreateWidget(this, ALSOverlayStateSwitcherTemplate));
 	OverlaySwitcher->AddToViewport();
 	UGameplayStatics::PlaySound2D(this, ClickSound, 1.25f, 1.0f, 0.2f);
 }
@@ -128,4 +146,8 @@ void AALSPlayerController::CycleOverlayDown() {
 		OverlaySwitcher->CycleState(false);
 		UGameplayStatics::PlaySound2D(this, ClickSound, 1.25f, 1.0f, 0.2f);
 	}
+}
+
+FALSDebugInfo AALSPlayerController::GetDebugInfo_Implementation() {
+	return FALSDebugInfo(DebugFocusCharacter, bDebugView, bShowHud, bShowTraces, bShowDebugShapes, bShowLayerColors, bSlowMotion, bShowCharacterInfo && !bOverlayMenuOpen);
 }

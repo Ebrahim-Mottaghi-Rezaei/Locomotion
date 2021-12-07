@@ -2,8 +2,10 @@
 
 using UnrealBuildTool;
 
-public class CALSv4 : ModuleRules {
-    public CALSv4(ReadOnlyTargetRules Target) : base(Target) {
+public class CALSv4 : ModuleRules
+{
+    public CALSv4(ReadOnlyTargetRules Target) : base(Target)
+    {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
         PublicIncludePaths.AddRange(
@@ -28,6 +30,8 @@ public class CALSv4 : ModuleRules {
                 "Slate",
                 "SlateCore",
                 "AnimGraphRuntime",
+                "AIModule",
+                "ClothingSystemRuntimeNv"
                 // ... add other public dependencies that you statically link with here ...
             });
 

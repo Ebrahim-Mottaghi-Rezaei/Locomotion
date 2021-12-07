@@ -60,8 +60,8 @@ enum class EALSStance :uint8 {
 
 UENUM(BlueprintType)
 enum class EALSViewMode :uint8 {
-	ALS_FPS UMETA(DisplayName = "First Person"),
-	ALS_TPS UMETA(DisplayName = "Third Person")
+	ALS_TPS UMETA(DisplayName = "Third Person"),
+	ALS_FPS UMETA(DisplayName = "First Person")
 };
 
 UENUM(BlueprintType)
@@ -82,7 +82,7 @@ enum class EALSFootStepType :uint8 {
 UENUM(BlueprintType)
 enum class EALSGroundedEntryState :uint8 {
 	ALS_None UMETA(DisplayName = "None"),
-	ALS_Ragdoll UMETA(DisplayName = "Ragdoll")
+	ALS_Roll UMETA(DisplayName = "Roll")
 };
 
 UENUM(BlueprintType)
@@ -108,4 +108,23 @@ enum class EALSMovementDirection :uint8 {
 	ALS_Backward UMETA(DisplayName = "Backward"),
 	ALS_Right UMETA(DisplayName = "Right"),
 	ALS_Left UMETA(DisplayName = "Left")
+};
+
+UENUM(BlueprintType)
+enum class EALSDetectSprintActionType :uint8 {
+	ALS_PressAndHold UMETA(DisplayName = "Press And Hold"),
+	ALS_DoublePress UMETA(DisplayName = "Double Press")
+};
+
+UENUM(BlueprintType)
+enum class EALSButtonPressType :uint8 {
+	ALS_Tapping UMETA(DisplayName = "Tapping"),
+	ALS_Holding UMETA(DisplayName = "Holding"),
+	ALS_Released UMETA(DisplayName = "Released"),
+};
+
+UENUM(BlueprintType)
+enum class EALSMannequinMeshType :uint8 {
+	ALS_Default UMETA(DisplayName = "ALS Default"),
+	ALS_Mannequin UMETA(DisplayName = "UE Mannequin")
 };

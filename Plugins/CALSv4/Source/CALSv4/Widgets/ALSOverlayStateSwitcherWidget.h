@@ -11,8 +11,7 @@
 USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
 struct FALSOverlayStateParams {
 	GENERATED_BODY()
-public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UALSOverlayStateButtonWidget* Widget;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		EALSOverlayState State;
@@ -25,6 +24,7 @@ public:
 };
 
 ENUM_RANGE_BY_COUNT(EALSOverlayState, EALSOverlayState::ALS_Barrel)
+
 UCLASS()
 class CALSV4_API UALSOverlayStateSwitcherWidget : public UUserWidget {
 	GENERATED_BODY()
@@ -35,19 +35,23 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 		UCanvasPanel* MovablePanels;
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-		UVerticalBox* VerticalBox;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 		TArray<FALSOverlayStateParams> OverlayStateButtons;
-
+	UVerticalBox* VerticalBox;
 public:
 	virtual void NativeConstruct() override;
-	virtual  void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
-	void SelectOverlayState() const;
-	void CycleState(bool bUp);
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Widget")
+		void SelectOverlayState() const;
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Widget")
+		void CycleState(bool bUp);
 
 protected:
-	void CreateButtons();
-	void UpdateButtonFocus();
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Widget")
+		void CreateButtons();
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Widget")
+		void UpdateButtonFocus();
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Widget")
+		void SetVerticalBox(UVerticalBox* verticalBox);
 	uint8 selectedIndex;
 };

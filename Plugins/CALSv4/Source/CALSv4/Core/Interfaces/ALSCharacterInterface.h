@@ -1,11 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CALSv4/Data/ALSStructs.h"
+
+#include <CALSv4/Data/ALSStructs.h>
 #include "UObject/Interface.h"
+
 #include "ALSCharacterInterface.generated.h"
 
-// This class does not need to be modified.
 UINTERFACE(Blueprintable, MinimalAPI)
 class UALSCharacterInterface : public UInterface {
 	GENERATED_BODY()
@@ -14,23 +15,28 @@ class UALSCharacterInterface : public UInterface {
 class CALSV4_API IALSCharacterInterface {
 	GENERATED_BODY()
 
-		// Add interface functions to this class. This is the class that will be inherited to implement this interface.
-public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++ ALS|Character Information")
+	public:
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Advanced Locomotion System|Interfaces|Character")
 		FALSCurrentState GetCurrentState();
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++ ALS|Character Information")
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Advanced Locomotion System|Interfaces|Character")
 		FALSEssentialValues GetEssentialValues();
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++ ALS|Character States")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Interfaces|Character")
 		void SetMovementState(EALSMovementState NewMovementState);
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++ ALS|Character States")
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Interfaces|Character")
 		void SetMovementAction(EALSMovementAction NewMovementAction);
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++ ALS|Character States")
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Interfaces|Character")
 		void SetRotationMode(EALSRotationMode NewRotationMode);
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++ ALS|Character States")
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Interfaces|Character")
 		void SetGait(EALSGait NewGait);
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++ ALS|Character States")
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Interfaces|Character")
 		void SetViewMode(EALSViewMode NewViewMode);
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++ ALS|Character States")
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Interfaces|Character")
 		void SetOverlayState(EALSOverlayState NewOverlayState);
 };

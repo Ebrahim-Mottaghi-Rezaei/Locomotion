@@ -11,25 +11,25 @@ class CALSV4_API AALSPlayerCameraManager : public APlayerCameraManager {
 	GENERATED_BODY()
 
 		AALSPlayerCameraManager();
-public:
+	public:
 	virtual void OnPossess(APawn* ControlledPawn);
-protected:
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	protected:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		USkeletalMeshComponent* CameraBehaviour;
 
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-		FVector DebugViewOffset;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-		FRotator DebugViewRotation;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Camera Manager")
+		FVector DebugViewOffset = FVector(350.0f, 0.0f, 50.0f);;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Camera Manager")
+		FRotator DebugViewRotation = FRotator(-5.0f, 180.0f, 0.0f);;
+	UPROPERTY(BlueprintReadWrite, Category = "Advanced Locomotion System|Camera Manager")
 		FVector RootLocation;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadWrite, Category = "Advanced Locomotion System|Camera Manager")
 		FVector PivotLocation;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadWrite, Category = "Advanced Locomotion System|Camera Manager")
 		FVector TargetCameraLocation;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadWrite, Category = "Advanced Locomotion System|Camera Manager")
 		FRotator TargetCameraRotation;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadWrite, Category = "Advanced Locomotion System|Camera Manager")
 		FTransform SmoothedPivotTarget;
 
 	APawn* PawnInControl;
@@ -39,8 +39,9 @@ protected:
 	float GetCameraBehaviourParam(FName CurveName);
 
 	FVector CalculateAxisIndependentLag(FVector CurrentLocation, FVector TargetLocation, FRotator CameraRotation, FVector LagSpeed);
+	
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Camera Manager")
+		FALSCameraBehaviourResult CustomCameraBehaviour();
 
-	FALSCameraBehaviourResult CustomCameraBehaviour();
-private:
-	TArray<AActor*> _actorsToIgnore;
+	TArray<AActor*> ActorsToIgnore;	
 };

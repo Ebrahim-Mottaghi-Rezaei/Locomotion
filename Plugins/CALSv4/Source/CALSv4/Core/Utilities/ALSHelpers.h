@@ -1,19 +1,32 @@
 #pragma once
-#include "CoreMinimal.h"
-#include "CALSv4/Data/ALSStructs.h"
 
-template<class T>
-class ALSGeneralHelpers {
+#include "CoreMinimal.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
+#include "CALSv4/Data/ALSStructs.h"
+#include "ALSHelpers.generated.h"
+
+UCLASS()
+class CALSV4_API UALSLogger :public UBlueprintFunctionLibrary {
+	GENERATED_BODY()
 public:
-	static T GetItemInArray(TArray<T>Items, const uint8 SelectedIndex, const bool bNext);
-	static T GetItemInArray(TArray<T>Items, const T selectedItem, const bool bNext);
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Helpers|Logging")
+		static void LogInfo(FString Message);
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Helpers|Logging")
+		static void LogWarning(FString Message);
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Helpers|Logging")
+		static void LogError(FString Message);
 };
 
-class ALSHelpers {
+UCLASS()
+class CALSV4_API UALSHelpers : public UBlueprintFunctionLibrary {
+	GENERATED_BODY()
 public:
-	static FTransform SubtractTransform(FTransform A, FTransform B);
-	static FALSComponentAndTransform LocalSpaceToWorldSpace(FALSComponentAndTransform localSpace);
-	static FALSComponentAndTransform WorldSpaceToLocalSpace(FALSComponentAndTransform localSpace);
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Helpers|Math")
+		static FTransform SubtractTransform(FTransform A, FTransform B);
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Helpers|Math")
+		static FALSComponentAndTransform LocalSpaceToWorldSpace(FALSComponentAndTransform LocalSpace);
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Helpers|Math")
+		static FALSComponentAndTransform WorldSpaceToLocalSpace(FALSComponentAndTransform WorldSpace);
 
 	/**
 	 *	Computes the distance between two bones / sockets and can remap the range.
@@ -29,5 +42,6 @@ public:
 	 *	@param OutRangeMin The minimum for the output range (commonly == 0.0)
 	 *	@param OutRangeMax The maximum for the output range (commonly == 1.0)
 	 */
-	static float GetDistanceBetweenTwoSocketsAndMapRange(const USkeletalMeshComponent* Component, const FName SocketOrBoneNameA, ERelativeTransformSpace SocketSpaceA, const FName SocketOrBoneNameB, ERelativeTransformSpace SocketSpaceB, bool bRemapRange, float InRangeMin, float InRangeMax, float OutRangeMin, float OutRangeMax);
+	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Helpers|Animation")
+		static float GetDistanceBetweenTwoSocketsAndMapRange(const USkeletalMeshComponent* Component, const FName SocketOrBoneNameA, ERelativeTransformSpace SocketSpaceA, const FName SocketOrBoneNameB, ERelativeTransformSpace SocketSpaceB, bool bRemapRange, float InRangeMin, float InRangeMax, float OutRangeMin, float OutRangeMax);
 };

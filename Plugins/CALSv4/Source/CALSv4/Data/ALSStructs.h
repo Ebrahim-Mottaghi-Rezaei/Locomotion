@@ -2,17 +2,18 @@
 
 #include "CoreMinimal.h"
 #include "ALSEnums.h"
+#include "Engine/DataTable.h"
 #include "Engine/EngineTypes.h"
-
 #include "ALSStructs.generated.h"
 
 class UPrimitiveComponent;
 class UCurveVector;
+class UCurveFloat;
 class UAnimMontage;
 class UAnimSequenceBase;
 class ACharacter;
 
-USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSComponentAndTransform {
 	GENERATED_BODY()
 
@@ -25,7 +26,7 @@ struct FALSComponentAndTransform {
 	FALSComponentAndTransform(FTransform transform, UPrimitiveComponent* component);
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSCameraSettings {
 	GENERATED_BODY()
 
@@ -41,7 +42,7 @@ struct FALSCameraSettings {
 		bool DoCollisionTest;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSCameraSettingsGait {
 	GENERATED_BODY()
 
@@ -56,7 +57,7 @@ struct FALSCameraSettingsGait {
 };
 
 
-USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSCameraSettingsState {
 	GENERATED_BODY()
 
@@ -70,7 +71,7 @@ struct FALSCameraSettingsState {
 		FALSCameraSettingsGait Aiming;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSDynamicMontageParams {
 	GENERATED_BODY()
 
@@ -90,7 +91,7 @@ struct FALSDynamicMontageParams {
 	FALSDynamicMontageParams(UAnimSequenceBase* animation, float blendInTime, float blendOutTime, float playRate, float startTime);
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSLeanAmount {
 	GENERATED_BODY()
 
@@ -103,7 +104,7 @@ struct FALSLeanAmount {
 	FALSLeanAmount(float FB, float LR);
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSMantleAsset {
 	GENERATED_BODY()
 
@@ -130,7 +131,7 @@ struct FALSMantleAsset {
 	FALSMantleAsset(UAnimMontage* AnimMontage, UCurveVector* PositionCorrectionCurve, FVector StartingOffset, float LowHeight, float LowPlayRate, float LowStartPosition, float HighHeight, float HighPlayRate, float HighStartPosition);
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSMantleParams {
 	GENERATED_BODY()
 
@@ -150,7 +151,7 @@ struct FALSMantleParams {
 };
 
 
-USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSMantleTraceSettings {
 	GENERATED_BODY()
 
@@ -166,7 +167,7 @@ struct FALSMantleTraceSettings {
 		float DownwardTraceRadius;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSMovementSettings {
 	GENERATED_BODY()
 
@@ -182,7 +183,7 @@ struct FALSMovementSettings {
 		UCurveFloat* RotationRateCurve;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSMovementSettingsStance {
 	GENERATED_BODY()
 
@@ -192,8 +193,8 @@ struct FALSMovementSettingsStance {
 		FALSMovementSettings Crouching;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
-struct FALSMovementSettingsState {
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
+struct FALSMovementSettingsState :public FTableRowBase {
 	GENERATED_BODY()
 
 		UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -204,7 +205,7 @@ struct FALSMovementSettingsState {
 		FALSMovementSettingsStance Aiming;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSRotateInPlaceAsset {
 	GENERATED_BODY()
 
@@ -222,7 +223,7 @@ struct FALSRotateInPlaceAsset {
 		float FastPlayRate;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSTurnInPlaceAsset {
 	GENERATED_BODY()
 
@@ -236,9 +237,11 @@ struct FALSTurnInPlaceAsset {
 		float PlayRate;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		bool ScaleTurnAngle;
+
+	FALSTurnInPlaceAsset();
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSVelocityBlend {
 	GENERATED_BODY()
 
@@ -253,11 +256,10 @@ struct FALSVelocityBlend {
 
 	FALSVelocityBlend();
 	FALSVelocityBlend(float f, float b, float l, float r);
-
 };
 
 //Animation Modifiers Structures.
-USTRUCT(BlueprintType, Category = "C++ ALS|Animation Modifiers")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|Animation Modifiers")
 struct FAnimCurveCreationData {
 	GENERATED_BODY()
 
@@ -265,9 +267,11 @@ struct FAnimCurveCreationData {
 		int FrameNumber;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float CurveValue;
+
+	FAnimCurveCreationData();
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|Animation Modifiers")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|Animation Modifiers")
 struct FALSAnimCurveCreationParams {
 	GENERATED_BODY()
 
@@ -278,9 +282,11 @@ struct FALSAnimCurveCreationParams {
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TArray<FAnimCurveCreationData> Keys;
+
+	FALSAnimCurveCreationParams();
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|Character Information")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|Character Information")
 struct FALSCurrentState {
 	GENERATED_BODY()
 
@@ -306,7 +312,7 @@ struct FALSCurrentState {
 	FALSCurrentState();
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|Character Information")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|Character Information")
 struct FALSEssentialValues {
 	GENERATED_BODY()
 
@@ -328,10 +334,15 @@ struct FALSEssentialValues {
 		FRotator AimingRotation;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float AimYawRate;
+
+	FALSEssentialValues();
+	FALSEssentialValues(FVector velocity, FVector acceleration, FVector movementInput, bool isMoving, bool hasMovementInput, float speed, float movementInputAmount, FRotator aimingRotation, float aimYawRate);
+	
+	FString ToString() const;
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|Debug")
-struct FDebugInfo {
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|Debug")
+struct FALSDebugInfo {
 	GENERATED_BODY()
 
 		UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -347,16 +358,15 @@ struct FDebugInfo {
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		bool bShowLayerColors;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		bool bSlomo;
+		bool bSlowMotion;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		bool bShowCharacterInfo;
 
-	FDebugInfo() {
-		DebugFocusCharacter = nullptr;
-	}
+	FALSDebugInfo();
+	FALSDebugInfo(ACharacter* FocusedDebugCharacter, bool DebugView, bool ShowHUD, bool ShowTraces, bool ShowDebugShapes, bool ShowLayerColors, bool SlowMotion, bool ShowCharacterInfo);
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|Camera System")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|Camera System")
 struct FALSCameraParameters {
 	GENERATED_BODY()
 
@@ -367,9 +377,10 @@ struct FALSCameraParameters {
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		bool bRightShoulder;
 	FALSCameraParameters();
+	FALSCameraParameters(float tP_FOV, float fp_FOV, bool rightShoulder);
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|Camera System")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|Camera System")
 struct FALSTraceParams {
 	GENERATED_BODY()
 
@@ -381,9 +392,10 @@ struct FALSTraceParams {
 		float TraceRadius;
 
 	FALSTraceParams();
+	FALSTraceParams(TEnumAsByte<ETraceTypeQuery> traceChannel, FVector traceOrigin, float traceRadius);
 };
 
-USTRUCT(BlueprintType, Category = "C++ ALS|Camera System")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|Camera System")
 struct FALSCameraBehaviourResult {
 	GENERATED_BODY()
 
@@ -399,10 +411,17 @@ struct FALSCameraBehaviourResult {
 	FALSCameraBehaviourResult(FVector location, FRotator rotation, float fov);
 };
 
-//Function Return Value Types
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSControlVectors {
-	FVector Forward;
-	FVector Right;
+	GENERATED_BODY()
+
+		UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+		FVector Forward;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+		FVector Right;
+
+	FALSControlVectors();
+	FALSControlVectors(FVector forward, FVector right);
 };
 
 struct FALSHitResult {

@@ -2,7 +2,6 @@
 
 #include <CALSv4/Data/ALSEnums.h>
 #include <CALSv4/Data/ALSStructs.h>
-#include <CALSv4/Core/Utilities/ALSDebug.h>
 #include <CALSv4/Core/Utilities/ALSHelpers.h>
 
 #include "Components/CapsuleComponent.h"
@@ -14,41 +13,8 @@
 
 UALSAnimInstance::UALSAnimInstance() {
 	RootMotionMode = ERootMotionMode::RootMotionFromEverything;
-	MovementState = EALSMovementState::ALS_None;
-	PrevMovementState = EALSMovementState::ALS_None;
-	MovementAction = EALSMovementAction::ALS_LowMantle;
-	RotationMode = EALSRotationMode::ALS_VelocityDirection;
-	Gait = EALSGait::ALS_Walking;
-	Stance = EALSStance::ALS_Standing;
-	ViewMode = EALSViewMode::ALS_TPS;
-	OverlayState = EALSOverlayState::ALS_Default;
 
-	GroundedEntryState = EALSGroundedEntryState::ALS_None;
-	MovementDirection = EALSMovementDirection::ALS_Forward;
-	TrackedHipsDirection = EALSHipsDirection::ALS_F;
-
-	bShouldMove = false;
-	bRotateL = false;
-	bRotateR = false;
-	bPivot = false;
-	RotateRate = 1.0f;
-	StandingPlayRate = 1.0f;
-	CrouchingPlayRate = 1.0f;
-	StrideBlend = 0.0f;
-	VelocityBlend = FALSVelocityBlend();
-	LeanAmount = FALSLeanAmount();
-
-	AimSweepTime = 0.5f;
-
-	BasePose_N = 1.0f;
-
-	TurnCheckMinAngle = 45.0f;
-	Turn180Threshold = 130.0f;
-	AimYawRateLimit = 50.0f;
-	ElapsedDelayTime = 0.0f;
-	MinAngleDelay = 0.75f;
-	MaxAngleDelay = 0.0f;
-
+#pragma region Setting up the Turns assets
 	N_TurnIP_L90 = FALSTurnInPlaceAsset();
 	N_TurnIP_L90.PlayRate = 1.2f;
 	N_TurnIP_L90.AnimatedAngle = -90.0f;
@@ -59,7 +25,7 @@ UALSAnimInstance::UALSAnimInstance() {
 	if (IsValid(ALS_N_TurnIP_L90.Object) && ALS_N_TurnIP_L90.Succeeded())
 		N_TurnIP_L90.Animation = ALS_N_TurnIP_L90.Object;
 	else
-		ALSDebug::LogError(TEXT("Animation not found: ALS_N_TurnIP_L90"));
+		UALSLogger::LogError(TEXT("Animation not found: ALS_N_TurnIP_L90"));
 
 	N_TurnIP_R90 = FALSTurnInPlaceAsset();
 	N_TurnIP_R90.PlayRate = 1.2f;
@@ -70,7 +36,7 @@ UALSAnimInstance::UALSAnimInstance() {
 	if (IsValid(ALS_N_TurnIP_R90.Object) && ALS_N_TurnIP_R90.Succeeded())
 		N_TurnIP_R90.Animation = ALS_N_TurnIP_R90.Object;
 	else
-		ALSDebug::LogError(TEXT("Animation not found: ALS_N_TurnIP_R90"));
+		UALSLogger::LogError(TEXT("Animation not found: ALS_N_TurnIP_R90"));
 
 	N_TurnIP_L180 = FALSTurnInPlaceAsset();
 	N_TurnIP_L180.PlayRate = 1.2f;
@@ -81,7 +47,7 @@ UALSAnimInstance::UALSAnimInstance() {
 	if (IsValid(ALS_N_TurnIP_L180.Object) && ALS_N_TurnIP_L180.Succeeded())
 		N_TurnIP_L180.Animation = ALS_N_TurnIP_L180.Object;
 	else
-		ALSDebug::LogError(TEXT("Animation not found: ALS_N_TurnIP_L180"));
+		UALSLogger::LogError(TEXT("Animation not found: ALS_N_TurnIP_L180"));
 
 	N_TurnIP_R180 = FALSTurnInPlaceAsset();
 	N_TurnIP_R180.PlayRate = 1.2f;
@@ -92,7 +58,7 @@ UALSAnimInstance::UALSAnimInstance() {
 	if (IsValid(ALS_N_TurnIP_R180.Object) && ALS_N_TurnIP_R180.Succeeded())
 		N_TurnIP_R180.Animation = ALS_N_TurnIP_R180.Object;
 	else
-		ALSDebug::LogError(TEXT("Animation not found: ALS_N_TurnIP_R180"));
+		UALSLogger::LogError(TEXT("Animation not found: ALS_N_TurnIP_R180"));
 
 	CLF_TurnIP_L90 = FALSTurnInPlaceAsset();
 	CLF_TurnIP_L90.AnimatedAngle = -90.0f;
@@ -103,7 +69,7 @@ UALSAnimInstance::UALSAnimInstance() {
 	if (IsValid(ALS_CLF_TurnIP_L90.Object) && ALS_CLF_TurnIP_L90.Succeeded())
 		CLF_TurnIP_L90.Animation = ALS_CLF_TurnIP_L90.Object;
 	else
-		ALSDebug::LogError(TEXT("Animation not found: ALS_CLF_TurnIP_L90"));
+		UALSLogger::LogError(TEXT("Animation not found: ALS_CLF_TurnIP_L90"));
 
 	CLF_TurnIP_R90 = FALSTurnInPlaceAsset();
 	CLF_TurnIP_R90.AnimatedAngle = 90.0f;
@@ -114,10 +80,10 @@ UALSAnimInstance::UALSAnimInstance() {
 	if (IsValid(ALS_CLF_TurnIP_R90.Object) && ALS_CLF_TurnIP_R90.Succeeded())
 		CLF_TurnIP_R90.Animation = ALS_CLF_TurnIP_R90.Object;
 	else
-		ALSDebug::LogError(TEXT("Animation not found: ALS_CLF_TurnIP_R90"));
+		UALSLogger::LogError(TEXT("Animation not found: ALS_CLF_TurnIP_R90"));
 
 	CLF_TurnIP_L180 = FALSTurnInPlaceAsset();
-	CLF_TurnIP_L180.AnimatedAngle = 180.0f;
+	CLF_TurnIP_L180.AnimatedAngle = -180.0f;
 	CLF_TurnIP_L180.PlayRate = 1.2f;
 	CLF_TurnIP_L180.SlotName = TEXT("(CLF) Turn/Rotate");
 	CLF_TurnIP_L180.ScaleTurnAngle = false;
@@ -125,7 +91,7 @@ UALSAnimInstance::UALSAnimInstance() {
 	if (IsValid(ALS_CLF_TurnIP_L180.Object) && ALS_CLF_TurnIP_L180.Succeeded())
 		CLF_TurnIP_L180.Animation = ALS_CLF_TurnIP_L180.Object;
 	else
-		ALSDebug::LogError(TEXT("Animation not found: ALS_CLF_TurnIP_L180"));
+		UALSLogger::LogError(TEXT("Animation not found: ALS_CLF_TurnIP_L180"));
 
 	CLF_TurnIP_R180 = FALSTurnInPlaceAsset();
 	CLF_TurnIP_R180.AnimatedAngle = 180.0f;
@@ -136,83 +102,75 @@ UALSAnimInstance::UALSAnimInstance() {
 	if (IsValid(ALS_CLF_TurnIP_R180.Object) && ALS_CLF_TurnIP_R180.Succeeded())
 		CLF_TurnIP_R180.Animation = ALS_CLF_TurnIP_R180.Object;
 	else
-		ALSDebug::LogError(TEXT("Animation not found: ALS_CLF_TurnIP_R180"));
+		UALSLogger::LogError(TEXT("Animation not found: ALS_CLF_TurnIP_R180"));
+#pragma endregion
 
-	RotateMinThreshold = -50.0f;
-	RotateMaxThreshold = 50.0f;
-	AimYawRateMinRange = 90.0f;
-	AimYawRateMaxRange = 270.0f;
-	MinPlayRate = 1.15;
-	MaxPlayRate = 3.0f;
-
-	AnimatedWalkSpeed = 150.0f;
-	AnimatedRunSpeed = 350.0f;
-	AnimatedSprintSpeed = 600.0f;
-	AnimatedCrouchSpeed = 150.0f;
-	VelocityBlendInterpSpeed = 12.0f;
-	GroundedLeanInterpSpeed = 4.0f;
-	InAirLeanInterpSpeed = 4.0f;
-	SmoothedAimingRotationInterpSpeed = 10.0f;
-	InputYawOffsetInterpSpeed = 8.0f;
-	TriggerPivotSpeedLimit = 200.0f;
-	FootHeight = 13.5f;
-	IK_TraceDistanceAboveFoot = 50.0f;
-	IK_TraceDistanceBelowFoot = 45.0f;
-
-	JumpPlayRate = 1.2f;
-	LandPrediction = 1.0f;
-
-	EnableAimOffset = 1.0f;
-	EnableHandIK_R = 1.0f;
-	EnableHandIK_L = 1.0f;
-
+#pragma region Setting Up Curves
 	const ConstructorHelpers::FObjectFinder<UCurveFloat> _DiagonalScaleAmountCurve(TEXT("CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/DiagonalScaleAmount.DiagonalScaleAmount'"));
 	if (IsValid(_DiagonalScaleAmountCurve.Object) && _DiagonalScaleAmountCurve.Succeeded())
 		DiagonalScaleAmountCurve = _DiagonalScaleAmountCurve.Object;
 	else
-		ALSDebug::LogError(TEXT("Curve not found: DiagonalScaleAmount"));
+		UALSLogger::LogError(TEXT("Curve not found: DiagonalScaleAmount"));
 
 	const ConstructorHelpers::FObjectFinder<UCurveFloat> _StrideBlend_N_Walk(TEXT("CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/StrideBlend_N_Walk.StrideBlend_N_Walk'"));
 	if (IsValid(_StrideBlend_N_Walk.Object) && _StrideBlend_N_Walk.Succeeded())
 		StrideBlend_N_Walk = _StrideBlend_N_Walk.Object;
 	else
-		ALSDebug::LogError(TEXT("Curve not found: StrideBlend_N_Walk"));
+		UALSLogger::LogError(TEXT("Curve not found: StrideBlend_N_Walk"));
 
 	const ConstructorHelpers::FObjectFinder<UCurveFloat> _StrideBlend_N_Run(TEXT("CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/StrideBlend_N_Run.StrideBlend_N_Run'"));
 	if (IsValid(_StrideBlend_N_Run.Object) && _StrideBlend_N_Run.Succeeded())
 		StrideBlend_N_Run = _StrideBlend_N_Run.Object;
 	else
-		ALSDebug::LogError(TEXT("Curve not found: StrideBlend_N_Run"));
+		UALSLogger::LogError(TEXT("Curve not found: StrideBlend_N_Run"));
 
 	const ConstructorHelpers::FObjectFinder<UCurveFloat> _StrideBlend_C_Walk(TEXT("CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/StrideBlend_N_Walk.StrideBlend_N_Walk'"));
 	if (IsValid(_StrideBlend_C_Walk.Object) && _StrideBlend_C_Walk.Succeeded())
 		StrideBlend_C_Walk = _StrideBlend_C_Walk.Object;
 	else
-		ALSDebug::LogError(TEXT("Curve not found: StrideBlend_C_Walk"));
+		UALSLogger::LogError(TEXT("Curve not found: StrideBlend_C_Walk"));
 
 	const ConstructorHelpers::FObjectFinder<UCurveFloat> _LandPredictionCurve(TEXT("CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/LandPredictionBlend.LandPredictionBlend'"));
 	if (IsValid(_LandPredictionCurve.Object) && _LandPredictionCurve.Succeeded())
 		LandPredictionCurve = _LandPredictionCurve.Object;
 	else
-		ALSDebug::LogError(TEXT("Curve not found: LandPredictionCurve"));
+		UALSLogger::LogError(TEXT("Curve not found: LandPredictionCurve"));
 
 	const ConstructorHelpers::FObjectFinder<UCurveFloat> _LeanInAirAmount(TEXT("CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/LeanInAirAmount.LeanInAirAmount'"));
 	if (IsValid(_LeanInAirAmount.Object) && _LeanInAirAmount.Succeeded())
 		LeanInAirCurve = _LeanInAirAmount.Object;
 	else
-		ALSDebug::LogError(TEXT("Curve not found: LeanInAirCurve"));
+		UALSLogger::LogError(TEXT("Curve not found: LeanInAirCurve"));
 
 	const ConstructorHelpers::FObjectFinder<UCurveVector> _YawOffset_FB(TEXT("CurveVector'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/YawOffset_FB.YawOffset_FB'"));
 	if (IsValid(_YawOffset_FB.Object) && _YawOffset_FB.Succeeded())
 		YawOffset_FB = _YawOffset_FB.Object;
 	else
-		ALSDebug::LogError(TEXT("Curve not found: YawOffset_FB"));
+		UALSLogger::LogError(TEXT("Curve not found: YawOffset_FB"));
 
 	const ConstructorHelpers::FObjectFinder<UCurveVector> _YawOffset_LR(TEXT("CurveVector'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/YawOffset_LR.YawOffset_LR'"));
 	if (IsValid(_YawOffset_LR.Object) && _YawOffset_LR.Succeeded())
 		YawOffset_LR = _YawOffset_LR.Object;
 	else
-		ALSDebug::LogError(TEXT("Curve not found: YawOffset_LR"));
+		UALSLogger::LogError(TEXT("Curve not found: YawOffset_LR"));
+#pragma endregion
+
+#pragma region Setting Up Transitions
+	static ConstructorHelpers::FObjectFinder<UAnimSequence> ALS_N_Transition_R_Finder(TEXT("AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/Transitions/ALS_N_Transition_R.ALS_N_Transition_R'"));
+	if (IsValid(ALS_N_Transition_R_Finder.Object) && ALS_N_Transition_R_Finder.Succeeded()) {
+		ALS_N_Transition_R = ALS_N_Transition_R_Finder.Object;
+	} else {
+		UALSLogger::LogError(TEXT("Animation not found: ALS_N_Transition_R"));
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimSequence> ALS_N_Transition_L_Finder(TEXT("AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/Transitions/ALS_N_Transition_L.ALS_N_Transition_L'"));
+	if (IsValid(ALS_N_Transition_L_Finder.Object) && ALS_N_Transition_L_Finder.Succeeded()) {
+		ALS_N_Transition_L = ALS_N_Transition_L_Finder.Object;
+	} else {
+		UALSLogger::LogError(TEXT("Animation not found: ALS_N_Transition_R"));
+	}
+#pragma endregion
+
 }
 
 void UALSAnimInstance::NativeInitializeAnimation() {
@@ -228,8 +186,8 @@ void UALSAnimInstance::NativeBeginPlay() {
 	Super::NativeBeginPlay();
 }
 
-void UALSAnimInstance::NativeUpdateAnimation(const float DeltaSeconds) {
-	if (DeltaSeconds == 0 || !IsValid(Character))
+void UALSAnimInstance::NativeUpdateAnimation(const volatile float DeltaSeconds) {
+	if (DeltaSeconds == 0 || !Character)
 		return;
 
 	Super::NativeUpdateAnimation(DeltaSeconds);
@@ -244,13 +202,18 @@ void UALSAnimInstance::NativeUpdateAnimation(const float DeltaSeconds) {
 	UpdateFootIK();
 
 	if (MovementState == EALSMovementState::ALS_Grounded) {
-		const bool bShouldMoveNew = ShouldMoveCheck();
-		if (bShouldMove == bShouldMoveNew) {
+		bShouldMove = ShouldMoveCheck();
+
+		if (bShouldMove == bShouldMove_Last) {
 			if (bShouldMove) {
+				if (GEngine)
+					GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, TEXT("bShouldMove = True"));
+
 				//Do While Moving
 				UpdateMovementValues();
 				UpdateRotationValues();
 			} else {
+				GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, TEXT("bShouldMove = False"));
 				//Do While Not Moving
 				if (CanRotateInPlace()) {
 					RotateInPlaceCheck();
@@ -269,14 +232,17 @@ void UALSAnimInstance::NativeUpdateAnimation(const float DeltaSeconds) {
 					DynamicTransitionCheck();
 				}
 			}
-		} else if (bShouldMoveNew) {			//Which means bShouldMove!=bShouldMoveNew and bShouldMoveNew == true because it is in an 'else if' clause
-			bShouldMove = bShouldMoveNew;		//Updating the bShouldMove to the latest value
-
-			//Do When Starting To Move
-			ElapsedDelayTime = 0.0f;
-			bRotateL = false;
-			bRotateR = false;
+		} else {
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Changing bShouldMove to %s"), bShouldMove ? TEXT("True") : TEXT("False")));
+			if (bShouldMove) {
+				//Do When Starting To Move
+				ElapsedDelayTime = 0.0f;
+				bRotateL = false;
+				bRotateR = false;
+			}
 		}
+
+		bShouldMove_Last = bShouldMove;
 
 	} else if (MovementState == EALSMovementState::ALS_InAir) {
 		//Do While InAir
@@ -287,33 +253,46 @@ void UALSAnimInstance::NativeUpdateAnimation(const float DeltaSeconds) {
 	}
 }
 
-float UALSAnimInstance::GetAnimCurveClamped(FName Name, float Bias, float ClampMin, float ClampMax) {
-	return 0.0f;
+float UALSAnimInstance::GetAnimCurveClamped(const FName Name, const float Bias, const float ClampMin, const float ClampMax) {
+	float value = 0.0f;
+	GetCurveValue(Name, value);
+
+	return UKismetMathLibrary::Clamp(value + Bias, ClampMin, ClampMax);
 }
 
-void UALSAnimInstance::ResetIKOffsets() {}
+void UALSAnimInstance::ResetIKOffsets() {
+	FootOffset_L_Location = UKismetMathLibrary::VInterpTo(FootOffset_L_Location, FVector::ZeroVector, DeltaTimeX, 15.0f);
+	FootOffset_R_Location = UKismetMathLibrary::VInterpTo(FootOffset_R_Location, FVector::ZeroVector, DeltaTimeX, 15.0f);
+
+	FootOffset_L_Rotation = UKismetMathLibrary::RInterpTo(FootOffset_L_Rotation, FRotator::ZeroRotator, DeltaTimeX, 15.0f);
+	FootOffset_R_Rotation = UKismetMathLibrary::RInterpTo(FootOffset_R_Rotation, FRotator::ZeroRotator, DeltaTimeX, 15.0f);
+}
 
 void UALSAnimInstance::UpdateCharacterInfo() {
-	const auto values = IALSCharacterInterface::Execute_GetEssentialValues(Character);
-	Velocity = values.Velocity;
-	Acceleration = values.Acceleration;
-	MovementInput = values.MovementInput;
-	bIsMoving = values.bIsMoving;
-	bHasMovementInput = values.bHasMovementInput;
-	Speed = values.Speed;
-	MovementInputAmount = values.MovementInputAmount;
-	AimingRotation = values.AimingRotation;
-	AimYawRate = values.AimYawRate;
+	if (Character && Character->GetClass()->ImplementsInterface(UALSCharacterInterface::StaticClass())) {
+		const auto values = IALSCharacterInterface::Execute_GetEssentialValues(Character);
+		Velocity = values.Velocity;
+		Acceleration = values.Acceleration;
+		MovementInput = values.MovementInput;
+		bIsMoving = values.bIsMoving;
+		bHasMovementInput = values.bHasMovementInput;
+		Speed = values.Speed;
+		MovementInputAmount = values.MovementInputAmount;
+		AimingRotation = values.AimingRotation;
+		AimYawRate = values.AimYawRate;
+		UALSLogger::LogInfo(*values.ToString());
 
-	const auto states = IALSCharacterInterface::Execute_GetCurrentState(Character);
-	MovementState = states.MovementState;
-	PrevMovementState = states.PrevMovementState;
-	MovementAction = states.MovementAction;
-	RotationMode = states.RotationMode;
-	Gait = states.ActualGait;
-	Stance = states.ActualStance;
-	ViewMode = states.ViewMode;
-	OverlayState = states.OverlayState;
+		//const auto states = Character->GetCurrentState_Implementation();
+		const auto states = IALSCharacterInterface::Execute_GetCurrentState(Character);
+		MovementState = states.MovementState;
+		PrevMovementState = states.PrevMovementState;
+		MovementAction = states.MovementAction;
+		RotationMode = states.RotationMode;
+		Gait = states.ActualGait;
+		Stance = states.ActualStance;
+		ViewMode = states.ViewMode;
+		OverlayState = states.OverlayState;
+	}
 }
 
 void UALSAnimInstance::UpdateAimingValues() {
@@ -370,9 +349,9 @@ void UALSAnimInstance::UpdateLayerValues() {
 
 	//Set whether the arms should blend in mesh space or local space. The Mesh space weight will always be 1 unless the Local Space (LS) curve is fully weighted.
 	Arm_L_LS = GetCurveValue(FName(TEXT("Layering_Arm_L_LS")));
-	Arm_L_MS = (float)(1 - (int)FMath::Floor(Arm_L_LS));
+	Arm_L_MS = static_cast<float>(1 - UKismetMathLibrary::FFloor(Arm_L_LS));
 	Arm_R_LS = GetCurveValue(FName(TEXT("Layering_Arm_R_LS")));
-	Arm_R_MS = (float)(1 - (int)FMath::Floor(Arm_L_LS));
+	Arm_R_MS = static_cast<float>(1 - UKismetMathLibrary::FFloor(Arm_R_LS));
 }
 
 void UALSAnimInstance::UpdateFootIK() {
@@ -380,19 +359,23 @@ void UALSAnimInstance::UpdateFootIK() {
 	SetFootLocking(FName(TEXT("Enable_FootIK_L")), FName(TEXT("FootLock_L")), FName(TEXT("ik_foot_l")), FootLock_L_Alpha, FootLock_L_Location, FootLock_L_Rotation);
 	SetFootLocking(FName(TEXT("Enable_FootIK_R")), FName(TEXT("FootLock_R")), FName(TEXT("ik_foot_r")), FootLock_R_Alpha, FootLock_R_Location, FootLock_R_Rotation);
 
-	/*if (MovementState == EALSMovementState::ALS_InAir) {
+	if (MovementState == EALSMovementState::ALS_InAir) {
 		SetPelvisIKOffset(FVector::ZeroVector, FVector::ZeroVector);
 		ResetIKOffsets();
 	} else if (MovementState != EALSMovementState::ALS_Ragdoll) {
-		SetFootOffsets(FName(TEXT("Enable_FootIK_L")), FName(TEXT("ik_foot_l")), FName(TEXT("root")), FVector::ZeroVector, FootOffset_L_Location, FootOffset_L_Rotation);
-		SetFootOffsets(FName(TEXT("Enable_FootIK_R")), FName(TEXT("ik_foot_r")), FName(TEXT("root")), FVector::ZeroVector, FootOffset_R_Location, FootOffset_R_Rotation);
-		SetPelvisIKOffset(FVector::ZeroVector, FVector::ZeroVector);
-	}*/
+		FVector FootOffsetRTarget;
+		FVector FootOffsetLTarget;
+
+		SetFootOffsets(FName(TEXT("Enable_FootIK_L")), FName(TEXT("ik_foot_l")), FName(TEXT("root")), FootOffsetLTarget, FootOffset_L_Location, FootOffset_L_Rotation);
+		SetFootOffsets(FName(TEXT("Enable_FootIK_R")), FName(TEXT("ik_foot_r")), FName(TEXT("root")), FootOffsetRTarget, FootOffset_R_Location, FootOffset_R_Rotation);
+
+		SetPelvisIKOffset(FootOffsetLTarget, FootOffsetRTarget);
+	}
 }
 
 void UALSAnimInstance::UpdateMovementValues() {
 	//Interp and set the Velocity Blend.
-	InterpVelocityBlend(VelocityBlend, CalculateVelocityBlend(), VelocityBlendInterpSpeed, DeltaTimeX);
+	VelocityBlend = InterpVelocityBlend(VelocityBlend, CalculateVelocityBlend(), VelocityBlendInterpSpeed, DeltaTimeX);
 
 	//Set the Diagnal Scale Amount.
 	DiagonalScaleAmount = CalculateDiagonalScaleAmount();
@@ -449,7 +432,7 @@ void UALSAnimInstance::UpdateRagdollValues() {
 
 bool UALSAnimInstance::ShouldMoveCheck() {
 	//Enable Movement Animations if IsMoving and HasMovementInput, or if the Speed is greater than 150. 
-	return Speed > 150.0f || (bIsMoving && bHasMovementInput);
+	return Speed > 150.0f || bIsMoving && bHasMovementInput;
 }
 
 bool UALSAnimInstance::CanTurnInPlace() {
@@ -554,28 +537,13 @@ void UALSAnimInstance::DynamicTransitionCheck() {
 	/*Check each foot to see if the location difference between the IK_Foot bone and its desired / target location (determined via a virtual bone) exceeds a threshold.
 	If it does, play an additive transition animation on that foot. The currently set transition plays the second half of a 2 foot transition animation, so that only a single foot moves.
 	Because only the IK_Foot bone can be locked, the separate virtual bone allows the system to know its desired location when locked.*/
-	const float distanceL = ALSHelpers::GetDistanceBetweenTwoSocketsAndMapRange(GetOwningComponent(), FName(TEXT("ik_foot_l")), RTS_Component, FName(TEXT("VB foot_target_l")), RTS_Component, false, 0.0f, 0.0f, 0.0f, 0.0f);
+	const float distanceL = UALSHelpers::GetDistanceBetweenTwoSocketsAndMapRange(GetOwningComponent(), FName(TEXT("ik_foot_l")), RTS_Component, FName(TEXT("VB foot_target_l")), RTS_Component, false, 0.0f, 0.0f, 0.0f, 0.0f);
+	if (distanceL > 8.0f)
+		PlayDynamicTransition(0.1f, FALSDynamicMontageParams(ALS_N_Transition_R, 0.2f, 0.2f, 1.5f, 0.8f));
 
-	if (distanceL > 8.0f) {
-		static ConstructorHelpers::FObjectFinder<UAnimSequence> ALS_N_Transition_R(TEXT("AnimSequence'/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/Transitions/ALS_N_Transition_R.ALS_N_Transition_R'"));
-		if (IsValid(ALS_N_Transition_R.Object) && ALS_N_Transition_R.Succeeded()) {
-			PlayDynamicTransition(0.1f, FALSDynamicMontageParams(ALS_N_Transition_R.Object, 0.2f, 0.2f, 1.5f, 0.8f));
-		} else {
-			ALSDebug::LogError(TEXT("Animation not found: ALS_N_Transition_R"));
-		}
-	}
-
-
-	const float distanceR = ALSHelpers::GetDistanceBetweenTwoSocketsAndMapRange(GetOwningComponent(), FName(TEXT("ik_foot_r")), RTS_Component, FName(TEXT("VB foot_target_r")), RTS_Component, false, 0.0f, 0.0f, 0.0f, 0.0f);
-
-	if (distanceR > 8.0f) {
-		static ConstructorHelpers::FObjectFinder<UAnimSequence> ALS_N_Transition_L(TEXT("AnimSequence'/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/Transitions/ALS_N_Transition_L.ALS_N_Transition_L'"));
-		if (IsValid(ALS_N_Transition_L.Object) && ALS_N_Transition_L.Succeeded()) {
-			PlayDynamicTransition(0.1f, FALSDynamicMontageParams(ALS_N_Transition_L.Object, 0.2f, 0.2f, 1.5f, 0.8f));
-		} else {
-			ALSDebug::LogError(TEXT("Animation not found: ALS_N_Transition_L"));
-		}
-	}
+	const float distanceR = UALSHelpers::GetDistanceBetweenTwoSocketsAndMapRange(GetOwningComponent(), FName(TEXT("ik_foot_r")), RTS_Component, FName(TEXT("VB foot_target_r")), RTS_Component, false, 0.0f, 0.0f, 0.0f, 0.0f);
+	if (distanceR > 8.0f)
+		PlayDynamicTransition(0.1f, FALSDynamicMontageParams(ALS_N_Transition_L, 0.2f, 0.2f, 1.5f, 0.8f));
 }
 
 FALSVelocityBlend UALSAnimInstance::CalculateVelocityBlend() {
@@ -586,7 +554,7 @@ FALSVelocityBlend UALSAnimInstance::CalculateVelocityBlend() {
 
 	const FVector RelativeDirection = LocRelativeVelocityDir / Sum;
 
-	return FALSVelocityBlend(FMath::Clamp(RelativeDirection.X, 0.0f, 1.0f), FMath::Abs(FMath::Clamp(RelativeDirection.X, -1.0f, 0.0f)), FMath::Abs(FMath::Clamp(RelativeDirection.Y, -1.0f, 0.0f)), FMath::Clamp(RelativeDirection.X, 0.0f, 1.0f));
+	return FALSVelocityBlend(FMath::Clamp(RelativeDirection.X, 0.0f, 1.0f), FMath::Abs(FMath::Clamp(RelativeDirection.X, -1.0f, 0.0f)), FMath::Abs(FMath::Clamp(RelativeDirection.Y, -1.0f, 0.0f)), FMath::Clamp(RelativeDirection.Y, 0.0f, 1.0f));
 
 }
 
@@ -599,8 +567,11 @@ float UALSAnimInstance::CalculateDiagonalScaleAmount() {
 FVector UALSAnimInstance::CalculateRelativeAccelerationAmount() {
 	//Calculate the Relative Acceleration Amount. This value represents the current amount of acceleration / deceleration relative to the actor rotation.
 	//It is normalized to a range of -1 to 1 so that -1 equals the Max Braking Deceleration, and 1 equals the Max Acceleration of the Character Movement Component.
-	const float tmp = FVector::DotProduct(Acceleration, Velocity) > 0 ? Character->GetCharacterMovement()->GetMaxAcceleration() : Character->GetCharacterMovement()->GetMaxBrakingDeceleration();
-	return Character->GetActorRotation().UnrotateVector(Acceleration.GetClampedToMaxSize(tmp) / tmp);
+	const float max = FVector::DotProduct(Acceleration, Velocity) > 0 ?
+		Character->GetCharacterMovement()->GetMaxAcceleration() :
+		Character->GetCharacterMovement()->GetMaxBrakingDeceleration();
+
+	return  Character->GetActorRotation().UnrotateVector(Acceleration.GetClampedToMaxSize(max) / max);
 }
 
 float UALSAnimInstance::CalculateWalkRunBlend() {
@@ -619,7 +590,9 @@ float UALSAnimInstance::CalculateStrideBlend() {
 float UALSAnimInstance::CalculateStandingPlayRate() {
 	/*Calculate the Play Rate by dividing the Character's speed by the Animated Speed for each gait. The lerps are determined by the "Weight_Gait" anim curve that exists on every locomotion cycle so that the play rate is always in sync with the currently blended animation. The value is also divided by the Stride Blend and the mesh scale so that the play rate increases as the stride or scale gets smaller.*/
 	const float lerpedA = FMath::Lerp(Speed / AnimatedWalkSpeed, Speed / AnimatedRunSpeed, GetAnimCurveClamped(FName(TEXT("Weight_Gait")), -1.0f, 0.0f, 1.0f));
-	return (FMath::Lerp(lerpedA, Speed / AnimatedSprintSpeed, GetAnimCurveClamped(FName(TEXT("Weight_Gait")), -2.0f, 0.0f, 1.0f)) / StrideBlend) / GetOwningComponent()->GetComponentScale().Z;
+	const float SecondLerpedLevel = FMath::Lerp(lerpedA, Speed / AnimatedSprintSpeed, GetAnimCurveClamped(TEXT("Weight_Gait"), -2.0f, 0.0f, 1.0f));
+
+	return FMath::Clamp(SecondLerpedLevel / (StrideBlend * GetOwningComponent()->GetComponentScale().Z), 0.0f, 3.0f);
 }
 
 float UALSAnimInstance::CalculateCrouchingPlayRate() {
@@ -651,10 +624,12 @@ FALSLeanAmount UALSAnimInstance::CalculateInAirLeanAmount() {
 	return FALSLeanAmount(tmp2.Y, tmp2.X);
 }
 
-void UALSAnimInstance::SetFootOffsets(FName EnableFootIKCurve, FName IKFootBone, FName RootBone, FVector& CurrentLocationTarget, FVector& CurrentLocationOffset, FRotator& CurrentRotationOffset) {
+void UALSAnimInstance::SetFootOffsets(FName EnableFootIKCurve, FName IKFootBone, FName RootBone, FVector & CurrentLocationTarget, FVector & CurrentLocationOffset, FRotator & CurrentRotationOffset) {
 	//Only update Foot IK offset values if the Foot IK curve has a weight. If it equals 0, clear the offset values.
 	if (GetCurveValue(EnableFootIKCurve) > 0.0f) {
 		//Step 1: Trace downward from the foot location to find the geometry. If the surface is walkable, save the Impact Location and Normal.
+		FRotator TargetRotationOffset = FRotator::ZeroRotator;
+
 		const auto tmp = GetOwningComponent()->GetSocketLocation(IKFootBone);
 		const FVector IKFootFloorLocation = FVector(tmp.X, tmp.Y, GetOwningComponent()->GetSocketLocation(RootBone).Z);
 		const auto channel = UEngineTypes::ConvertToTraceType(ECC_Visibility);
@@ -662,10 +637,9 @@ void UALSAnimInstance::SetFootOffsets(FName EnableFootIKCurve, FName IKFootBone,
 
 		UKismetSystemLibrary::LineTraceSingle(this, IKFootFloorLocation + FVector(0.0f, 0.0f, IK_TraceDistanceAboveFoot), IKFootFloorLocation - FVector(0.0f, 0.0f, IK_TraceDistanceBelowFoot), channel, false, IgnoredActors, GetDebugTraceType(EDrawDebugTrace::ForOneFrame), HitResult, true);
 
-		FRotator TargetRotationOffset = FRotator::ZeroRotator;
 		if (Character->GetCharacterMovement()->IsWalkable(HitResult)) {
 			//Step 1.1: Find the difference in location from the Impact point and the expected (flat) floor location. These values are offset by the nomrmal multiplied by the foot height to get better behavior on angled surfaces.
-			CurrentLocationOffset = (HitResult.ImpactPoint + HitResult.ImpactNormal * FootHeight) - (IKFootFloorLocation + FVector::UpVector * FootHeight);
+			CurrentLocationTarget = HitResult.ImpactPoint + HitResult.ImpactNormal * FootHeight - (IKFootFloorLocation + FVector::UpVector * FootHeight);
 
 			//Step 1.2: Calculate the Rotation offset by getting the Atan2 of the Impact Normal.
 			TargetRotationOffset = FRotator(-UKismetMathLibrary::DegAtan2(HitResult.ImpactNormal.X, HitResult.ImpactNormal.Z), 0.0f, UKismetMathLibrary::DegAtan2(HitResult.ImpactNormal.Y, HitResult.ImpactNormal.Z));
@@ -687,12 +661,11 @@ void UALSAnimInstance::SetFootOffsets(FName EnableFootIKCurve, FName IKFootBone,
 void UALSAnimInstance::SetPelvisIKOffset(FVector FootOffset_L_Target, FVector FootOffset_R_Target) {
 	//Calculate the Pelvis Alpha by finding the average Foot IK weight. If the alpha is 0, clear the offset.
 	PelvisAlpha = (GetCurveValue(FName(TEXT("Enable_FootIK_L"))) + GetCurveValue(FName(TEXT("Enable_FootIK_R")))) / 2.0f;
-	FVector PelvisTarget = FVector::ZeroVector;
 
 	if (PelvisAlpha > 0) {
 
 		//Step 1: Set the new Pelvis Target to be the lowest Foot Offset
-		PelvisTarget = FootOffset_L_Target.Z < FootOffset_R_Target.Z ? FootOffset_L_Target : FootOffset_R_Target;
+		FVector PelvisTarget = FootOffset_L_Target.Z < FootOffset_R_Target.Z ? FootOffset_L_Target : FootOffset_R_Target;
 
 		//Step 2: Interp the Current Pelvis Offset to the new target value. Interpolate at different speeds based on whether the new target is above or below the current one.
 		PelvisOffset = UKismetMathLibrary::VInterpTo(PelvisOffset, PelvisTarget, DeltaTimeX, PelvisTarget.Z > PelvisOffset.Z ? 10.0f : 15.0f);
@@ -703,7 +676,7 @@ void UALSAnimInstance::SetPelvisIKOffset(FVector FootOffset_L_Target, FVector Fo
 
 }
 
-void UALSAnimInstance::SetFootLocking(FName Enable_FootIK_Curve, FName FootLockCurve, FName IKFootBone, float& CurrentFootLockAlpha, FVector& CurrentFootLockLocation, FRotator& CurrentFootLockRotation) {
+void UALSAnimInstance::SetFootLocking(FName Enable_FootIK_Curve, FName FootLockCurve, FName IKFootBone, float& CurrentFootLockAlpha, FVector & CurrentFootLockLocation, FRotator & CurrentFootLockRotation) {
 	//Only update values if FootIK curve has a weight.
 	if (GetCurveValue(Enable_FootIK_Curve) <= 0)
 		return;
@@ -726,7 +699,7 @@ void UALSAnimInstance::SetFootLocking(FName Enable_FootIK_Curve, FName FootLockC
 		SetFootLockOffsets(CurrentFootLockLocation, CurrentFootLockRotation);
 }
 
-void UALSAnimInstance::SetFootLockOffsets(FVector& LocalLocation, FRotator& LocalRotation) {
+void UALSAnimInstance::SetFootLockOffsets(FVector & LocalLocation, FRotator & LocalRotation) {
 	FRotator RotationDifference;
 
 	//Use the delta between the current and last updated rotation to find how much the foot should be rotated to remain planted on the ground.
@@ -788,6 +761,13 @@ FALSLeanAmount UALSAnimInstance::InterpLeanAmount(FALSLeanAmount current, FALSLe
 	return FALSLeanAmount(UKismetMathLibrary::FInterpTo(current.FrontBack, target.FrontBack, deltaTime, interpSpeed), UKismetMathLibrary::FInterpTo(current.LeftRight, target.LeftRight, deltaTime, interpSpeed));
 }
 
+void UALSAnimInstance::AnimNotifyPivot() {
+	bPivot = Speed < TriggerPivotSpeedLimit;
+	FTimerDelegate PivotDel;
+	PivotDel.BindLambda([this] { bPivot = false; });
+	GetWorld()->GetTimerManager().SetTimer(AnimNotifyPivotHandle, PivotDel, 0.1f, false);
+}
+
 TEnumAsByte<EDrawDebugTrace::Type> UALSAnimInstance::GetDebugTraceType(TEnumAsByte<EDrawDebugTrace::Type> ShowTraceType) {
 	return EDrawDebugTrace::Type::ForOneFrame;
 }
@@ -796,22 +776,22 @@ void UALSAnimInstance::PlayTransition(FALSDynamicMontageParams params) {
 	PlaySlotAnimationAsDynamicMontage(params.Animation, FName(TEXT("Grounded Slot")), params.BlendInTime, params.BlendOutTime, params.PlayRate, 1, 0.0f, params.StartTime);
 }
 
+//TODO Maybe the very first condition must be removed. !bDynamicTransitionFlag and it replaced by clearing the timer.
 void UALSAnimInstance::PlayDynamicTransition(const float ReTriggerDelay, const FALSDynamicMontageParams Parameters) {
 	//Ignore incoming requests when there is an existing request in progress
 	if (!bDynamicTransitionFlag) {
 		bDynamicTransitionFlag = true;
 
 		//Binding the function with specific values
-		DynamicTransitionDel.BindUFunction(this, FName("PlayDynamicTransitionDo"), Parameters);
+		DynamicTransitionDel.BindLambda([this, Parameters] {
+			GetWorld()->GetTimerManager().ClearTimer(DynamicTransitionHandle);
+			bDynamicTransitionFlag = false;
+
+			PlaySlotAnimationAsDynamicMontage(Parameters.Animation, FName(TEXT("Grounded Slot")), Parameters.BlendInTime, Parameters.BlendOutTime, Parameters.PlayRate, 1, 0.0f, Parameters.StartTime);
+		});
+
 		GetWorld()->GetTimerManager().SetTimer(DynamicTransitionHandle, DynamicTransitionDel, ReTriggerDelay, false);
 	}
-}
-
-void UALSAnimInstance::PlayDynamicTransitionDo(FALSDynamicMontageParams Params) {
-	GetWorld()->GetTimerManager().ClearTimer(DynamicTransitionHandle);
-	bDynamicTransitionFlag = false;
-
-	PlaySlotAnimationAsDynamicMontage(Params.Animation, FName(TEXT("Grounded Slot")), Params.BlendInTime, Params.BlendOutTime, Params.PlayRate, 1, 0.0f, Params.StartTime);
 }
 
 void UALSAnimInstance::Jumped_Implementation() {
