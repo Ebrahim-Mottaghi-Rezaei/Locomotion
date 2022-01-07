@@ -10,9 +10,10 @@ UCLASS()
 class CALSV4_API AALSPlayerCameraManager : public APlayerCameraManager {
 	GENERATED_BODY()
 
-		AALSPlayerCameraManager();
 	public:
+	AALSPlayerCameraManager();
 	virtual void OnPossess(APawn* ControlledPawn);
+
 	protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		USkeletalMeshComponent* CameraBehaviour;
@@ -32,16 +33,13 @@ class CALSV4_API AALSPlayerCameraManager : public APlayerCameraManager {
 	UPROPERTY(BlueprintReadWrite, Category = "Advanced Locomotion System|Camera Manager")
 		FTransform SmoothedPivotTarget;
 
-	APawn* PawnInControl;
-
-	TEnumAsByte<EDrawDebugTrace::Type> GetDebugTraceType(EDrawDebugTrace::Type ShowTraceType);
-
-	float GetCameraBehaviourParam(FName CurveName);
-
-	FVector CalculateAxisIndependentLag(FVector CurrentLocation, FVector TargetLocation, FRotator CameraRotation, FVector LagSpeed);
-	
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Camera Manager")
 		FALSCameraBehaviourResult CustomCameraBehaviour();
+	
+	FVector CalculateAxisIndependentLag(FVector CurrentLocation, FVector TargetLocation, FRotator CameraRotation, FVector LagSpeed) const;
+	float GetCameraBehaviourParam(FName CurveName) const;
+	TEnumAsByte<EDrawDebugTrace::Type> GetDebugTraceType(EDrawDebugTrace::Type ShowTraceType) const;
 
-	TArray<AActor*> ActorsToIgnore;	
+	TArray<AActor*> ActorsToIgnore;
+	APawn* ControlledPawn;
 };

@@ -67,9 +67,8 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Debug")
 		virtual void ToggleSlowMotion();
 
-	virtual void SelectPrevItem();
-
-	virtual void SelectNextItem();
+	virtual void SelectPrevALSCharacter();
+	virtual void SelectNextALSCharacter();
 
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|HUD")
 		virtual void OpenOverlayMenu();
@@ -80,7 +79,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|HUD")
 		virtual void CycleOverlayDown();
 
-	uint8 SelectedOverlayIndex;
+	uint8 SelectedALSCharacterIndex;
 	
 public:
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Debug")

@@ -8,7 +8,7 @@
 #include "Components/VerticalBox.h"
 #include "ALSOverlayStateSwitcherWidget.generated.h"
 
-USTRUCT(BlueprintType, Category = "C++ ALS|DataStructures")
+USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSOverlayStateParams {
 	GENERATED_BODY()
 		UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -16,7 +16,10 @@ struct FALSOverlayStateParams {
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		EALSOverlayState State;
 
-	FALSOverlayStateParams() {}
+	FALSOverlayStateParams() {
+		Widget = nullptr;
+		State = EALSOverlayState::ALS_Default;
+	}
 	FALSOverlayStateParams(UALSOverlayStateButtonWidget* widget, EALSOverlayState state) {
 		Widget = widget;
 		State = state;
@@ -29,15 +32,18 @@ UCLASS()
 class CALSV4_API UALSOverlayStateSwitcherWidget : public UUserWidget {
 	GENERATED_BODY()
 
-protected:
+	protected:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 		EALSOverlayState NewOverlayState;
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 		UCanvasPanel* MovablePanels;
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+		TSubclassOf<UALSOverlayStateButtonWidget> OverlayStateButtonTemplate;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 		TArray<FALSOverlayStateParams> OverlayStateButtons;
 	UVerticalBox* VerticalBox;
-public:
+	public:
+	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
@@ -46,12 +52,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Widget")
 		void CycleState(bool bUp);
 
-protected:
+	protected:
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Widget")
 		void CreateButtons();
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Widget")
 		void UpdateButtonFocus();
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Widget")
-		void SetVerticalBox(UVerticalBox* verticalBox);
+		void SetUIElements(UCanvasPanel* movablePanel, UVerticalBox* verticalBox);
+
+	TArray<EALSOverlayState> OverlayStates;
 	uint8 selectedIndex;
 };

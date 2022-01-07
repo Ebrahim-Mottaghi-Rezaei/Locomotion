@@ -69,7 +69,7 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Advanced Locomotion System|Camera System")
 		float FirstPersonFOV = 90.0f;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Advanced Locomotion System|Camera System")
-		bool bRightShoulder = false;
+		bool bRightShoulder = true;
 
 	//Category=State Values
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|State Values")

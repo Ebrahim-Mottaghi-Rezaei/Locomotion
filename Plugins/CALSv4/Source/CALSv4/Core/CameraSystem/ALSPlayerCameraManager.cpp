@@ -23,40 +23,39 @@ AALSPlayerCameraManager::AALSPlayerCameraManager() {
 	AutoReceiveInput = EAutoReceiveInput::Player0;
 }
 
-void AALSPlayerCameraManager::OnPossess(APawn* ControlledPawn) {
+void AALSPlayerCameraManager::OnPossess(APawn* controlledPawn) {
 	//Set "Controlled Pawn" when Player Controller Possesses new character. (called from Player Controller)
-	PawnInControl = ControlledPawn;
+	ControlledPawn = controlledPawn;
 
 	//Updated references in the Camera Behavior AnimBP.
 	const auto cameraAnimInstance = Cast<UALSPlayerCameraBehaviour>(CameraBehaviour->GetAnimInstance());
 
 	cameraAnimInstance->playerController = GetOwningPlayerController();
-	cameraAnimInstance->controlledPawn = PawnInControl;
+	cameraAnimInstance->controlledPawn = ControlledPawn;
 }
 
-TEnumAsByte<EDrawDebugTrace::Type> AALSPlayerCameraManager::GetDebugTraceType(EDrawDebugTrace::Type ShowTraceType) {
-	auto* pc = static_cast<AALSPlayerController*>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	const UALSControllerInterface* Interface = Cast<UALSControllerInterface>(pc);
-
-	if (IsValid(pc) && IsValid(Interface))
-		return pc->GetDebugInfo_Implementation().bShowTraces ? ShowTraceType : EDrawDebugTrace::None;
+TEnumAsByte<EDrawDebugTrace::Type> AALSPlayerCameraManager::GetDebugTraceType(const EDrawDebugTrace::Type ShowTraceType) const {
+	const auto playerController = static_cast<AALSPlayerController*>(UGameplayStatics::GetPlayerController(this, 0));
+	if (playerController && playerController->GetClass()->ImplementsInterface(UALSControllerInterface::StaticClass())) {
+		const bool bShowTraces = IALSControllerInterface::Execute_GetDebugInfo(playerController).bShowTraces;
+		return bShowTraces ? ShowTraceType : EDrawDebugTrace::None;
+	}
 
 	return EDrawDebugTrace::None;
 }
 
 //Get an Anim Curve value from the Player Camera Behavior AnimBP to use as a parameter in the custom camera behavior calculations
-float AALSPlayerCameraManager::GetCameraBehaviourParam(FName CurveName) {
-	if (!CameraBehaviour) 	{
+float AALSPlayerCameraManager::GetCameraBehaviourParam(const FName CurveName) const {
+	if (!CameraBehaviour) {
 		UALSLogger::LogError(TEXT("Camera Manager - Camera Behaviour is null."));
 		return 0.0f;
 	}
 
-
 	const auto* animInstance = CameraBehaviour->GetAnimInstance();
-	return IsValid(animInstance) ? animInstance->GetCurveValue(CurveName) : 0.0f;
+	return animInstance ? animInstance->GetCurveValue(CurveName) : 0.0f;
 }
 
-FVector AALSPlayerCameraManager::CalculateAxisIndependentLag(FVector CurrentLocation, FVector TargetLocation, FRotator CameraRotation, FVector LagSpeed) {
+FVector AALSPlayerCameraManager::CalculateAxisIndependentLag(const FVector CurrentLocation, const FVector TargetLocation, FRotator CameraRotation, const FVector LagSpeed) const {
 	CameraRotation.Pitch = 0.0f;
 	CameraRotation.Roll = 0.0f;
 
@@ -79,10 +78,10 @@ FALSCameraBehaviourResult AALSPlayerCameraManager::CustomCameraBehaviour() {
 	float FPFOV;
 
 	//Step 1: Get Camera Parameters from CharacterBP via the Camera Interface
-	if (PawnInControl && PawnInControl->GetClass()->ImplementsInterface(UALSCameraInterface::StaticClass())) {
-		PivotTarget = IALSCameraInterface::Execute_Get3PPivotTarget(PawnInControl);
-		FPTarget = IALSCameraInterface::Execute_GetFPCameraTarget(PawnInControl);
-		const auto cameraParams = IALSCameraInterface::Execute_GetCameraParameters(PawnInControl);
+	if (ControlledPawn && ControlledPawn->GetClass()->ImplementsInterface(UALSCameraInterface::StaticClass())) {
+		PivotTarget = IALSCameraInterface::Execute_Get3PPivotTarget(ControlledPawn);
+		FPTarget = IALSCameraInterface::Execute_GetFPCameraTarget(ControlledPawn);
+		const auto cameraParams = IALSCameraInterface::Execute_GetCameraParameters(ControlledPawn);
 		TPFOV = cameraParams.TP_FOV;
 		FPFOV = cameraParams.FP_FOV;
 	}
@@ -99,13 +98,13 @@ FALSCameraBehaviourResult AALSPlayerCameraManager::CustomCameraBehaviour() {
 
 	//Step 4: Calculate Pivot Location (BlueSphere). Get the Smoothed Pivot Target and apply local offsets for further camera control.
 	PivotLocation = SmoothedPivotTarget.GetLocation() +
-		UKismetMathLibrary::GetForwardVector(SmoothedPivotTarget.Rotator()) * GetCameraBehaviourParam(FName(TEXT("PivotOffset_X"))) +
-		UKismetMathLibrary::GetRightVector(SmoothedPivotTarget.Rotator()) * GetCameraBehaviourParam(FName(TEXT("PivotOffset_Y"))) +
-		UKismetMathLibrary::GetUpVector(SmoothedPivotTarget.Rotator()) * GetCameraBehaviourParam(FName(TEXT("PivotOffset_Z")));
+		UKismetMathLibrary::GetForwardVector(SmoothedPivotTarget.GetRotation().Rotator()) * GetCameraBehaviourParam(FName(TEXT("PivotOffset_X"))) +
+		UKismetMathLibrary::GetRightVector(SmoothedPivotTarget.GetRotation().Rotator()) * GetCameraBehaviourParam(FName(TEXT("PivotOffset_Y"))) +
+		UKismetMathLibrary::GetUpVector(SmoothedPivotTarget.GetRotation().Rotator()) * GetCameraBehaviourParam(FName(TEXT("PivotOffset_Z")));
 
 	//Step 5: Calculate Target Camera Location. Get the Pivot location and apply camera relative offsets.
 	TargetCameraLocation = FMath::Lerp(
-		GetCameraBehaviourParam(FName(TEXT("CameraOffset_X"))) * UKismetMathLibrary::GetForwardVector(TargetCameraRotation) +
+		PivotLocation + GetCameraBehaviourParam(FName(TEXT("CameraOffset_X"))) * UKismetMathLibrary::GetForwardVector(TargetCameraRotation) +
 		GetCameraBehaviourParam(FName(TEXT("CameraOffset_Y"))) * UKismetMathLibrary::GetRightVector(TargetCameraRotation) +
 		GetCameraBehaviourParam(FName(TEXT("CameraOffset_Z"))) * UKismetMathLibrary::GetUpVector(TargetCameraRotation),
 		PivotTarget.GetLocation() + DebugViewOffset,
@@ -113,10 +112,10 @@ FALSCameraBehaviourResult AALSPlayerCameraManager::CustomCameraBehaviour() {
 	);
 
 	//Step 6: Trace for an object between the camera and character to apply a corrective offset. Trace origins are set within the Character BP via the Camera Interface. Functions like the normal spring arm, but can allow for different trace origins regardless of the pivot.
-	if (PawnInControl && PawnInControl->GetClass()->ImplementsInterface(UALSCameraInterface::StaticClass())) {
-		auto traceParams = IALSCameraInterface::Execute_Get3PTraceParameters(PawnInControl);
+	if (ControlledPawn && ControlledPawn->GetClass()->ImplementsInterface(UALSCameraInterface::StaticClass())) {
+		auto traceParams = IALSCameraInterface::Execute_Get3PTraceParameters(ControlledPawn);
 		FHitResult HitResult;
-		UKismetSystemLibrary::SphereTraceSingle(GetWorld(), traceParams.TraceOrigin, TargetCameraLocation, traceParams.TraceRadius, traceParams.TraceChannel.GetValue(), false, ActorsToIgnore, EDrawDebugTrace::Type::ForOneFrame, HitResult, true);
+		UKismetSystemLibrary::SphereTraceSingle(GetWorld(), traceParams.TraceOrigin, TargetCameraLocation, traceParams.TraceRadius, traceParams.TraceChannel.GetValue(), false, ActorsToIgnore, GetDebugTraceType(EDrawDebugTrace::ForOneFrame), HitResult, true);
 
 		if (HitResult.bBlockingHit && !HitResult.bStartPenetrating) {
 			TargetCameraLocation = HitResult.Location - HitResult.TraceEnd + TargetCameraLocation;

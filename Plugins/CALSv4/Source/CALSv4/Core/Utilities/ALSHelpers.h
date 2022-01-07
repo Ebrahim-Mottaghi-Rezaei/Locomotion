@@ -8,7 +8,7 @@
 UCLASS()
 class CALSV4_API UALSLogger :public UBlueprintFunctionLibrary {
 	GENERATED_BODY()
-public:
+	public:
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Helpers|Logging")
 		static void LogInfo(FString Message);
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Helpers|Logging")
@@ -20,7 +20,7 @@ public:
 UCLASS()
 class CALSV4_API UALSHelpers : public UBlueprintFunctionLibrary {
 	GENERATED_BODY()
-public:
+	public:
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Helpers|Math")
 		static FTransform SubtractTransform(FTransform A, FTransform B);
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Helpers|Math")
@@ -44,4 +44,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Helpers|Animation")
 		static float GetDistanceBetweenTwoSocketsAndMapRange(const USkeletalMeshComponent* Component, const FName SocketOrBoneNameA, ERelativeTransformSpace SocketSpaceA, const FName SocketOrBoneNameB, ERelativeTransformSpace SocketSpaceB, bool bRemapRange, float InRangeMin, float InRangeMax, float OutRangeMin, float OutRangeMax);
+
+	static void SetFVectorByRef(FVector& Vector, FVector NewValue);
+	static void SetFRotatorByRef(FRotator& Rotator, FRotator NewValue);
 };

@@ -1,50 +1,60 @@
 #include "ALSOverlayStateSwitcherWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "CALSv4/Core/Interfaces/ALSCameraInterface.h"
+#include "GameFramework/Character.h"
 #include "CALSv4/Core/Interfaces/ALSCharacterInterface.h"
 #include "Components/CanvasPanelSlot.h"
+#include <Blueprint/UserWidget.h>
+
+void UALSOverlayStateSwitcherWidget::NativeOnInitialized() {
+	for (const EALSOverlayState value : TEnumRange<EALSOverlayState>())
+		OverlayStates.Add(value);
+}
 
 void UALSOverlayStateSwitcherWidget::NativeConstruct() {
 	Super::NativeConstruct();
 
-	if (GetOwningPlayer()->GetClass()->ImplementsInterface(UALSCharacterInterface::StaticClass())) {
-		NewOverlayState = IALSCharacterInterface::Execute_GetCurrentState(GetOwningPlayer()).OverlayState;
-		CreateButtons();
+	auto* Character = GetOwningPlayer()->GetCharacter();
+	if (Character->GetClass()->ImplementsInterface(UALSCharacterInterface::StaticClass())) {
+		NewOverlayState = IALSCharacterInterface::Execute_GetCurrentState(Character).OverlayState;
+
+		if (VerticalBox->GetChildrenCount() == 0)
+			CreateButtons();
+
 		UpdateButtonFocus();
 	}
 }
 
-void UALSOverlayStateSwitcherWidget::NativeTick(const FGeometry& MovieSceneBlends, float InDeltaTime) {
+void UALSOverlayStateSwitcherWidget::NativeTick(const FGeometry & MovieSceneBlends, float InDeltaTime) {
 	Super::NativeTick(MovieSceneBlends, InDeltaTime);
 
 	//local player controller
-	const auto pc = GetOwningPlayer();
+	const auto pc = GetOwningPlayer()->GetPawn();
 
-	if (GetOwningPlayer()->GetClass()->ImplementsInterface(UALSCameraInterface::StaticClass())) {
-		const FTransform transform = IALSCameraInterface::Execute_Get3PPivotTarget(GetOwningPlayer());
+	if (pc->GetClass()->ImplementsInterface(UALSCameraInterface::StaticClass())) {
+		const FTransform transform = IALSCameraInterface::Execute_Get3PPivotTarget(pc);
 
 		FVector2D screenpos;
-		UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(pc, transform.GetLocation() + FVector(0, 0, 100), screenpos, false);
+		UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(GetOwningPlayer(), transform.GetLocation() + FVector(0, 0, 100), screenpos, false);
 		UWidgetLayoutLibrary::SlotAsCanvasSlot(MovablePanels)->SetPosition(screenpos);
 	}
-
 }
 
 void UALSOverlayStateSwitcherWidget::SelectOverlayState() const {
-	if (GetOwningPlayer()->GetClass()->ImplementsInterface(UALSCharacterInterface::StaticClass())) {
-		IALSCharacterInterface::Execute_SetOverlayState(GetOwningPlayer(), NewOverlayState);
+	auto* character = GetOwningPlayer()->GetCharacter();
+	if (character->GetClass()->ImplementsInterface(UALSCharacterInterface::StaticClass())) {
+		IALSCharacterInterface::Execute_SetOverlayState(character, NewOverlayState);
 	}
 }
 
 void UALSOverlayStateSwitcherWidget::CreateButtons() {
 	//ALS_Barrel is the last element in the EALSOverlayState enum. if any other states added
 	for (const EALSOverlayState value : TEnumRange<EALSOverlayState>()) {
-		const auto button = static_cast<UALSOverlayStateButtonWidget*>(CreateWidget(GetOwningPlayer(), UALSOverlayStateButtonWidget::StaticClass()));
-		button->GetText()->SetText(FText::FromString(*UEnum::GetValueAsString(value)));
+		const auto button = static_cast<UALSOverlayStateButtonWidget*>(CreateWidget(GetOwningPlayer(), OverlayStateButtonTemplate));
+		button->GetText()->SetText(FText::FromString(UEnum::GetDisplayValueAsText(value).ToString()));
 		VerticalBox->AddChildToVerticalBox(button);
 		OverlayStateButtons.Add(FALSOverlayStateParams(button, value));
 	}
-
 }
 
 void UALSOverlayStateSwitcherWidget::UpdateButtonFocus() {
@@ -55,20 +65,18 @@ void UALSOverlayStateSwitcherWidget::UpdateButtonFocus() {
 	}
 }
 
-void UALSOverlayStateSwitcherWidget::SetVerticalBox(UVerticalBox* verticalBox) {
+void UALSOverlayStateSwitcherWidget::SetUIElements(UCanvasPanel * movablePanel, UVerticalBox * verticalBox) {
+	MovablePanels = movablePanel;
 	VerticalBox = verticalBox;
 }
 
 void UALSOverlayStateSwitcherWidget::CycleState(bool bUp) {
-	TArray<EALSOverlayState> tmp;
-
-	for (const EALSOverlayState value : TEnumRange<EALSOverlayState>())
-		tmp.Add(value);
-
 	if (bUp)
-		selectedIndex = selectedIndex + 1 < tmp.Num() ? selectedIndex + 1 : 0;
+		selectedIndex = selectedIndex + 1 < OverlayStates.Num() ? selectedIndex + 1 : 0;
 	else
-		selectedIndex = selectedIndex - 1 >= 0 ? selectedIndex - 1 : tmp.Num();
+		selectedIndex = selectedIndex - 1 >= 0 ? selectedIndex - 1 : OverlayStates.Num() - 1;
 
-	NewOverlayState = tmp[selectedIndex];
+	NewOverlayState = OverlayStates[selectedIndex];
+
+	UpdateButtonFocus();
 }

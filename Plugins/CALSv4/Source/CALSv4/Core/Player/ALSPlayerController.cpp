@@ -37,6 +37,8 @@ void AALSPlayerController::BeginPlay() {
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AALSBaseCharacter::StaticClass(), alsCharacters);
 	for (AActor* c : alsCharacters)
 		AvailableDebugCharacters.Add(static_cast<AALSBaseCharacter*>(c));
+
+	OverlaySwitcher = static_cast<UALSOverlayStateSwitcherWidget*>(CreateWidget(this, ALSOverlayStateSwitcherTemplate));
 }
 
 void AALSPlayerController::OnPossess(APawn* InPawn) {
@@ -62,14 +64,14 @@ void AALSPlayerController::SetupInputComponent() {
 		InputComponent->BindKey(EKeys::U, IE_Pressed, this, &AALSPlayerController::ToggleShowLayerColors);
 		InputComponent->BindKey(EKeys::I, IE_Pressed, this, &AALSPlayerController::ToggleShowCharacterInfo);
 		InputComponent->BindKey(EKeys::Z, IE_Pressed, this, &AALSPlayerController::ToggleSlowMotion);
-		InputComponent->BindKey(EKeys::Comma, IE_Pressed, this, &AALSPlayerController::SelectPrevItem);
-		InputComponent->BindKey(EKeys::Period, IE_Pressed, this, &AALSPlayerController::SelectNextItem);
+		InputComponent->BindKey(EKeys::Comma, IE_Pressed, this, &AALSPlayerController::SelectPrevALSCharacter);
+		InputComponent->BindKey(EKeys::Period, IE_Pressed, this, &AALSPlayerController::SelectNextALSCharacter);
 
 		InputComponent->BindAction(TEXT("OpenOverlayMenu"), IE_Pressed, this, &AALSPlayerController::OpenOverlayMenu);
-		InputComponent->BindAction(TEXT("CloseOverlayMenu"), IE_Released, this, &AALSPlayerController::CloseOverlayMenu);
+		InputComponent->BindAction(TEXT("OpenOverlayMenu"), IE_Released, this, &AALSPlayerController::CloseOverlayMenu);
 
-		InputComponent->BindAction(TEXT("CycleOverlayUp"), IE_Pressed, this, &AALSPlayerController::OpenOverlayMenu);
-		InputComponent->BindAction(TEXT("CycleOverlayDown"), IE_Released, this, &AALSPlayerController::CloseOverlayMenu);
+		InputComponent->BindAction(TEXT("CycleOverlayUp"), IE_Pressed, this, &AALSPlayerController::CycleOverlayDown);
+		InputComponent->BindAction(TEXT("CycleOverlayDown"), IE_Released, this, &AALSPlayerController::CycleOverlayUp);
 	}
 }
 
@@ -102,14 +104,14 @@ void AALSPlayerController::ToggleSlowMotion() {
 	UGameplayStatics::SetGlobalTimeDilation(this, bSlowMotion ? 0.15f : 1.0f);
 }
 
-void AALSPlayerController::SelectPrevItem() {
-	SelectedOverlayIndex = SelectedOverlayIndex - 1 >= 0 ? SelectedOverlayIndex - 1 : AvailableDebugCharacters.Num() - 1;
-	DebugFocusCharacter = AvailableDebugCharacters[SelectedOverlayIndex];
+void AALSPlayerController::SelectPrevALSCharacter() {
+	SelectedALSCharacterIndex = SelectedALSCharacterIndex - 1 > 0 ? SelectedALSCharacterIndex - 1 : AvailableDebugCharacters.Num() - 1;
+	DebugFocusCharacter = AvailableDebugCharacters[SelectedALSCharacterIndex];
 }
 
-void AALSPlayerController::SelectNextItem() {
-	SelectedOverlayIndex = SelectedOverlayIndex + 1 < AvailableDebugCharacters.Num() ? SelectedOverlayIndex + 1 : 0;
-	DebugFocusCharacter = AvailableDebugCharacters[SelectedOverlayIndex];
+void AALSPlayerController::SelectNextALSCharacter() {
+	SelectedALSCharacterIndex = SelectedALSCharacterIndex + 1 < AvailableDebugCharacters.Num() ? SelectedALSCharacterIndex + 1 : 0;
+	DebugFocusCharacter = AvailableDebugCharacters[SelectedALSCharacterIndex];
 }
 
 void AALSPlayerController::OpenOverlayMenu() {
@@ -118,7 +120,6 @@ void AALSPlayerController::OpenOverlayMenu() {
 	if (!bSlowMotion)
 		UGameplayStatics::SetGlobalTimeDilation(this, 0.35f);
 
-	OverlaySwitcher = static_cast<UALSOverlayStateSwitcherWidget*>(CreateWidget(this, ALSOverlayStateSwitcherTemplate));
 	OverlaySwitcher->AddToViewport();
 	UGameplayStatics::PlaySound2D(this, ClickSound, 1.25f, 1.0f, 0.2f);
 }
