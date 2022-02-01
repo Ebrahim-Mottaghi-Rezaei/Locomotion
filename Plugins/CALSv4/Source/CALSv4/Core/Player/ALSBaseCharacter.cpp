@@ -395,40 +395,54 @@ void AALSBaseCharacter::PlayerWalkEnd() {
 }
 
 void AALSBaseCharacter::PlayerSprintBegin() {
-	if (SprintActionType == EALSDetectSprintActionType::ALS_DoublePress) {
-		//Gait Action Type 2 (Unused): Hold "Sprint Action" to run, double tap and hold to sprint.
-		bSprintHeld = true;
+	//Implementing the dual mode functionality on "Sprint Action" input event, 'double tap' or 'hold to sprint'
 
+	if (SprintProcessingMode == EALSInputProcessingMode::ALS_PressAndHold) {
+		DesiredGait = EALSGait::ALS_Sprinting;
+	} else {
+		//UALSLogger::LogInfo(TEXT("Sprint Pressed"));
+		bSprintHeld = true;
 		SprintTapCounter++;
 
-		FTimerDelegate resetSprintHeld;
-		resetSprintHeld.BindLambda([this] {
-			DesiredGait = SprintTapCounter < 2 ? EALSGait::ALS_Running : EALSGait::ALS_Sprinting;
-			SprintTapCounter = 0;
+		DesiredGait = EALSGait::ALS_Running;
+
+		FTimerDelegate del;
+		del.BindLambda([this]() {
+			if (SprintTapCounter > 1) {
+				GetWorldTimerManager().ClearTimer(Sprint_Handle);
+
+				//UALSLogger::LogInfo(TEXT("Sprinting"));
+				DesiredGait = EALSGait::ALS_Sprinting;
+			} else if (SprintTapCounter == 1) {
+				GetWorldTimerManager().ClearTimer(Sprint_Handle);
+
+				//UALSLogger::LogInfo(TEXT("Walking"));
+				DesiredGait = EALSGait::ALS_Walking;
+			}
 		});
 
-		GetWorldTimerManager().SetTimer(sprintDetection_th, resetSprintHeld, 0.3f, false);
-	} else {
-		DesiredGait = EALSGait::ALS_Sprinting;
+		GetWorldTimerManager().SetTimer(Sprint_Handle, del, DoubleTapTime, false);
 	}
 }
 
 void AALSBaseCharacter::PlayerSprintEnd() {
-	if (SprintActionType == EALSDetectSprintActionType::ALS_DoublePress) {
-		bSprintHeld = false;
+	if (SprintProcessingMode == EALSInputProcessingMode::ALS_PressAndHold) {
 		DesiredGait = EALSGait::ALS_Running;
+	} else {
+		//UALSLogger::LogError(TEXT("Sprint Released"));
 
-		FTimerDelegate resetSprintHeld;
-		resetSprintHeld.BindLambda([this] {
-			if (!bSprintHeld) DesiredGait = EALSGait::ALS_Walking;
+		bSprintHeld = true;
+
+		FTimerDelegate del;
+		del.BindLambda([this]() {
+			GetWorldTimerManager().ClearTimer(Sprint_Handle);
+			//UALSLogger::LogError(TEXT("Running"));
+
+			SprintTapCounter = 0;
+			DesiredGait = EALSGait::ALS_Running;
 		});
 
-		if (GetWorldTimerManager().IsTimerActive(sprintDetection_th))
-			GetWorldTimerManager().ClearTimer(sprintDetection_th);
-
-		GetWorldTimerManager().SetTimer(sprintDetection_th, resetSprintHeld, 0.2f, false);
-	} else {
-		DesiredGait = EALSGait::ALS_Running;
+		GetWorldTimerManager().SetTimer(Sprint_Handle, del, DoubleTapTime, false);
 	}
 }
 

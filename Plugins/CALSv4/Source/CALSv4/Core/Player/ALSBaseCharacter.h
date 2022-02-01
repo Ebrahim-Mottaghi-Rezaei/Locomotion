@@ -21,9 +21,11 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 	protected:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System")
 		uint8 AnimationFrameRate = 30;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Input", meta = (ClampMin = "0.1", ClampMax = "0.5", UIMin = "0.1", UIMax = "0.5"))
+		float DoubleTapTime = 0.1f;
 	//Category=Input
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Input")
-		EALSDetectSprintActionType SprintActionType;
+		EALSInputProcessingMode SprintProcessingMode = EALSInputProcessingMode::ALS_DoublePress;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|Input")
 		EALSButtonPressType CameraActionPressType;
@@ -332,7 +334,7 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 	FTimerHandle ResetBreakFall_th;
 
 	uint8 SprintTapCounter;
-	FTimerHandle sprintDetection_th;
+	FTimerHandle Sprint_Handle;
 
 	FTimerHandle cameraAction_th;
 

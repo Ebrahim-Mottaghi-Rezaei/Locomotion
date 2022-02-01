@@ -111,7 +111,7 @@ enum class EALSMovementDirection :uint8 {
 };
 
 UENUM(BlueprintType)
-enum class EALSDetectSprintActionType :uint8 {
+enum class EALSInputProcessingMode :uint8 {
 	ALS_PressAndHold UMETA(DisplayName = "Press And Hold"),
 	ALS_DoublePress UMETA(DisplayName = "Double Press")
 };
@@ -128,3 +128,4 @@ enum class EALSMannequinMeshType :uint8 {
 	ALS_Default UMETA(DisplayName = "ALS Default"),
 	ALS_Mannequin UMETA(DisplayName = "UE Mannequin")
 };
+
