@@ -458,7 +458,7 @@ void AALSCharacter::UpdateHeldObject() {
 	} else if (OverlayState == EALSOverlayState::ALS_Bow) {
 		AttachToHand(nullptr, Bow);
 	} else if (OverlayState == EALSOverlayState::ALS_Torch) {
-		AttachToHand(Torch, nullptr);
+		AttachToHand(Torch,nullptr,nullptr,true,FVector::ZeroVector);
 	} else if (OverlayState == EALSOverlayState::ALS_Box) {
 		AttachToHand(Box, nullptr);
 	} else if (OverlayState == EALSOverlayState::ALS_Barrel) {
