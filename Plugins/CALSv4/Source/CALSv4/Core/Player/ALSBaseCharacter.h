@@ -277,36 +277,46 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 #pragma region IALS_Character_Interface_Overrides.
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Character Base|Character")
 		FALSCurrentState GetCurrentState();
+	virtual FALSCurrentState GetCurrentState_Implementation();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Character Base|Character")
 		FALSEssentialValues GetEssentialValues();
+	virtual FALSEssentialValues GetEssentialValues_Implementation();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Character Base|Character")
 		void SetMovementState(EALSMovementState NewMovementState);
+	virtual void SetMovementState_Implementation(EALSMovementState NewMovementState) override;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Character Base|Character")
 		void SetMovementAction(EALSMovementAction NewMovementAction);
+	virtual void SetMovementAction_Implementation(EALSMovementAction NewMovementAction) override;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Character Base|Character")
 		void SetRotationMode(EALSRotationMode NewRotationMode);
+	virtual void SetRotationMode_Implementation(EALSRotationMode NewRotationMode) override;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Character Base|Character")
 		void SetGait(EALSGait NewGait);
+	virtual void SetGait_Implementation(EALSGait NewGait) override;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Character Base|Character")
 		void SetViewMode(EALSViewMode NewViewMode);
+	virtual void SetViewMode_Implementation(EALSViewMode NewViewMode) override;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Character Base|Character")
 		void SetOverlayState(EALSOverlayState NewOverlayState);
+	virtual	void SetOverlayState_Implementation(EALSOverlayState NewOverlayState) override;
 #pragma endregion
 
 
 #pragma region IALS_Camera_Interface_Overrides.
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Character Base|Camera System")
 		FALSCameraParameters GetCameraParameters();
+	virtual FALSCameraParameters GetCameraParameters_Implementation() override;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Character Base|Camera System")
 		FVector GetFPCameraTarget();
+	virtual FVector GetFPCameraTarget_Implementation() override;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Character Base|Camera System")
 		FTransform Get3PPivotTarget();
@@ -328,7 +338,7 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 
 	FTimerHandle timerHandle_Landing;
 
-	FTimerHandle timerHandle_StanceActionInputCounter;
+	FTimerHandle StanceAction_th;
 	uint8 StanceActionInputCounter;
 
 	FTimerHandle ResetBreakFall_th;

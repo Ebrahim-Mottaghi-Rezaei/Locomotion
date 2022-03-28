@@ -641,7 +641,7 @@ FALSLeanAmount UALSAnimInstance::CalculateInAirLeanAmount() {
 	return FALSLeanAmount(tmp2.Y, tmp2.X);
 }
 
-void UALSAnimInstance::SetFootOffsets(FName EnableFootIKCurve, FName IKFootBone, FName RootBone, FVector & CurrentLocationTarget, FVector & CurrentLocationOffset, FRotator & CurrentRotationOffset) {
+void UALSAnimInstance::SetFootOffsets(FName EnableFootIKCurve, FName IKFootBone, FName RootBone, FVector& CurrentLocationTarget, FVector& CurrentLocationOffset, FRotator& CurrentRotationOffset) {
 	//Only update Foot IK offset values if the Foot IK curve has a weight. If it equals 0, clear the offset values.
 	if (GetCurveValue(EnableFootIKCurve) <= 0.0f) {
 		UALSHelpers::SetFVectorByRef(CurrentLocationOffset, FVector::ZeroVector);
@@ -696,7 +696,7 @@ void UALSAnimInstance::SetPelvisIKOffset(FVector FootOffset_L_Target, FVector Fo
 	}
 }
 
-void UALSAnimInstance::SetFootLocking(FName Enable_FootIK_Curve, FName FootLockCurve, FName IKFootBone, float& CurrentFootLockAlpha, FVector & CurrentFootLockLocation, FRotator & CurrentFootLockRotation) {
+void UALSAnimInstance::SetFootLocking(FName Enable_FootIK_Curve, FName FootLockCurve, FName IKFootBone, float& CurrentFootLockAlpha, FVector& CurrentFootLockLocation, FRotator& CurrentFootLockRotation) {
 	//Only update values if FootIK curve has a weight.
 	if (GetCurveValue(Enable_FootIK_Curve) <= 0)
 		return;
@@ -720,7 +720,7 @@ void UALSAnimInstance::SetFootLocking(FName Enable_FootIK_Curve, FName FootLockC
 		SetFootLockOffsets(CurrentFootLockLocation, CurrentFootLockRotation);
 }
 
-void UALSAnimInstance::SetFootLockOffsets(FVector & LocalLocation, FRotator & LocalRotation) {
+void UALSAnimInstance::SetFootLockOffsets(FVector& LocalLocation, FRotator& LocalRotation) {
 	FRotator RotationDifference;
 
 	//Use the delta between the current and last updated rotation to find how much the foot should be rotated to remain planted on the ground.
@@ -784,7 +784,7 @@ FALSVelocityBlend UALSAnimInstance::InterpVelocityBlend(const FALSVelocityBlend 
 	return FALSVelocityBlend(f, b, l, r);
 }
 
-FALSLeanAmount UALSAnimInstance::InterpLeanAmount(FALSLeanAmount & current, FALSLeanAmount & target, const float interpSpeed, const float deltaTime) {
+FALSLeanAmount UALSAnimInstance::InterpLeanAmount(FALSLeanAmount& current, FALSLeanAmount& target, const float interpSpeed, const float deltaTime) {
 	auto retValue = FALSLeanAmount();
 	retValue.FrontBack = FMath::FInterpTo(current.FrontBack, target.FrontBack, deltaTime, interpSpeed);
 	retValue.LeftRight = FMath::FInterpTo(current.LeftRight, target.LeftRight, deltaTime, interpSpeed);

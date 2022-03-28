@@ -79,7 +79,7 @@ FSlateColor UALSHudWidget::GetShowCharacterInfoColor() const {
 }
 
 FString UALSHudWidget::GetDebugCharacterName() const {
-	return IsValid(DebugFocusCharacter) ? DebugFocusCharacter->GetName() : FString(TEXT("[C++ ALS] No Valid Character Selected"));
+	return IsValid(DebugFocusCharacter) ? DebugFocusCharacter->GetName() : FString(TEXT("[C++ ALS v4] : No Valid Character Selected"));
 }
 
 FString UALSHudWidget::GetCharacterStates() const {
@@ -101,10 +101,10 @@ FString UALSHudWidget::GetCharacterStates() const {
 
 FString UALSHudWidget::GetAnimCurvesNames() const {
 	if (!IsValid(DebugFocusCharacter))
-		return FString("[C++ ALS] DebugFocusCharacter is not valid");
+		return FString("[C++ ALS v4] : DebugFocusCharacter is not valid");
 
 	if (!IsValid(DebugFocusCharacter->GetMesh()->GetAnimInstance()))
-		return FString("[C++ ALS] AnimInstance is not valid");
+		return FString("[C++ ALS v4] : AnimInstance is not valid");
 
 	const auto* animInstance = DebugFocusCharacter->GetMesh()->GetAnimInstance();
 	TArray<FName> CurveNames;
@@ -121,10 +121,10 @@ FString UALSHudWidget::GetAnimCurvesNames() const {
 
 FText UALSHudWidget::GetAnimCurvesValues() const {
 	if (!IsValid(DebugFocusCharacter))
-		return FText::FromString(TEXT("[C++ ALS] DebugFocusCharacter is not valid"));
+		return FText::FromString(TEXT("[C++ ALS v4] : DebugFocusCharacter is not valid"));
 
 	if (!IsValid(DebugFocusCharacter->GetMesh()->GetAnimInstance()))
-		return FText::FromString("[C++ ALS] AnimInstance is not valid");
+		return FText::FromString("[C++ ALS v4] : AnimInstance is not valid");
 
 	const auto* animInstance = DebugFocusCharacter->GetMesh()->GetAnimInstance();
 	if (!IsValid(animInstance))
