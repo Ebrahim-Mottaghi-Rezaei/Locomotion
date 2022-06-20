@@ -507,9 +507,7 @@ FTransform AALSCharacter::Get3PPivotTarget_Implementation() {
 }
 
 FALSTraceParams AALSCharacter::Get3PTraceParameters_Implementation() {
-	Super::Get3PTraceParameters_Implementation();
-
-	return FALSTraceParams(static_cast<TEnumAsByte<ETraceTypeQuery>>(ECC_Camera), GetMesh()->GetSocketLocation(FName(bRightShoulder ? "TP_CameraTrace_R" : "TP_CameraTrace_L")), 15.0f);
+	return FALSTraceParams(ETT_CameraCollisionChannel, GetMesh()->GetSocketLocation(FName(bRightShoulder ? "TP_CameraTrace_R" : "TP_CameraTrace_L")), 15.0f);
 }
 
 void AALSCharacter::OnOverlayStateChanged(const EALSOverlayState NewOverlayState) {
@@ -542,8 +540,6 @@ UAnimMontage* AALSCharacter::GetRollAnimation() {
 }
 
 FALSMantleAsset AALSCharacter::GetMantleAsset(const EALSMantleType MantleType) {
-	//Super::GetMantleAsset(MantleType);
-
 	if (MantleType != EALSMantleType::ALS_LowMantle)
 		return Mantle2mDefault;
 

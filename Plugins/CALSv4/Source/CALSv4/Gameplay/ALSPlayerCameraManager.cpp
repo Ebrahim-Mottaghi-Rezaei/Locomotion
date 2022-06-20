@@ -121,22 +121,27 @@ FALSCameraBehaviourResult AALSPlayerCameraManager::CustomCameraBehaviour() {
 	);
 
 	//Step 6: Trace for an object between the camera and character to apply a corrective offset. Trace origins are set within the Character BP via the Camera Interface. Functions like the normal spring arm, but can allow for different trace origins regardless of the pivot.
-	if (ControlledPawn && ControlledPawn->GetClass()->ImplementsInterface(UALSCameraInterface::StaticClass())) {
-		auto traceParams = IALSCameraInterface::Execute_Get3PTraceParameters(ControlledPawn);
-		FHitResult HitResult;
-		UKismetSystemLibrary::SphereTraceSingle(this, traceParams.TraceOrigin, TargetCameraLocation, traceParams.TraceRadius, traceParams.TraceChannel, false, ActorsToIgnore, GetDebugTraceType(EDrawDebugTrace::ForOneFrame), HitResult, true);
+	if (IsValid(ControlledPawn)) {
+		if (ControlledPawn->GetClass()->ImplementsInterface(UALSCameraInterface::StaticClass())) {
 
-		if (HitResult.bBlockingHit && !HitResult.bStartPenetrating) {
-			TargetCameraLocation = HitResult.Location - HitResult.TraceEnd + TargetCameraLocation;
+			auto traceParams = IALSCameraInterface::Execute_Get3PTraceParameters(ControlledPawn);
+
+			FHitResult HitResult;
+
+			UKismetSystemLibrary::SphereTraceSingle(this, traceParams.TraceOrigin, TargetCameraLocation, traceParams.TraceRadius, traceParams.TraceChannel, false, ActorsToIgnore, GetDebugTraceType(EDrawDebugTrace::ForOneFrame), HitResult, true);
+
+			if (HitResult.bBlockingHit /*&& HitResult.bStartPenetrating*/) {
+				TargetCameraLocation = HitResult.Location - HitResult.TraceEnd + TargetCameraLocation;
+			}
 		}
 	}
 
 	//Step 7: Draw Debug Shapes.
 	if (GetOwningPlayerController() && GetOwningPlayerController()->GetClass()->ImplementsInterface(UALSControllerInterface::StaticClass())) {
 		if (IALSControllerInterface::Execute_GetDebugInfo(GetOwningPlayerController()).bShowDebugShapes) {
-			UKismetSystemLibrary::DrawDebugSphere(this, PivotTarget.GetLocation(), 16.0f, 8, FColor::FromHex(FString(TEXT("00FF00FF"))), 0.f, 0.5f);
+			UKismetSystemLibrary::DrawDebugSphere(this, PivotTarget.GetLocation(), 16.0f, 8, FColor::Green, 0.f, 0.5f);
 
-			UKismetSystemLibrary::DrawDebugSphere(this, SmoothedPivotTarget.GetLocation(), 16.0f, 8, FColor::FromHex(FString(TEXT("FF2A00FF"))), 0.f, 0.5f);
+			UKismetSystemLibrary::DrawDebugSphere(this, SmoothedPivotTarget.GetLocation(), 16.0f, 8, FColor::Orange, 0.f, 0.5f);
 
 			UKismetSystemLibrary::DrawDebugSphere(this, PivotLocation, 16.0f, 8, FColor::FromHex(FString(TEXT("00AAFFFF"))), 0.f, 0.5f);
 

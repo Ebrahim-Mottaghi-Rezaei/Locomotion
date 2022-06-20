@@ -278,7 +278,7 @@ FString FALSTraceParams::ToString(bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Trace Channel: %s, Trace Origin: %s, Trace Radius: %s"), *UEnum::GetValueAsString(TraceChannel), *TraceOrigin.ToString(), *FString::SanitizeFloat(TraceRadius));
 
 	if (bPrintToLog)
-		UALSLogger::LogInfo(r);
+		UALSLogger::LogInfo(r, 0.0f);
 
 	return r;
 }

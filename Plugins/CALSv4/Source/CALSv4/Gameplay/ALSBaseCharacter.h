@@ -28,7 +28,7 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System")
 		TEnumAsByte<ECollisionChannel> ECC_Climbable = ECollisionChannel::ECC_GameTraceChannel2;
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System")
-		TEnumAsByte<ECollisionChannel> ECC_Visibility = ECollisionChannel::ECC_Visibility;
+		TEnumAsByte<ECollisionChannel> CameraCollisionCheckChannel = ECollisionChannel::ECC_Camera;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Input", meta = (ClampMin = "0.1", ClampMax = "0.5", UIMin = "0.1", UIMax = "0.5"))
 		float DoubleTapTime = 0.1f;
@@ -338,12 +338,13 @@ public:
 	virtual FALSTraceParams Get3PTraceParameters_Implementation() override;
 #pragma endregion
 
+protected:
+	TEnumAsByte<ETraceTypeQuery> ETT_CameraCollisionChannel;
 private:
+	TEnumAsByte<ETraceTypeQuery> ETT_Climbable;
+
 	float DeltaTimeX;
 	TArray<AActor*> IgnoredActors;
-
-	ETraceTypeQuery ETT_Climbable;
-	ETraceTypeQuery ETT_Visibility;
 
 	FTimeline mantleTimeline;
 	UAnimInstance* animInstance;

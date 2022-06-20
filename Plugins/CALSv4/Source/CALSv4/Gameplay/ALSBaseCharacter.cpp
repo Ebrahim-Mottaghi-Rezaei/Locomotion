@@ -21,10 +21,6 @@
 
 AALSBaseCharacter::AALSBaseCharacter() {
 	PrimaryActorTick.bCanEverTick = true;
-
-	ETT_Climbable = UEngineTypes::ConvertToTraceType(ECC_Climbable);
-	ETT_Visibility = UEngineTypes::ConvertToTraceType(ECC_Visibility);
-
 	bUseControllerRotationYaw = false;
 
 	Tags.Add(TEXT("ALS_Character"));
@@ -133,6 +129,9 @@ AALSBaseCharacter::AALSBaseCharacter() {
 
 void AALSBaseCharacter::BeginPlay() {
 	Super::BeginPlay();
+
+	ETT_Climbable = UEngineTypes::ConvertToTraceType(ECC_Climbable);
+	ETT_CameraCollisionChannel = UEngineTypes::ConvertToTraceType(CameraCollisionCheckChannel);
 
 	//Make sure the mesh and animInstance update after the CharacterBP to ensure it gets the most recent values.
 	GetMesh()->AddTickPrerequisiteActor(this);
@@ -1316,5 +1315,5 @@ FTransform AALSBaseCharacter::Get3PPivotTarget_Implementation() {
 }
 
 FALSTraceParams AALSBaseCharacter::Get3PTraceParameters_Implementation() {
-	return FALSTraceParams(ETT_Visibility, GetActorLocation(), 10.0f);
+	return FALSTraceParams(ETT_CameraCollisionChannel, GetActorLocation(), 10.0f);
 }
