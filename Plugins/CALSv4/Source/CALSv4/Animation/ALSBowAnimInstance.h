@@ -1,3 +1,5 @@
+
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -6,9 +8,13 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBowDraw, float, draw);
 
+/**
+ *
+ */
 UCLASS()
 class CALSV4_API UALSBowAnimInstance : public UAnimInstance {
 	GENERATED_BODY()
+
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Advanced Locomotion System|Bow")
 		FOnBowDraw OnBowDrawChanged;

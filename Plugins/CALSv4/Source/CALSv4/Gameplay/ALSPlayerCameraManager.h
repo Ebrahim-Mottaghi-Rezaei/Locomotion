@@ -1,20 +1,25 @@
+
+
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CALSv4/Data/ALSStructs.h"
 #include "Camera/PlayerCameraManager.h"
-#include "Kismet/KismetSystemLibrary.h"
+#include <Kismet/KismetSystemLibrary.h>
+#include "../ALSStructs.h"
 #include "ALSPlayerCameraManager.generated.h"
 
+/**
+ *
+ */
 UCLASS()
 class CALSV4_API AALSPlayerCameraManager : public APlayerCameraManager {
 	GENERATED_BODY()
 
-	public:
+public:
 	AALSPlayerCameraManager();
 	virtual void OnPossess(APawn* ControlledPawn);
 
-	protected:
+protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		USkeletalMeshComponent* CameraBehaviour;
 
@@ -35,7 +40,7 @@ class CALSV4_API AALSPlayerCameraManager : public APlayerCameraManager {
 
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Camera Manager")
 		FALSCameraBehaviourResult CustomCameraBehaviour();
-	
+
 	FVector CalculateAxisIndependentLag(FVector CurrentLocation, FVector TargetLocation, FRotator CameraRotation, FVector LagSpeed) const;
 	float GetCameraBehaviourParam(FName CurveName) const;
 	TEnumAsByte<EDrawDebugTrace::Type> GetDebugTraceType(EDrawDebugTrace::Type ShowTraceType) const;

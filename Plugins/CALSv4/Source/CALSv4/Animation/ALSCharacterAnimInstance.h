@@ -1,23 +1,25 @@
+
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "../../Data/ALSEnums.h"
-#include "../../Data/ALSStructs.h"
-#include "../Interfaces/ALSAnimationInterface.h"
-#include <CALSv4/Core/Player/ALSCharacter.h>
+#include "../Gameplay/ALSBaseCharacter.h"
+#include "../ALSEnums.h"
+#include "../ALSStructs.h"
+#include "ALSCharacterAnimationInterface.h"
+#include "ALSCharacterAnimInstance.generated.h"
 
-#include "TimerManager.h"
-
-#include "ALSAnimInstance.generated.h"
-
-UCLASS(Transient, Blueprintable, BlueprintType, Category = "Advanced Locomotion System|Animation Instance")
-class CALSV4_API UALSAnimInstance : public UAnimInstance, public IALSAnimationInterface {
+/**
+ *
+ */
+UCLASS()
+class CALSV4_API UALSCharacterAnimInstance : public UAnimInstance, public IALSCharacterAnimationInterface {
 	GENERATED_BODY()
 
-	public:
-	UALSAnimInstance();
-	protected:
+public:
+	UALSCharacterAnimInstance();
+protected:
 #pragma region Variables
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly)
 		AALSBaseCharacter* Character;
@@ -302,11 +304,11 @@ class CALSV4_API UALSAnimInstance : public UAnimInstance, public IALSAnimationIn
 		UAnimSequence* ALS_N_Transition_L;
 #pragma endregion
 
-	public:
+public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
-	protected:
+protected:
 	//Macros
 	UFUNCTION(BlueprintPure)
 		virtual float GetAnimCurveClamped(FName Name, float Bias, float ClampMin, float ClampMax);
@@ -422,6 +424,6 @@ class CALSV4_API UALSAnimInstance : public UAnimInstance, public IALSAnimationIn
 		void SetOverlayOverrideState(int NewState);
 	virtual void SetOverlayOverrideState_Implementation(int NewState) override;
 
-	private:
+private:
 	bool bShouldMove_Last;
 };

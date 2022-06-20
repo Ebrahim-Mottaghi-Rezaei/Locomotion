@@ -1,10 +1,17 @@
-#pragma once
-#include "CoreMinimal.h"
-#include "CALSv4/Data/ALSEnums.h"
-#include "ALSPlayerCameraBehaviour.generated.h"
 
-UCLASS(Transient, Blueprintable, BlueprintType, hideCategories = (AnimInstance))
-class CALSV4_API UALSPlayerCameraBehaviour :public UAnimInstance {
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Animation/AnimInstance.h"
+#include "../ALSEnums.h"
+#include "ALSCameraAnimInstance.generated.h"
+
+/**
+ *
+ */
+UCLASS()
+class CALSV4_API UALSCameraAnimInstance : public UAnimInstance {
 	GENERATED_BODY()
 
 protected:
@@ -31,6 +38,5 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Camera Animation")
 		EALSViewMode ViewMode = EALSViewMode::ALS_TPS;
 
-	virtual  void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 };

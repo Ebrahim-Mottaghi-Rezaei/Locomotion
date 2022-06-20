@@ -1,10 +1,18 @@
+
+
+
 #include "ALSOverlayStateSwitcherWidget.h"
+#include "../ALSEnums.h"
+#include <GameFramework/Character.h>
+#include "../Gameplay/ALSCharacterInterface.h"
+#include "../Gameplay/ALSCameraInterface.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
-#include "CALSv4/Core/Interfaces/ALSCameraInterface.h"
-#include "GameFramework/Character.h"
-#include "CALSv4/Core/Interfaces/ALSCharacterInterface.h"
-#include "Components/CanvasPanelSlot.h"
+#include <Misc/EnumRange.h>
+#include <UObject/NoExportTypes.h>
+#include <Components/CanvasPanelSlot.h>
+#include "ALSOverlayStateButtonWidget.h"
 #include <Blueprint/UserWidget.h>
+#include <Components/TextBlock.h>
 
 void UALSOverlayStateSwitcherWidget::NativeOnInitialized() {
 	for (const EALSOverlayState value : TEnumRange<EALSOverlayState>())
@@ -25,7 +33,7 @@ void UALSOverlayStateSwitcherWidget::NativeConstruct() {
 	}
 }
 
-void UALSOverlayStateSwitcherWidget::NativeTick(const FGeometry & MovieSceneBlends, float InDeltaTime) {
+void UALSOverlayStateSwitcherWidget::NativeTick(const FGeometry& MovieSceneBlends, float InDeltaTime) {
 	Super::NativeTick(MovieSceneBlends, InDeltaTime);
 
 	//local player controller
@@ -49,7 +57,7 @@ void UALSOverlayStateSwitcherWidget::SelectOverlayState() const {
 
 void UALSOverlayStateSwitcherWidget::CreateButtons() {
 	//ALS_Barrel is the last element in the EALSOverlayState enum. if any other states added
-	for (const EALSOverlayState value : TEnumRange<EALSOverlayState>()) {
+	for (EALSOverlayState value : TEnumRange<EALSOverlayState>()) {
 		const auto button = static_cast<UALSOverlayStateButtonWidget*>(CreateWidget(GetOwningPlayer(), OverlayStateButtonTemplate));
 		button->GetText()->SetText(FText::FromString(UEnum::GetDisplayValueAsText(value).ToString()));
 		VerticalBox->AddChildToVerticalBox(button);
@@ -65,7 +73,7 @@ void UALSOverlayStateSwitcherWidget::UpdateButtonFocus() {
 	}
 }
 
-void UALSOverlayStateSwitcherWidget::SetUIElements(UCanvasPanel * movablePanel, UVerticalBox * verticalBox) {
+void UALSOverlayStateSwitcherWidget::SetUIElements(UCanvasPanel* movablePanel, UVerticalBox* verticalBox) {
 	MovablePanels = movablePanel;
 	VerticalBox = verticalBox;
 }

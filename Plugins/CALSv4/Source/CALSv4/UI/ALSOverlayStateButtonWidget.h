@@ -1,14 +1,18 @@
+
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Image.h"
-#include "Components/TextBlock.h"
 #include "ALSOverlayStateButtonWidget.generated.h"
 
+/**
+ *
+ */
 UCLASS()
 class CALSV4_API UALSOverlayStateButtonWidget : public UUserWidget {
 	GENERATED_BODY()
+
 protected:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Overlay State Button")
 		FLinearColor BackgroundSelectedColor = FLinearColor::White;

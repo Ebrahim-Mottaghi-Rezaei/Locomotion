@@ -1,4 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
+
 #include "CALSv4.h"
 
 #define LOCTEXT_NAMESPACE "FCALSv4Module"
@@ -13,4 +14,5 @@ void FCALSv4Module::ShutdownModule() {
 }
 
 #undef LOCTEXT_NAMESPACE
+
 IMPLEMENT_MODULE(FCALSv4Module, CALSv4)

@@ -1,29 +1,38 @@
+
+
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CALSv4/Core/Interfaces/ALSCameraInterface.h"
-#include "CALSv4/Core/Interfaces/ALSCharacterInterface.h"
-#include "CALSv4/Data/ALSStructs.h"
-#include "Components/TimelineComponent.h"
-#include "Engine/DataTable.h"
 #include "GameFramework/Character.h"
-#include "Kismet/KismetSystemLibrary.h"
+#include "../ALSEnums.h"
+#include <Engine/DataTable.h>
+#include "../ALSStructs.h"
+#include <Kismet/KismetSystemLibrary.h>
+#include <Components/TimelineComponent.h>
+#include "ALSCharacterInterface.h"
+#include "ALSCameraInterface.h"
 #include "ALSBaseCharacter.generated.h"
 
 UCLASS()
 class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInterface, public IALSCameraInterface {
 	GENERATED_BODY()
-
-	public:
+public:
 	// Sets default values for this character's properties
 	AALSBaseCharacter();
 
-	protected:
+protected:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System")
 		uint8 AnimationFrameRate = 30;
+
+	//You should look it up in the GameTraceChannel in DefaultEngine.ini
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System")
+		TEnumAsByte<ECollisionChannel> ECC_Climbable = ECollisionChannel::ECC_GameTraceChannel2;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System")
+		TEnumAsByte<ECollisionChannel> ECC_Visibility = ECollisionChannel::ECC_Visibility;
+
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Input", meta = (ClampMin = "0.1", ClampMax = "0.5", UIMin = "0.1", UIMax = "0.5"))
 		float DoubleTapTime = 0.1f;
-	//Category=Input
+	///Category=Input
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Input")
 		EALSInputProcessingMode SprintProcessingMode = EALSInputProcessingMode::ALS_DoublePress;
 
@@ -47,7 +56,7 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|Input")
 		bool bSprintHeld;
 
-	//Category=Essential Information
+	///Category=Essential Information
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|Essential Information")
 		FVector Acceleration = FVector::ZeroVector;
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|Essential Information")
@@ -65,7 +74,7 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|Essential Information")
 		float AimYawRate = 0.0f;
 
-	//Category=Camera System
+	///Category=Camera System
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Advanced Locomotion System|Camera System")
 		float ThirdPersonFOV = 90.0f;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Advanced Locomotion System|Camera System")
@@ -73,7 +82,7 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Advanced Locomotion System|Camera System")
 		bool bRightShoulder = true;
 
-	//Category=State Values
+	///Category=State Values
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|State Values")
 		EALSMovementState MovementState = EALSMovementState::ALS_None;
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|State Values")
@@ -91,7 +100,7 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|State Values")
 		EALSOverlayState OverlayState = EALSOverlayState::ALS_Default;
 
-	//Category=Movement System
+	///Category=Movement System
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Movement System")
 		FDataTableRowHandle MovementModel;
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|Movement System")
@@ -99,7 +108,7 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|Movement System")
 		FALSMovementSettings CurrentMovementSettings;
 
-	//Category=Rotation System
+	///Category=Rotation System
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|Rotation System")
 		FRotator TargetRotation = FRotator::ZeroRotator;
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|Rotation System")
@@ -107,7 +116,9 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|Rotation System")
 		float YawOffset;
 
-	//Category=Mantle System
+	///Category=Mantle System
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Mantle System")
+		UCurveFloat* MantleTimelineCurve;
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|Mantle System")
 		FALSMantleParams MantleParams;
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|Mantle System")
@@ -129,7 +140,7 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Advanced Locomotion System|Mantle System")
 		UCurveVector* LowMantle;
 
-	//Category=Ragdoll
+	///Category=Ragdoll
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|Ragdoll System")
 		bool bRagdollOnGround = false;
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|Ragdoll System")
@@ -137,16 +148,16 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|Ragdoll System")
 		FVector LastRagdollVelocity = FVector::ZeroVector;
 
-	//Category=Cached Variables
+	///Category=Cached Variables
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|Cached Variables")
 		FVector PreviousVelocity = FVector::ZeroVector;
 	UPROPERTY(BlueprintReadOnly, Category = "Advanced Locomotion System|Cached Variables")
 		float PreviousAimYaw = 0.0f;
 
-	// Called when the game starts or when spawned
+	/// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	public:
+public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode) override;
@@ -154,8 +165,8 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 	virtual void Landed(const FHitResult& Hit) override;
 	virtual void OnJumped_Implementation() override;
-	protected:
-	//Category=Utility
+protected:
+	///Category=Utility
 	UFUNCTION(BlueprintGetter, Category = "Advanced Locomotion System|Character Base|Utility")
 		virtual FALSControlVectors GetControlVectors();
 	UFUNCTION(BlueprintGetter, Category = "Advanced Locomotion System|Character Base|Utility")
@@ -164,13 +175,13 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 		virtual FVector GetCapsuleLocationFromBase(FVector baseLocation, float zOffset);
 	UFUNCTION(BlueprintGetter, Category = "Advanced Locomotion System|Character Base|Utility")
 		virtual float GetAnimCurveValue(FName curveName);
-	//Category=Input
+	///Category=Input
 	void ReceiveMoveForwardBackwards(float value);
 	void ReceiveMoveRightLeft(float value);
 	virtual void PlayerMovementInput(const bool bIsForwardAxis);
 	virtual void PlayerCameraYawInput(float value);
 	virtual void PlayerCameraPitchInput(float value);
-	virtual void PlayerJumpPressedInput(FKey key);
+	virtual void PlayerJumpPressedInput();
 	virtual void PlayerStanceActionInput(FKey key);
 	virtual void PlayerWalkBegin();
 	virtual void PlayerWalkEnd();
@@ -194,13 +205,12 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 		virtual FVector GetPlayerMovementInput();
 	UFUNCTION(BlueprintGetter, Category = "Advanced Locomotion System|Character Base|Input")
 		virtual FVector2D FixDiagonalGamePadValues(float inX, float inY);
-	//Category=Essential Information
+	///Category=Essential Information
 	virtual void SetEssentialValues();
 	virtual void CacheValues();
 	UFUNCTION(BlueprintGetter, Category = "Advanced Locomotion System|Character Base|Essential Information")
 		virtual FVector CalculateAcceleration();
-	//Category=State Change
-	virtual void OnBeginPlay();
+	///Category=State Change
 	virtual void OnCharacterMovementModeChanged(EMovementMode PrevMovementMode, EMovementMode NewMovementMode, uint8 PrevCustomMode, uint8 NewCustomMode);
 	virtual void OnMovementStateChanged(EALSMovementState NewMovementState);
 	virtual void OnMovementActionChanged(EALSMovementAction NewMovementAction);
@@ -209,7 +219,7 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 	virtual void OnGaitChanged(EALSGait NewActualGait);
 	virtual void OnViewModeChanged(EALSViewMode NewViewMode);
 	virtual void OnOverlayStateChanged(EALSOverlayState NewOverlayState);
-	//Category=Movement System
+	///Category=Movement System
 	virtual void SetMovementModel();
 	virtual void UpdateCharacterMovement();
 	virtual void UpdateDynamicMovementSettings(EALSGait AllowedGait);
@@ -225,7 +235,7 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 		virtual float GetMappedSpeed();
 	UFUNCTION(BlueprintGetter, Category = "Advanced Locomotion System|Character Base|Movement System")
 		virtual UAnimMontage* GetRollAnimation();
-	//Rotation System
+	///Rotation System
 	virtual void UpdateGroundedRotation();
 	virtual void UpdateInAirRotation();
 	virtual void SmoothCharacterRotation(FRotator Target, float TargetInterpSpeedConst, float ActorInterpSpeedSmooth);
@@ -236,20 +246,21 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 		virtual float CalculateGroundedRotationRate();
 	UFUNCTION(BlueprintGetter, Category = "Advanced Locomotion System|Character Base|Rotation System")
 		virtual bool CanUpdateMovingRotation();
-	//Category=Mantle System
+	///Category=Mantle System
 	UFUNCTION(BlueprintCallable)
 		virtual bool MantleCheck(FALSMantleTraceSettings TraceSettings, TEnumAsByte<EDrawDebugTrace::Type> DebugType);
 	UFUNCTION(BlueprintCallable)
 		virtual void MantleStart(float MantleHeight, FALSComponentAndTransform MantleLedgeWS, EALSMantleType MantleType);
 	UFUNCTION(BlueprintCallable)
-		virtual void MantleUpdate(float BlendIn);
+		virtual void MantleUpdate(const float BlendIn);
 	UFUNCTION(BlueprintCallable)
 		virtual void MantleEnd();
+
 	UFUNCTION(BlueprintGetter, Category = "Advanced Locomotion System|Character Base|Mantle System")
 		virtual bool CapsuleHasRoomCheck(UCapsuleComponent* Capsule, FVector TargetLocation, float HeightOffset, float RadiusOffset, TEnumAsByte<EDrawDebugTrace::Type> DebugType);
 	UFUNCTION(BlueprintGetter, Category = "Advanced Locomotion System|Character Base|Mantle System")
 		virtual FALSMantleAsset GetMantleAsset(EALSMantleType MantleType);
-	//Category=Ragdoll System
+	///Category=Ragdoll System
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Character Base|Ragdoll System")
 		virtual void RagdollStart();
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Character Base|Ragdoll System")
@@ -262,17 +273,17 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 		virtual void SetActorLocationDuringRagdoll();
 	UFUNCTION(BlueprintGetter, Category = "Advanced Locomotion System|Character Base|Ragdoll System")
 		virtual UAnimMontage* GetGetupAnimation(const bool bIsRagdollFacedUp);
-	//Category=Debug
+	///Category=Debug
 	virtual void DrawDebugShapes();
 	UFUNCTION(BlueprintGetter, Category = "Advanced Locomotion System|Character Base|Debug")
 		virtual TEnumAsByte<EDrawDebugTrace::Type> GetTraceDebugType(TEnumAsByte<EDrawDebugTrace::Type> showTraceType);
 
-	//BreakFall CustomEvent
+	///BreakFall CustomEvent
 	virtual void BreakFall();
-	//Roll CustomEvent
+	///Roll CustomEvent
 	virtual void Roll();
 
-	public:
+public:
 
 #pragma region IALS_Character_Interface_Overrides.
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Advanced Locomotion System|Character Base|Character")
@@ -327,11 +338,12 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 	virtual FALSTraceParams Get3PTraceParameters_Implementation() override;
 #pragma endregion
 
-	private:
+private:
 	float DeltaTimeX;
 	TArray<AActor*> IgnoredActors;
-	ETraceTypeQuery ALS_ECC_Climbable;
-	ETraceTypeQuery ECC__Visibility;
+
+	ETraceTypeQuery ETT_Climbable;
+	ETraceTypeQuery ETT_Visibility;
 
 	FTimeline mantleTimeline;
 	UAnimInstance* animInstance;
@@ -350,4 +362,14 @@ class CALSV4_API AALSBaseCharacter : public ACharacter, public IALSCharacterInte
 
 	float forwardInputValue;
 	float rightInputValue;
+
+
+	//Previous States
+	EALSStance prevStance;
+	EALSMovementAction PrevMovementAction;
+	EALSRotationMode prevRotationMode;
+	EALSGait prevGait;
+	EALSViewMode prevViewMode;
+	EALSOverlayState prevOverlayState;
+	//Previous States
 };

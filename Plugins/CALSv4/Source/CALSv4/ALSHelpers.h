@@ -1,26 +1,20 @@
+
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "CALSv4/Data/ALSStructs.h"
+#include "ALSStructs.h"
 #include "ALSHelpers.generated.h"
 
-UCLASS()
-class CALSV4_API UALSLogger :public UBlueprintFunctionLibrary {
-	GENERATED_BODY()
-	public:
-	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Helpers|Logging")
-		static void LogInfo(FString Message, const float duration = 5.0f);
-	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Helpers|Logging")
-		static void LogWarning(FString Message, const float duration = 5.0f);
-	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Helpers|Logging")
-		static void LogError(FString Message, const float duration = 5.0f);
-};
-
+/**
+ *
+ */
 UCLASS()
 class CALSV4_API UALSHelpers : public UBlueprintFunctionLibrary {
 	GENERATED_BODY()
-	public:
+
+public:
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Helpers|Math")
 		static FTransform SubtractTransform(FTransform A, FTransform B);
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Helpers|Math")
@@ -47,4 +41,7 @@ class CALSV4_API UALSHelpers : public UBlueprintFunctionLibrary {
 
 	static void SetFVectorByRef(FVector& Vector, FVector NewValue);
 	static void SetFRotatorByRef(FRotator& Rotator, FRotator NewValue);
+
+	static FString Bool2String(bool bValue);
+	static FString Bool2String(bool bValue, FString trueText, FString falseText);
 };

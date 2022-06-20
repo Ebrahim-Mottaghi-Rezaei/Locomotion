@@ -1,21 +1,29 @@
-#include "ALSBaseCharacter.h"
 
-#include "ClothingSimulationFactoryNv.h"
-#include "CALSv4/Core/AI/ALSBaseAIController.h"
-#include "CALSv4/Core/Interfaces/ALSAnimationInterface.h"
-#include "CALSv4/Core/Interfaces/ALSControllerInterface.h"
-#include "CALSv4/Core/Utilities/ALSHelpers.h"
-#include "Components/CapsuleComponent.h"
-#include "Curves/CurveVector.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
+
+
+#include "ALSBaseCharacter.h"
+#include <Components/CapsuleComponent.h>
+#include <AI/NavigationSystemBase.h>
+#include "../ALSLogger.h"
+#include <ClothingSystemRuntimeNv/Public/ClothingSimulationFactoryNv.h>
+#include <GameFramework/CharacterMovementComponent.h>
+#include "../AI/ALSBaseAIController.h"
+#include <GameFramework/Character.h>
+#include <Kismet/KismetMathLibrary.h>
+#include <Kismet/GameplayStatics.h>
+#include "../ALSHelpers.h"
+#include "CALSv4/Animation/ALSCharacterAnimationInterface.h"
+#include <Curves/CurveVector.h>
+#include "../ALSStructs.h"
+#include "ALSControllerInterface.h"
+
+
 
 AALSBaseCharacter::AALSBaseCharacter() {
 	PrimaryActorTick.bCanEverTick = true;
 
-	ALS_ECC_Climbable = UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel2);
-	ECC__Visibility = UEngineTypes::ConvertToTraceType(ECC_Visibility);
+	ETT_Climbable = UEngineTypes::ConvertToTraceType(ECC_Climbable);
+	ETT_Visibility = UEngineTypes::ConvertToTraceType(ECC_Visibility);
 
 	bUseControllerRotationYaw = false;
 
@@ -39,7 +47,7 @@ AALSBaseCharacter::AALSBaseCharacter() {
 	mesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	mesh->SetCollisionResponseToAllChannels(ECR_Block);
 	mesh->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
-	mesh->SetCollisionResponseToChannel(UEngineTypes::ConvertToCollisionChannel(ALS_ECC_Climbable), ECR_Ignore);
+	mesh->SetCollisionResponseToChannel(ECC_Climbable, ECR_Ignore);
 	mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	mesh->SetCollisionResponseToChannel(ECC_Vehicle, ECR_Ignore);
 	mesh->ClothingSimulationFactory = UClothingSimulationFactoryNv::StaticClass();
@@ -48,7 +56,7 @@ AALSBaseCharacter::AALSBaseCharacter() {
 	const auto cmc = GetCharacterMovement();
 	cmc->MaxAcceleration = 1500.0f;
 	cmc->BrakingFrictionFactor = 0.0f;
-	cmc->CrouchedHalfHeight = 60.0f;
+	cmc->SetCrouchedHalfHeight(60.0f);
 	cmc->MinAnalogWalkSpeed = 25.0f;
 	cmc->bCanWalkOffLedgesWhenCrouching = true;
 	cmc->AirControl = 0.15f;
@@ -100,9 +108,6 @@ AALSBaseCharacter::AALSBaseCharacter() {
 	else
 		UALSLogger::LogError("Mantle_1m not found.");
 
-
-	IgnoredActors.Add(GetOwner());
-
 	DeltaTimeX = 1.0 / static_cast<float>(AnimationFrameRate);
 
 	AIControllerClass = AALSBaseAIController::StaticClass();
@@ -119,19 +124,57 @@ AALSBaseCharacter::AALSBaseCharacter() {
 	else
 		UALSLogger::LogError("Mantle_2m not found.");
 
-	FOnTimelineEvent MantleUpdate;
-	//float blendIn;
-	MantleUpdate.BindUFunction(this, FName("MantleUpdate"));
-	mantleTimeline.SetTimelinePostUpdateFunc(MantleUpdate);
-
-	FOnTimelineEvent MantleEnd;
-	MantleEnd.BindUFunction(this, FName("MantleEnd"));
-	mantleTimeline.SetTimelineFinishedFunc(MantleEnd);
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> mantleTimelineCurve(TEXT("CurveFloat'/CALSv4/Data/MantleTimelineCurve.MantleTimelineCurve'"));
+	if (mantleTimelineCurve.Succeeded())
+		MantleTimelineCurve = mantleTimelineCurve.Object;
+	else
+		UALSLogger::LogError("MantleTimelineCurve not found.");
 }
 
 void AALSBaseCharacter::BeginPlay() {
 	Super::BeginPlay();
-	OnBeginPlay();
+
+	//Make sure the mesh and animInstance update after the CharacterBP to ensure it gets the most recent values.
+	GetMesh()->AddTickPrerequisiteActor(this);
+
+	//Set Reference to the Main Anim Instance.
+	if (IsValid(GetMesh()->GetAnimInstance()))
+		animInstance = GetMesh()->GetAnimInstance();
+
+	//Set the Movement Model
+	SetMovementModel();
+
+	//Update states to use the initial desired values.
+	OnGaitChanged(DesiredGait);
+	OnRotationModeChanged(DesiredRotationMode);
+	OnViewModeChanged(ViewMode);
+	OnOverlayStateChanged(OverlayState);
+	if (DesiredStance == EALSStance::ALS_Standing) {
+		UnCrouch();
+	} else {
+		Crouch();
+	}
+
+	//Set default rotation values.
+	const FRotator rotation = GetActorRotation();
+	TargetRotation = rotation;
+	LastVelocityRotation = rotation;
+	LastMovementInputRotation = rotation;
+
+	//Setting up the time-line
+	mantleTimeline.SetTimelineLengthMode(ETimelineLengthMode::TL_TimelineLength);
+
+	if (MantleTimelineCurve == nullptr) {
+		UALSLogger::LogError(TEXT("MantleTimelineCurve in ALSBaseCharacter is null"));
+	} else {
+		FOnTimelineFloat MantleUpdate;
+		MantleUpdate.BindUFunction(this, FName("MantleUpdate"));
+		mantleTimeline.AddInterpFloat(MantleTimelineCurve, MantleUpdate);
+
+		FOnTimelineEvent mantleTimelineFinished;
+		mantleTimelineFinished.BindUFunction(this, FName("MantleEnd"));
+		mantleTimeline.SetTimelineFinishedFunc(mantleTimelineFinished);
+	}
 }
 
 void AALSBaseCharacter::Tick(const float DeltaTime) {
@@ -157,8 +200,9 @@ void AALSBaseCharacter::Tick(const float DeltaTime) {
 			//Do while in Rag-doll
 			RagdollUpdate();
 			break;
-		case EALSMovementState::ALS_None:
 		case EALSMovementState::ALS_Mantling:
+			mantleTimeline.TickTimeline(DeltaTime);
+		case EALSMovementState::ALS_None:
 		default:;
 			break;
 	}
@@ -197,7 +241,7 @@ void AALSBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction(FName(TEXT("SprintAction")), IE_Pressed, this, &AALSBaseCharacter::PlayerSprintBegin);
 	PlayerInputComponent->BindAction(FName(TEXT("SprintAction")), IE_Released, this, &AALSBaseCharacter::PlayerSprintEnd);
 
-	//Select Rotation Mode: Switch the desired (default) rotation mode to Velocity or Looking Direction. This will be the mode the character reverts back to when un-aiming
+	//Select Rotation Mode: Switch the desired (default) rotation mode to Velocity or Looking Direction. This will be the mode the character reverts back to when unaiming
 	PlayerInputComponent->BindAction(FName(TEXT("ToggleRotationMode")), IE_Pressed, this, &AALSBaseCharacter::ToggleRotationMode);
 
 	//AimAction: Hold "AimAction" to enter the aiming mode, release to revert back the desired rotation mode.
@@ -243,7 +287,7 @@ void AALSBaseCharacter::Landed(const FHitResult& Hit) {
 			if (GetWorldTimerManager().IsTimerActive(timerHandle_Landing))
 				GetWorldTimerManager().ClearTimer(timerHandle_Landing);
 			GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
-		});
+			});
 
 		GetWorldTimerManager().SetTimer(timerHandle_Landing, timerDel, 0.5f, false);
 	}
@@ -254,8 +298,8 @@ void AALSBaseCharacter::OnJumped_Implementation() {
 
 	//On Jumped: Set the new In Air Rotation to the velocity rotation if speed is greater than 100.
 	InAirRotation = Speed > 100.0f ? LastVelocityRotation : GetActorRotation();
-	if (IsValid(animInstance) && animInstance->GetClass()->ImplementsInterface(UALSAnimationInterface::StaticClass())) {
-		const auto Interface = Cast<IALSAnimationInterface>(animInstance);
+	if (IsValid(animInstance) && animInstance->GetClass()->ImplementsInterface(UALSCharacterAnimationInterface::StaticClass())) {
+		const auto Interface = Cast<IALSCharacterAnimationInterface>(animInstance);
 		Interface->Jumped_Implementation();
 	}
 }
@@ -273,7 +317,7 @@ FALSControlVectors AALSBaseCharacter::GetControlVectors() {
 
 FVector AALSBaseCharacter::GetCapsuleBaseLocation(float ZOffset) {
 	const auto cc = GetCapsuleComponent();
-	return cc->GetComponentLocation() - cc->GetUpVector() * (ZOffset + cc->GetScaledCapsuleHalfHeight());
+	return cc->GetComponentLocation() - (cc->GetUpVector() * (ZOffset + cc->GetScaledCapsuleHalfHeight()));
 }
 
 FVector AALSBaseCharacter::GetCapsuleLocationFromBase(FVector baseLocation, float zOffset) {
@@ -316,19 +360,30 @@ void AALSBaseCharacter::PlayerCameraPitchInput(const float value) {
 	AddControllerPitchInput(LookUpDownRate * value);
 }
 
-void AALSBaseCharacter::PlayerJumpPressedInput(FKey key) {
+void AALSBaseCharacter::PlayerJumpPressedInput() {
 	if (MovementAction != EALSMovementAction::ALS_None)
 		return;
 
 	if (MovementState == EALSMovementState::ALS_Ragdoll) {
 		RagdollEnd();
 	} else if (MovementState != EALSMovementState::ALS_Mantling) {
+
 		if (MovementState == EALSMovementState::ALS_Grounded) {
-			if (!bHasMovementInput || bHasMovementInput && !MantleCheck(GroundedTraceSettings, EDrawDebugTrace::ForDuration))
+
+			if (bHasMovementInput) {
+				const bool MantleCheckResult = MantleCheck(GroundedTraceSettings, EDrawDebugTrace::ForDuration);
+				if (!MantleCheckResult) {
+					if (Stance == EALSStance::ALS_Standing)
+						Jump();
+					else
+						UnCrouch();
+				}
+			} else {
 				if (Stance == EALSStance::ALS_Standing)
 					Jump();
 				else
 					UnCrouch();
+			}
 
 		} else if (MovementState == EALSMovementState::ALS_InAir) {
 			MantleCheck(FallingTraceSettings, EDrawDebugTrace::ForDuration);
@@ -366,7 +421,7 @@ void AALSBaseCharacter::PlayerStanceActionInput(FKey key) {
 						GetWorldTimerManager().ClearTimer(ResetBreakFall_th);
 
 					bBreakFall = false;
-				});
+					});
 
 				if (GetWorldTimerManager().IsTimerActive(ResetBreakFall_th))
 					GetWorldTimerManager().ClearTimer(ResetBreakFall_th);
@@ -380,7 +435,7 @@ void AALSBaseCharacter::PlayerStanceActionInput(FKey key) {
 		}
 
 		this->StanceActionInputCounter = 0;
-	});
+		});
 
 	GetWorldTimerManager().SetTimer(StanceAction_th, timerDel, 0.3f, false);
 }
@@ -418,7 +473,7 @@ void AALSBaseCharacter::PlayerSprintBegin() {
 				//UALSLogger::LogInfo(TEXT("Walking"));
 				DesiredGait = EALSGait::ALS_Walking;
 			}
-		});
+			});
 
 		GetWorldTimerManager().SetTimer(Sprint_Handle, del, DoubleTapTime, false);
 	}
@@ -439,7 +494,7 @@ void AALSBaseCharacter::PlayerSprintEnd() {
 
 			SprintTapCounter = 0;
 			DesiredGait = EALSGait::ALS_Running;
-		});
+			});
 
 		GetWorldTimerManager().SetTimer(Sprint_Handle, del, DoubleTapTime, false);
 	}
@@ -455,16 +510,24 @@ void AALSBaseCharacter::ToggleRotationMode() {
 
 void AALSBaseCharacter::ChangeRotationMode(EALSRotationMode newMode) {
 	DesiredRotationMode = newMode;
-	SetRotationMode_Implementation(newMode);
+	if (this->GetClass()->ImplementsInterface(UALSCharacterInterface::StaticClass())) {
+		IALSCharacterInterface::Execute_SetRotationMode(this, newMode);
+	}
 }
 
 void AALSBaseCharacter::AimActionBegin() {
-	SetRotationMode_Implementation(EALSRotationMode::ALS_Aiming);
+	if (this->GetClass()->ImplementsInterface(UALSCharacterInterface::StaticClass())) {
+		IALSCharacterInterface::Execute_SetRotationMode(this, EALSRotationMode::ALS_Aiming);
+	}
+	//SetRotationMode_Implementation(EALSRotationMode::ALS_Aiming);
 }
 
 void AALSBaseCharacter::AimActionEnd() {
 	//AimAction: Hold "AimAction" to enter the aiming mode, release to revert back the desired rotation mode.
-	SetRotationMode_Implementation(ViewMode == EALSViewMode::ALS_TPS ? DesiredRotationMode : EALSRotationMode::ALS_LookingDirection);
+	if (this->GetClass()->ImplementsInterface(UALSCharacterInterface::StaticClass())) {
+		IALSCharacterInterface::Execute_SetRotationMode(this, ViewMode == EALSViewMode::ALS_TPS ? DesiredRotationMode : EALSRotationMode::ALS_LookingDirection);
+	}
+	//SetRotationMode_Implementation(ViewMode == EALSViewMode::ALS_TPS ? DesiredRotationMode : EALSRotationMode::ALS_LookingDirection);
 }
 
 void AALSBaseCharacter::CameraActionBegin() {
@@ -477,9 +540,12 @@ void AALSBaseCharacter::CameraActionBegin() {
 	holdAction.BindLambda([this] {
 		if (CameraActionPressType == EALSButtonPressType::ALS_Tapping) {
 			CameraActionPressType = EALSButtonPressType::ALS_Holding;
-			SetViewMode_Implementation(ViewMode == EALSViewMode::ALS_TPS ? EALSViewMode::ALS_FPS : EALSViewMode::ALS_TPS);
+			if (this->GetClass()->ImplementsInterface(UALSCharacterInterface::StaticClass())) {
+				IALSCharacterInterface::Execute_SetViewMode(this, ViewMode == EALSViewMode::ALS_TPS ? EALSViewMode::ALS_FPS : EALSViewMode::ALS_TPS);
+			}
+			//SetViewMode_Implementation(ViewMode == EALSViewMode::ALS_TPS ? EALSViewMode::ALS_FPS : EALSViewMode::ALS_TPS);
 		}
-	});
+		});
 
 	GetWorldTimerManager().SetTimer(cameraAction_th, holdAction, 0.2f, false);
 }
@@ -554,41 +620,13 @@ FVector AALSBaseCharacter::CalculateAcceleration() {
 	return (GetVelocity() - PreviousVelocity) / UGameplayStatics::GetWorldDeltaSeconds(this);
 }
 
-void AALSBaseCharacter::OnBeginPlay() {
-	//Make sure the mesh and animInstance update after the CharacterBP to ensure it gets the most recent values.
-	GetMesh()->AddTickPrerequisiteActor(this);
-
-	//Set Reference to the Main Anim Instance.
-	if (IsValid(GetMesh()->GetAnimInstance()))
-		animInstance = GetMesh()->GetAnimInstance();
-
-	//Set the Movement Model
-	SetMovementModel();
-
-	//Update states to use the initial desired values.
-	OnGaitChanged(DesiredGait);
-	OnRotationModeChanged(DesiredRotationMode);
-	OnViewModeChanged(ViewMode);
-	OnOverlayStateChanged(OverlayState);
-	if (DesiredStance == EALSStance::ALS_Standing) {
-		UnCrouch();
-	} else {
-		Crouch();
-	}
-
-	//Set default rotation values.
-	const FRotator rotation = GetActorRotation();
-	TargetRotation = rotation;
-	LastVelocityRotation = rotation;
-	LastMovementInputRotation = rotation;
-}
-
 void AALSBaseCharacter::OnCharacterMovementModeChanged(EMovementMode PrevMovementMode, EMovementMode NewMovementMode, uint8 PrevCustomMode, uint8 NewCustomMode) {
-	if (NewMovementMode == MOVE_Walking || NewMovementMode == MOVE_NavWalking) {
-		Execute_SetMovementState(this, EALSMovementState::ALS_Grounded);
-	} else if (NewMovementMode == MOVE_Falling) {
-		Execute_SetMovementState(this, EALSMovementState::ALS_InAir);
-	}
+	if (this->GetClass()->ImplementsInterface(UALSCharacterInterface::StaticClass()))
+		if (NewMovementMode == MOVE_Walking || NewMovementMode == MOVE_NavWalking) {
+			IALSCharacterInterface::Execute_SetMovementState(this, EALSMovementState::ALS_Grounded);
+		} else if (NewMovementMode == MOVE_Falling) {
+			IALSCharacterInterface::Execute_SetMovementState(this, EALSMovementState::ALS_InAir);
+		}
 }
 
 void AALSBaseCharacter::OnMovementStateChanged(const EALSMovementState NewMovementState) {
@@ -613,7 +651,7 @@ void AALSBaseCharacter::OnMovementStateChanged(const EALSMovementState NewMoveme
 }
 
 void AALSBaseCharacter::OnMovementActionChanged(const EALSMovementAction NewMovementAction) {
-	const auto PrevMovementAction = MovementAction;
+	PrevMovementAction = MovementAction;
 	MovementAction = NewMovementAction;
 	//Make the character crouch if performing a roll.
 	if (MovementAction == EALSMovementAction::ALS_Rolling) {
@@ -630,40 +668,52 @@ void AALSBaseCharacter::OnMovementActionChanged(const EALSMovementAction NewMove
 }
 
 void AALSBaseCharacter::OnStanceChanged(const EALSStance NewStance) {
-	const auto prevStance = Stance;
+	prevStance = Stance;
 	Stance = NewStance;
 }
 
 void AALSBaseCharacter::OnRotationModeChanged(const EALSRotationMode NewRotationMode) {
-	const auto prevRotationMode = RotationMode;
+	prevRotationMode = RotationMode;
 	RotationMode = NewRotationMode;
 
-	if (RotationMode == EALSRotationMode::ALS_VelocityDirection && ViewMode == EALSViewMode::ALS_FPS)
-		SetViewMode_Implementation(EALSViewMode::ALS_TPS);
+	if (RotationMode == EALSRotationMode::ALS_VelocityDirection && ViewMode == EALSViewMode::ALS_FPS) {
+		if (this->GetClass()->ImplementsInterface(UALSCharacterInterface::StaticClass())) {
+			IALSCharacterInterface::Execute_SetViewMode(this, EALSViewMode::ALS_TPS);
+		}
+		//SetViewMode_Implementation(EALSViewMode::ALS_TPS);
+	}
 }
 
 void AALSBaseCharacter::OnGaitChanged(const EALSGait NewActualGait) {
-	const auto prevGait = Gait;
+	prevGait = Gait;
 	Gait = NewActualGait;
 }
 
 void AALSBaseCharacter::OnViewModeChanged(const EALSViewMode NewViewMode) {
-	const auto prevViewMode = ViewMode;
+	prevViewMode = ViewMode;
 	ViewMode = NewViewMode;
 
 	if (ViewMode == EALSViewMode::ALS_TPS) {
 		//If Third Person, set the rotation mode back to the desired mode.
-		if (RotationMode != EALSRotationMode::ALS_Aiming)
-			SetRotationMode_Implementation(DesiredRotationMode);
+		if (RotationMode != EALSRotationMode::ALS_Aiming) {
+			if (this->GetClass()->ImplementsInterface(UALSCharacterInterface::StaticClass())) {
+				IALSCharacterInterface::Execute_SetRotationMode(this, DesiredRotationMode);
+			}
+			//SetRotationMode_Implementation(DesiredRotationMode);
+		}
 	} else {
 		//If First Person, set the rotation mode to looking direction if currently in the velocity direction mode.
-		if (RotationMode == EALSRotationMode::ALS_VelocityDirection)
-			SetRotationMode_Implementation(EALSRotationMode::ALS_LookingDirection);
+		if (RotationMode == EALSRotationMode::ALS_VelocityDirection) {
+			if (this->GetClass()->ImplementsInterface(UALSCharacterInterface::StaticClass())) {
+				IALSCharacterInterface::Execute_SetRotationMode(this, EALSRotationMode::ALS_LookingDirection);
+			}
+			//SetRotationMode_Implementation(EALSRotationMode::ALS_LookingDirection);
+		}
 	}
 }
 
 void AALSBaseCharacter::OnOverlayStateChanged(const EALSOverlayState NewOverlayState) {
-	const auto prevOverlayState = OverlayState;
+	prevOverlayState = OverlayState;
 	OverlayState = NewOverlayState;
 }
 
@@ -679,8 +729,12 @@ void AALSBaseCharacter::UpdateCharacterMovement() {
 
 	//Determine the Actual Gait. If it is different from the current Gait, Set the new Gait Event.
 	const auto actualGait = GetActualGait(allowedGait);
-	if (Gait != actualGait)
-		SetGait_Implementation(actualGait);
+	if (Gait != actualGait) {
+		if (this->GetClass()->ImplementsInterface(UALSCharacterInterface::StaticClass())) {
+			IALSCharacterInterface::Execute_SetGait(this, actualGait);
+		}
+		//SetGait_Implementation(actualGait); 
+	}
 
 	//Use the allowed gait to update the movement settings.
 	UpdateDynamicMovementSettings(allowedGait);
@@ -782,7 +836,7 @@ float AALSBaseCharacter::GetMappedSpeed() {
 }
 
 UAnimMontage* AALSBaseCharacter::GetRollAnimation() {
-	//This gets overriden in the AnimMan Child character to select the appropriate animation based on the overlay state.
+	//This gets overridden in the AnimMan Child character to select the appropriate animation based on the overlay state.
 	return nullptr;
 }
 
@@ -835,7 +889,7 @@ void AALSBaseCharacter::SmoothCharacterRotation(FRotator Target, float TargetInt
 	//Interpolate the Target Rotation for extra smooth rotation behavior
 	TargetRotation = UKismetMathLibrary::RInterpTo_Constant(TargetRotation, Target, UGameplayStatics::GetWorldDeltaSeconds(this), TargetInterpSpeedConst);
 
-	SetActorRotation(UKismetMathLibrary::RInterpTo(GetActorRotation(), Target, UGameplayStatics::GetWorldDeltaSeconds(this), ActorInterpSpeedSmooth));
+	SetActorRotation(UKismetMathLibrary::RInterpTo(GetActorRotation(), TargetRotation, UGameplayStatics::GetWorldDeltaSeconds(this), ActorInterpSpeedSmooth));
 }
 
 void AALSBaseCharacter::AddToCharacterRotation(FRotator DeltaRotation) {
@@ -874,35 +928,43 @@ bool AALSBaseCharacter::CanUpdateMovingRotation() {
 
 bool AALSBaseCharacter::MantleCheck(FALSMantleTraceSettings TraceSettings, TEnumAsByte<EDrawDebugTrace::Type> DebugType) {
 	//Step 1: Trace forward to find a wall / object the character cannot walk on.
-	const FVector start = GetCapsuleBaseLocation(2.0f) - 30 * GetPlayerMovementInput() + FVector(0.0f, 0.0f, (TraceSettings.MaxLedgeHeight + TraceSettings.MinLedgeHeight) / 2.0f);
-	const FVector end = start + GetPlayerMovementInput() * TraceSettings.ReachDistance;
-	const float halfHeight = 1.0f + (TraceSettings.MaxLedgeHeight - TraceSettings.MinLedgeHeight) / 2;
+
+	const auto playerMovementInput = GetPlayerMovementInput();
+
+	const FVector start = GetCapsuleBaseLocation(2.0f) - 30.0f * playerMovementInput + 0.5f * FVector::UpVector * (TraceSettings.MaxLedgeHeight + TraceSettings.MinLedgeHeight);
+
+	const FVector end = start + playerMovementInput * TraceSettings.ReachDistance;
+
+	const float halfHeight = 1.0f + 0.5f * (TraceSettings.MaxLedgeHeight - TraceSettings.MinLedgeHeight);
 
 	FHitResult HitResult;
 
-	UKismetSystemLibrary::CapsuleTraceSingle(this, start, end, TraceSettings.ForwardTraceRadius, halfHeight, ALS_ECC_Climbable, false, IgnoredActors, GetTraceDebugType(DebugType), HitResult, true, FColor::Black, FColor::Black, 1.0f);
+	UKismetSystemLibrary::CapsuleTraceSingle(this, start, end, TraceSettings.ForwardTraceRadius, halfHeight, ETT_Climbable, false, IgnoredActors, GetTraceDebugType(DebugType), HitResult, true, FColor::Black, FColor::Black, 1.0f);
 
-	if (!HitResult.bBlockingHit || HitResult.bStartPenetrating || GetCharacterMovement()->IsWalkable(HitResult))
+	if (!(HitResult.bBlockingHit && !HitResult.bStartPenetrating && !GetCharacterMovement()->IsWalkable(HitResult)))
 		return false;
 
-	//Step 2: Trace downward from the first trace's Impact Point and determine if the hit location is walkable.
 	const FVector impactPoint = HitResult.ImpactPoint;
 	const FVector impactNormal = HitResult.ImpactNormal;
 
-	const FVector end2 = -15.0f * impactNormal + FVector(impactPoint.X, impactPoint.Y, GetCapsuleBaseLocation(2.0f).Z);
-	const FVector start2 = end2 + FVector(0.0f, 0.0f, TraceSettings.MaxLedgeHeight + TraceSettings.DownwardTraceRadius + 1.0f);
-	UKismetSystemLibrary::SphereTraceSingle(this, start2, end2, TraceSettings.DownwardTraceRadius, ALS_ECC_Climbable, false, IgnoredActors, GetTraceDebugType(DebugType), HitResult, true, FColor::Orange, FColor::Red, 1.0f);
+	//Step 2: Trace downward from the first trace's Impact Point and determine if the hit location is walkable.
+	const FVector end2 = FVector(impactPoint.X, impactPoint.Y, GetCapsuleBaseLocation(2.0f).Z) - (15.0f * impactNormal);
+	const FVector start2 = end2 + FVector::UpVector * (TraceSettings.MaxLedgeHeight + TraceSettings.DownwardTraceRadius + 1.0f);
 
-	if (!HitResult.bBlockingHit || !GetCharacterMovement()->IsWalkable(HitResult))
+	FHitResult HitResult2;
+	UKismetSystemLibrary::SphereTraceSingle(this, start2, end2, TraceSettings.DownwardTraceRadius, ETT_Climbable, false, IgnoredActors, GetTraceDebugType(DebugType), HitResult2, true, FColor::Orange, FColor::Red, 1.0f);
+
+	if (!(HitResult2.bBlockingHit && GetCharacterMovement()->IsWalkable(HitResult2)))
 		return false;
 
-	FVector DownTraceLocation = FVector(HitResult.Location.X, HitResult.Location.Y, impactPoint.Z);
-	UPrimitiveComponent* HitComponent = HitResult.Component.Get();
+	FVector DownTraceLocation = FVector(HitResult2.Location.X, HitResult2.Location.Y, HitResult2.ImpactPoint.Z);
+	UPrimitiveComponent* HitComponent = HitResult2.Component.Get();
 
 	//Step 3: Check if the capsule has room to stand at the downward trace's location. If so, set that location as the Target Transform and calculate the mantle height.
 	const FVector targetLocation = GetCapsuleLocationFromBase(DownTraceLocation, 2.0f);
 
-	if (!CapsuleHasRoomCheck(GetCapsuleComponent(), targetLocation, 0.0f, 0.0f, DebugType)) return false;
+	if (!CapsuleHasRoomCheck(GetCapsuleComponent(), targetLocation, 0.0f, 0.0f, GetTraceDebugType(DebugType)))
+		return false;
 
 	const FTransform TargetTransform = FTransform(UKismetMathLibrary::Multiply_VectorVector(impactNormal, FVector(-1.0f, -1.0f, 0.0f)).ToOrientationRotator(), targetLocation);
 	const float mantleHeight = (TargetTransform.GetLocation() - GetActorLocation()).Z;
@@ -917,55 +979,64 @@ bool AALSBaseCharacter::MantleCheck(FALSMantleTraceSettings TraceSettings, TEnum
 
 	//Step 5: If everything checks out, start the Mantle
 	MantleStart(mantleHeight, FALSComponentAndTransform(TargetTransform, HitComponent), mantleType);
+
 	return true;
 }
 
 void AALSBaseCharacter::MantleStart(float MantleHeight, FALSComponentAndTransform MantleLedgeWS, EALSMantleType MantleType) {
+	//UALSLogger::LogInfo(TEXT("MantleStarting"));
+
+	//Step 2: Convert the world space target to the mantle component's local space for use in moving objects.
+	MantleLedgeLS = UALSHelpers::WorldSpaceToLocalSpace(MantleLedgeWS);
+
 	//Step 1: Get the Mantle Asset and use it to set the new Mantle Params.
 	const auto mantleAsset = GetMantleAsset(MantleType);
 	const float playRate = UKismetMathLibrary::MapRangeClamped(MantleHeight, mantleAsset.LowHeight, mantleAsset.HighHeight, mantleAsset.LowPlayRate, mantleAsset.HighPlayRate);
 	const float startingPosition = UKismetMathLibrary::MapRangeClamped(MantleHeight, mantleAsset.LowHeight, mantleAsset.HighHeight, mantleAsset.LowStartPosition, mantleAsset.HighStartPosition);
 	MantleParams = FALSMantleParams(mantleAsset.AnimMontage, mantleAsset.PositionCorrectionCurve, startingPosition, mantleAsset.StartingOffset, playRate);
 
-	//Step 2: Convert the world space target to the mantle component's local space for use in moving objects.
-	MantleLedgeLS = UALSHelpers::WorldSpaceToLocalSpace(MantleLedgeWS);
-
 	//Step 3: Set the Mantle Target and calculate the Starting Offset(offset amount between the actor and target transform).
 	MantleTarget = MantleLedgeWS.Transform;
+
 	MantleActualStartOffset = UALSHelpers::SubtractTransform(GetActorTransform(), MantleTarget);
 
 	//Step 4: Calculate the Animated Start Offset from the Target Location. This would be the location the actual animation starts at relative to the Target Transform.
-	const FVector tmp = MantleTarget.Rotator().Vector() * MantleParams.StartingOffset.Y;
-	const FVector v = FVector(tmp.X, tmp.Y, MantleParams.StartingOffset.Z);
-	MantleAnimatedStartOffset = UALSHelpers::SubtractTransform(FTransform(MantleTarget.Rotator(), MantleTarget.GetLocation() - v), MantleTarget);
+	const FVector t1 = MantleTarget.GetRotation().Vector() * MantleParams.StartingOffset.Y;
+	FVector LocationA = MantleTarget.GetLocation() - FVector(t1.X, t1.Y, MantleParams.StartingOffset.Z);
+	FTransform TransformA = FTransform(MantleTarget.GetRotation(), LocationA);
+	MantleAnimatedStartOffset = UALSHelpers::SubtractTransform(TransformA, MantleTarget);
 
 	//Step 5: Clear the Character Movement Mode and set the Movement State to Mantling
 	GetCharacterMovement()->SetMovementMode(MOVE_None, 0);
-	SetMovementState_Implementation(EALSMovementState::ALS_Mantling);
+
+	if (this->GetClass()->ImplementsInterface(UALSCharacterInterface::StaticClass()))
+		IALSCharacterInterface::Execute_SetMovementState(this, EALSMovementState::ALS_Mantling);
 
 	//Step 6: Configure the Mantle Timeline so that it is the same length as the Lerp/Correction curve minus the starting position, and plays at the same speed as the animation. Then start the time-line.
 	float timelineMin, timelineMax;
 	MantleParams.PositionCorrectionCurve->GetTimeRange(timelineMin, timelineMax);
 
-	/*MantleTimeline.SetTimelineLength(timelineMax - MantleParams.StartingPosition);
-	MantleTimeline.SetPlayRate(MantleParams.PlayRate);
-	MantleTimeline.PlayFromStart();*/
+	mantleTimeline.SetPlayRate(MantleParams.PlayRate);
+	mantleTimeline.SetTimelineLength(timelineMax - MantleParams.StartingPosition);
+	mantleTimeline.PlayFromStart();
 
 	//Step 7: Play the Anim Montage if valid.
 	if (MantleParams.AnimMontage && animInstance)
 		animInstance->Montage_Play(MantleParams.AnimMontage, MantleParams.PlayRate, EMontagePlayReturnType::MontageLength, MantleParams.StartingPosition, false);
 }
 
-void AALSBaseCharacter::MantleUpdate(float BlendIn) {
+void AALSBaseCharacter::MantleUpdate(const float BlendIn) {
+	//UALSLogger::LogWarning(FString::Printf(TEXT("MantleUpdating %f"), BlendIn), 0.0f);
+
 	//Step 1: Continually update the mantle target from the stored local transform to follow along with moving objects.
 	MantleTarget = UALSHelpers::LocalSpaceToWorldSpace(MantleLedgeLS).Transform;
 
 	//Step 2: Update the Position and Correction Alphas using the Position/Correction curve set for each Mantle.
 	const FVector VectorValue = MantleParams.PositionCorrectionCurve->GetVectorValue(MantleParams.StartingPosition + mantleTimeline.GetPlaybackPosition());
 
-	float positionAlpha = VectorValue.X;
-	float XYCorrectionAlpha = VectorValue.Y;
-	float ZCorrection = VectorValue.Z;
+	const float positionAlpha = VectorValue.X;
+	const float XYCorrectionAlpha = VectorValue.Y;
+	const float ZCorrection = VectorValue.Z;
 
 	//Step 3: Lerp multiple transforms together for independent control over the horizontal and vertical blend to the animated start position, as well as the target position.
 
@@ -975,14 +1046,14 @@ void AALSBaseCharacter::MantleUpdate(float BlendIn) {
 
 	//Blend into the animated vertical offset using the Z value of the Position / Correction Curve.
 	const auto Bv = FTransform(MantleActualStartOffset.GetRotation(), FVector(MantleActualStartOffset.GetLocation().X, MantleActualStartOffset.GetLocation().Y, MantleAnimatedStartOffset.GetLocation().Z));
-	const auto verticalTransform = UKismetMathLibrary::TLerp(MantleActualStartOffset, Bv, XYCorrectionAlpha);
+	const auto verticalTransform = UKismetMathLibrary::TLerp(MantleActualStartOffset, Bv, ZCorrection);
 
-	const auto t1 = FTransform(Bh.GetRotation(), FVector(Bh.GetLocation().X, Bh.GetLocation().Y, Bv.GetLocation().Z));
+	const auto t1 = FTransform(horizontalTransform.GetRotation(), FVector(horizontalTransform.GetLocation().X, horizontalTransform.GetLocation().Y, verticalTransform.GetLocation().Z));
 
 	//Blend from the currently blending transforms into the final mantle target using the X value of the Position/Correction Curve.
 	const auto t2 = UKismetMathLibrary::TLerp(MantleTarget + t1, MantleTarget, positionAlpha);
 
-	//Initial Blend In (controlled in the timeline curve) to allow the actor to blend into the Position/Correction curve at the mid point. This prevents pops when mantling an object lower than the animated mantle.
+	//Initial Blend In (controlled in the time line curve) to allow the actor to blend into the Position/Correction curve at the mid point. This prevents pops when mantling an object lower than the animated mantle.
 	const auto lerpedTarget = UKismetMathLibrary::TLerp(MantleTarget + MantleActualStartOffset, t2, BlendIn);
 
 	//Step 4: Set the actors location and rotation to the Lerped Target.
@@ -990,24 +1061,24 @@ void AALSBaseCharacter::MantleUpdate(float BlendIn) {
 }
 
 void AALSBaseCharacter::MantleEnd() {
-	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	//UALSLogger::LogInfo(TEXT("MantleEnded"));
+	GetCharacterMovement()->SetMovementMode(MOVE_Walking, 0);
 }
 
 bool AALSBaseCharacter::CapsuleHasRoomCheck(UCapsuleComponent* Capsule, const FVector TargetLocation, const float HeightOffset, const float RadiusOffset, const TEnumAsByte<EDrawDebugTrace::Type> DebugType) {
-	float Z =
-		GetCapsuleComponent()->GetScaledCapsuleHalfHeight_WithoutHemisphere() -
-		RadiusOffset +
-		HeightOffset;
+	float Z = Capsule->GetScaledCapsuleHalfHeight_WithoutHemisphere() - RadiusOffset + HeightOffset;
 
 	FHitResult HitResult;
 
-	UKismetSystemLibrary::SphereTraceSingleByProfile(this, TargetLocation + FVector(0.0f, 0.0f, Z), TargetLocation - FVector(0.0f, 0.0f, Z), GetCapsuleComponent()->GetUnscaledCapsuleRadius() + RadiusOffset, FName(TEXT("ALS_Character")), false, IgnoredActors, DebugType, HitResult, true, FColor::FromHex(TEXT("21E525FF")), FColor::FromHex(TEXT("EE4AFFFF")), 1.0f);
+	const auto ZUp = FVector::UpVector * Z;
 
-	return !HitResult.bBlockingHit && !HitResult.bStartPenetrating;
+	UKismetSystemLibrary::SphereTraceSingleByProfile(this, TargetLocation + ZUp, TargetLocation - ZUp, Capsule->GetUnscaledCapsuleRadius() + RadiusOffset, FName(TEXT("ALS_Character")), false, IgnoredActors, GetTraceDebugType(DebugType), HitResult, true, FColor::FromHex(TEXT("21E525FF")), FColor::FromHex(TEXT("EE4AFFFF")), 1.0f);
+
+	return !(HitResult.bBlockingHit || HitResult.bStartPenetrating);
 }
 
 FALSMantleAsset AALSBaseCharacter::GetMantleAsset(EALSMantleType MantleType) {
-	//Get the Default Mantle Asset values.These will be overriden in the AnimMan Child Character
+	//Get the Default Mantle Asset values.These will be overridden in the AnimMan Child Character
 	if (MantleType == EALSMantleType::ALS_HighMantle) {
 		return FALSMantleAsset(nullptr, HighMantle, FVector(0.0f, 65.0f, 200.0f), 50.0f, 1.0f, 0.5f, 100.0f, 1.0f, 0.0f);
 	}
@@ -1020,10 +1091,11 @@ FALSMantleAsset AALSBaseCharacter::GetMantleAsset(EALSMantleType MantleType) {
 }
 
 void AALSBaseCharacter::RagdollStart() {
-	UALSLogger::LogInfo(TEXT("Calling in ALSBaseCharacter"));
+
 	//Step 1: Clear the Character Movement Mode and set the Movement State to Ragdoll
 	GetCharacterMovement()->SetMovementMode(MOVE_None);
-	SetMovementState_Implementation(EALSMovementState::ALS_Ragdoll);
+	if (this->GetClass()->ImplementsInterface(UALSCharacterInterface::StaticClass()))
+		IALSCharacterInterface::Execute_SetMovementState(this, EALSMovementState::ALS_Ragdoll);
 
 	//Step 2: Disable capsule collision and enable mesh physics simulation starting from the pelvis.
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -1117,22 +1189,22 @@ void AALSBaseCharacter::DrawDebugShapes() {
 	const FVector arrow1Start = GetActorLocation() - FVector(0, 0, GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
 	const FVector arrow1End = arrow1Start + (GetVelocity() == FVector::ZeroVector ? LastVelocityRotation.Vector() : GetVelocity()).GetUnsafeNormal() * UKismetMathLibrary::MapRangeClamped(GetVelocity().Size(), 0.0f, GetCharacterMovement()->MaxWalkSpeed, 50.0f, 75.0f);
 	UKismetSystemLibrary::DrawDebugArrow(this,
-										 arrow1Start,
-										 arrow1End,
-										 60.0f,
-										 GetVelocity() == FVector::ZeroVector ? FColor::FromHex(TEXT("890089FF")) : FColor::FromHex(TEXT("FF00FFFF")));
+		arrow1Start,
+		arrow1End,
+		60.0f,
+		GetVelocity() == FVector::ZeroVector ? FColor::FromHex(TEXT("890089FF")) : FColor::FromHex(TEXT("FF00FFFF")));
 
 	//Movement Input Arrow
 	const FVector arrow2Start = GetActorLocation() - FVector(0, 0, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - 3.5f);
 	const FVector arrow2End = arrow1Start +
 		(GetCharacterMovement()->GetCurrentAcceleration() == FVector::ZeroVector ? LastMovementInputRotation.Vector() : GetVelocity()).GetUnsafeNormal() *
 		UKismetMathLibrary::MapRangeClamped(GetCharacterMovement()->GetCurrentAcceleration().Size() / GetCharacterMovement()->GetMaxAcceleration(),
-											0.0f, 1.0f, 50.0f, 75.0f);
+			0.0f, 1.0f, 50.0f, 75.0f);
 	UKismetSystemLibrary::DrawDebugArrow(this,
-										 arrow2Start,
-										 arrow2End,
-										 60.0f,
-										 GetVelocity() == FVector::ZeroVector ? FColor::FromHex(TEXT("896300FF")) : FColor::FromHex(TEXT("FFBC00FF")));
+		arrow2Start,
+		arrow2End,
+		60.0f,
+		GetVelocity() == FVector::ZeroVector ? FColor::FromHex(TEXT("896300FF")) : FColor::FromHex(TEXT("FFBC00FF")));
 
 	//Target Rotation Arrow
 	const FVector arrow3Start = GetActorLocation() - FVector(0.0f, 0.0f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - 7.0f);
@@ -1141,7 +1213,7 @@ void AALSBaseCharacter::DrawDebugShapes() {
 	UKismetSystemLibrary::DrawDebugArrow(this, arrow3Start, arrow3End, 50.0f, FColor::FromHex(TEXT("009CFFFF")), 0.0f, 3.0f);
 
 	//Aiming Rotation Cone
-	UKismetSystemLibrary::DrawDebugCone(this, GetMesh()->GetSocketLocation(FName(TEXT("FP_Camera"))), GetControlRotation().Vector().GetUnsafeNormal(), 100.0f, 30.0f, 30.0f, 8, FColor::FromHex(TEXT("009CFFFF")), 0.0f, 5.0f);
+	UKismetSystemLibrary::DrawDebugCone(this, GetMesh()->GetSocketLocation(FName(TEXT("FP_Camera"))), GetControlRotation().Vector().GetUnsafeNormal(), 100.0f, 30.0f, 30.0f, 8, FColor::FromHex(TEXT("009CFFFF")), 0.0f, 0.5f);
 
 	//Capsule 
 	UKismetSystemLibrary::DrawDebugCapsule(this, GetActorLocation(), GetCapsuleComponent()->GetScaledCapsuleHalfHeight(), GetCapsuleComponent()->GetScaledCapsuleRadius(), GetActorRotation(), FColor::Black, 0.0f, 0.3f);
@@ -1227,6 +1299,7 @@ FALSCurrentState AALSBaseCharacter::GetCurrentState_Implementation() {
 	retValue.ActualStance = Stance;
 	retValue.ViewMode = ViewMode;
 	retValue.OverlayState = OverlayState;
+	//retValue.ToString(true);
 	return retValue;
 }
 
@@ -1243,5 +1316,5 @@ FTransform AALSBaseCharacter::Get3PPivotTarget_Implementation() {
 }
 
 FALSTraceParams AALSBaseCharacter::Get3PTraceParameters_Implementation() {
-	return FALSTraceParams(ECC__Visibility, GetActorLocation(), 10.0f);
+	return FALSTraceParams(ETT_Visibility, GetActorLocation(), 10.0f);
 }

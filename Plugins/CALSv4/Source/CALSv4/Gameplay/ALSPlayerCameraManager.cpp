@@ -1,18 +1,23 @@
+
+
+
 #include "ALSPlayerCameraManager.h"
-#include "ALSPlayerCameraBehaviour.h"
-#include "CALSv4/Core/Interfaces/ALSCameraInterface.h"
-#include "CALSv4/Core/Interfaces/ALSControllerInterface.h"
-#include "CALSv4/Core/Player/ALSPlayerController.h"
-#include "CALSv4/Core/Utilities/ALSHelpers.h"
-#include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
+
+#include "CALSv4/Animation/ALSCameraAnimInstance.h"
+#include "../ALSLogger.h"
+#include "ALSPlayerController.h"
+#include "ALSControllerInterface.h"
+#include <Kismet/GameplayStatics.h>
+#include <Kismet/KismetMathLibrary.h>
+#include "ALSCameraInterface.h"
+
 
 AALSPlayerCameraManager::AALSPlayerCameraManager() {
 	CameraBehaviour = CreateDefaultSubobject<USkeletalMeshComponent>(FName(TEXT("CameraBehavior")));
 	CameraBehaviour->AttachToComponent(GetTransformComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 	CameraBehaviour->SetHiddenInGame(true);
 	CameraBehaviour->SetAnimationMode(EAnimationMode::AnimationBlueprint);
-	CameraBehaviour->SetAnimInstanceClass(UALSPlayerCameraBehaviour::StaticClass());
+	CameraBehaviour->SetAnimInstanceClass(UALSCameraAnimInstance::StaticClass());
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CameraMesh(TEXT("SkeletalMesh'/Game/AdvancedLocomotionV4/Blueprints/CameraSystem/Camera.Camera'"));
 	if (IsValid(CameraMesh.Object) && CameraMesh.Succeeded())
@@ -28,7 +33,7 @@ void AALSPlayerCameraManager::OnPossess(APawn* controlledPawn) {
 	ControlledPawn = controlledPawn;
 
 	//Updated references in the Camera Behavior AnimBP.
-	const auto cameraAnimInstance = Cast<UALSPlayerCameraBehaviour>(CameraBehaviour->GetAnimInstance());
+	const auto cameraAnimInstance = Cast<UALSCameraAnimInstance>(CameraBehaviour->GetAnimInstance());
 
 	cameraAnimInstance->playerController = GetOwningPlayerController();
 	cameraAnimInstance->controlledPawn = ControlledPawn;
@@ -87,7 +92,7 @@ FALSCameraBehaviourResult AALSPlayerCameraManager::CustomCameraBehaviour() {
 	}
 
 	//Step 2: Calculate Target Camera Rotation. Use the Control Rotation and interpolate for smooth camera rotation.
-	const FRotator rotation = FMath::RInterpTo(GetCameraRotation(), GetOwningPlayerController()->GetControlRotation(), GetWorld()->GetDeltaSeconds(), GetCameraBehaviourParam(FName(TEXT("RotationLagSpeed"))));
+	const FRotator rotation = FMath::RInterpTo(GetCameraRotation(), GetOwningPlayerController()->GetControlRotation(), UGameplayStatics::GetWorldDeltaSeconds(this), GetCameraBehaviourParam(FName(TEXT("RotationLagSpeed"))));
 	TargetCameraRotation = UKismetMathLibrary::RLerp(rotation, DebugViewRotation, GetCameraBehaviourParam(FName(TEXT("Override_Debug"))), true);
 
 	//Step 3: Calculate the Smoothed Pivot Target (Orange Sphere). Get the 3P Pivot Target (Green Sphere) and interpolate using axis independent lag for maximum control.
@@ -97,14 +102,18 @@ FALSCameraBehaviourResult AALSPlayerCameraManager::CustomCameraBehaviour() {
 	SmoothedPivotTarget = FTransform(PivotTarget.GetRotation().Rotator(), axisIndependentLag);
 
 	//Step 4: Calculate Pivot Location (BlueSphere). Get the Smoothed Pivot Target and apply local offsets for further camera control.
+
+	const auto tmpRotation = SmoothedPivotTarget.GetRotation().Rotator();
+
 	PivotLocation = SmoothedPivotTarget.GetLocation() +
-		UKismetMathLibrary::GetForwardVector(SmoothedPivotTarget.GetRotation().Rotator()) * GetCameraBehaviourParam(FName(TEXT("PivotOffset_X"))) +
-		UKismetMathLibrary::GetRightVector(SmoothedPivotTarget.GetRotation().Rotator()) * GetCameraBehaviourParam(FName(TEXT("PivotOffset_Y"))) +
-		UKismetMathLibrary::GetUpVector(SmoothedPivotTarget.GetRotation().Rotator()) * GetCameraBehaviourParam(FName(TEXT("PivotOffset_Z")));
+		UKismetMathLibrary::GetForwardVector(tmpRotation) * GetCameraBehaviourParam(FName(TEXT("PivotOffset_X"))) +
+		UKismetMathLibrary::GetRightVector(tmpRotation) * GetCameraBehaviourParam(FName(TEXT("PivotOffset_Y"))) +
+		UKismetMathLibrary::GetUpVector(tmpRotation) * GetCameraBehaviourParam(FName(TEXT("PivotOffset_Z")));
 
 	//Step 5: Calculate Target Camera Location. Get the Pivot location and apply camera relative offsets.
-	TargetCameraLocation = FMath::Lerp(
-		PivotLocation + GetCameraBehaviourParam(FName(TEXT("CameraOffset_X"))) * UKismetMathLibrary::GetForwardVector(TargetCameraRotation) +
+	TargetCameraLocation = UKismetMathLibrary::VLerp(
+		PivotLocation +
+		GetCameraBehaviourParam(FName(TEXT("CameraOffset_X"))) * UKismetMathLibrary::GetForwardVector(TargetCameraRotation) +
 		GetCameraBehaviourParam(FName(TEXT("CameraOffset_Y"))) * UKismetMathLibrary::GetRightVector(TargetCameraRotation) +
 		GetCameraBehaviourParam(FName(TEXT("CameraOffset_Z"))) * UKismetMathLibrary::GetUpVector(TargetCameraRotation),
 		PivotTarget.GetLocation() + DebugViewOffset,
@@ -115,7 +124,7 @@ FALSCameraBehaviourResult AALSPlayerCameraManager::CustomCameraBehaviour() {
 	if (ControlledPawn && ControlledPawn->GetClass()->ImplementsInterface(UALSCameraInterface::StaticClass())) {
 		auto traceParams = IALSCameraInterface::Execute_Get3PTraceParameters(ControlledPawn);
 		FHitResult HitResult;
-		UKismetSystemLibrary::SphereTraceSingle(GetWorld(), traceParams.TraceOrigin, TargetCameraLocation, traceParams.TraceRadius, traceParams.TraceChannel.GetValue(), false, ActorsToIgnore, GetDebugTraceType(EDrawDebugTrace::ForOneFrame), HitResult, true);
+		UKismetSystemLibrary::SphereTraceSingle(this, traceParams.TraceOrigin, TargetCameraLocation, traceParams.TraceRadius, traceParams.TraceChannel, false, ActorsToIgnore, GetDebugTraceType(EDrawDebugTrace::ForOneFrame), HitResult, true);
 
 		if (HitResult.bBlockingHit && !HitResult.bStartPenetrating) {
 			TargetCameraLocation = HitResult.Location - HitResult.TraceEnd + TargetCameraLocation;
@@ -143,7 +152,7 @@ FALSCameraBehaviourResult AALSPlayerCameraManager::CustomCameraBehaviour() {
 	FTransform cTransform = FTransform(DebugViewRotation, TargetCameraLocation);
 
 	FTransform retValue = UKismetMathLibrary::TLerp(UKismetMathLibrary::TLerp(aTransform, bTransform, GetCameraBehaviourParam(FName(TEXT("Weight_FirstPerson")))),
-													cTransform, GetCameraBehaviourParam(FName(TEXT("Override_Debug"))));
+		cTransform, GetCameraBehaviourParam(FName(TEXT("Override_Debug"))));
 
 	return FALSCameraBehaviourResult(retValue.GetLocation(), retValue.Rotator(), FMath::Lerp(TPFOV, FPFOV, GetCameraBehaviourParam(FName(TEXT("Weight_FirstPerson")))));
 }

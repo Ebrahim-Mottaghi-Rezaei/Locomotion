@@ -1,45 +1,24 @@
+
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "ALSBaseCharacter.h"
-
+#include "GameFramework/PlayerController.h"
 #include "ALSCharacter.generated.h"
 
-/*
-IMPORTANT!!!
-	This blueprint is a child of the ALS_Base_CharacterBP and contains dynamic coloring logic for debugging purposes (press 'U' to display).
-	It also provides placeholder functionality for equiping a held object (not gameplay ready). There is currently no inventory or weapon management system.
-	Its other primary function is to override certain functions within the Base_Character to update the camera target information and to properly select montages based on the current Overlay State.
-
-	All Overriden Functions:
-
-	- BPI_Get_3P_PivotTarget
-	- BPI_Get_FP_CameraTarget
-	- BPI_Get_3P_TraceParams
-
-	- OnOverlayStateChanged
-
-	- GetRollAnimation
-
-	- GetMantleAsset
-	- MantleEnd
-	- MantleStart
-
-	- GetGetUpAnimation
-	- RagdollStart
-	- RagdollEnd
- */
 
 UCLASS()
 class CALSV4_API AALSCharacter : public AALSBaseCharacter {
 	GENERATED_BODY()
-	public:
+
+public:
 	AALSCharacter();
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	protected:
+protected:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Advanced Locomotion System|Character")
 		USceneComponent* HeldObjectRoot;
@@ -198,7 +177,7 @@ class CALSV4_API AALSCharacter : public AALSBaseCharacter {
 
 	virtual FTransform Get3PPivotTarget_Implementation() override;
 	virtual FALSTraceParams Get3PTraceParameters_Implementation() override;
-	
+
 	virtual UAnimMontage* GetRollAnimation() override;
 	virtual FALSMantleAsset GetMantleAsset(EALSMantleType MantleType) override;
 	virtual void MantleStart(float MantleHeight, FALSComponentAndTransform MantleLedgeWS, EALSMantleType MantleType) override;
@@ -209,6 +188,6 @@ class CALSV4_API AALSCharacter : public AALSBaseCharacter {
 	virtual void ToggleCharacterMesh();
 	virtual void ChangeMannequinMeshTo(EALSMannequinMeshType MeshType);
 	virtual FLinearColor LerpColors2Level(FLinearColor L1A, FLinearColor L1B, FLinearColor L2A, FName L1Name, FName L2Name);
-	private:
+private:
 	bool bUpdateColoringSystemDoOnceFlag;
 };

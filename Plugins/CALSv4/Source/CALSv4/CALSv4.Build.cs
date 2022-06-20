@@ -2,26 +2,26 @@
 
 using UnrealBuildTool;
 
-public class CALSv4 : ModuleRules
-{
-    public CALSv4(ReadOnlyTargetRules Target) : base(Target)
-    {
+public class CALSv4 : ModuleRules {
+    public CALSv4(ReadOnlyTargetRules Target) : base(Target) {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
         PublicIncludePaths.AddRange(
             new string[] {
-                // ... add public include paths required here ...
-            });
+				// ... add public include paths required here ...
+			});
 
 
         PrivateIncludePaths.AddRange(
             new string[] {
-                // ... add other private include paths required here ...
-            });
+				// ... add other private include paths required here ...
+			}
+            );
 
 
         PublicDependencyModuleNames.AddRange(
-            new[]{
+            new string[]
+            {
                 "Core",
                 "InputCore",
                 "AnimationModifiers",
@@ -32,23 +32,24 @@ public class CALSv4 : ModuleRules
                 "AnimGraphRuntime",
                 "AIModule",
                 "ClothingSystemRuntimeNv"
-                // ... add other public dependencies that you statically link with here ...
             });
 
 
         PrivateDependencyModuleNames.AddRange(
-            new[]{
+            new string[]
+            {
                 "CoreUObject",
                 "Engine",
                 "Slate",
                 "SlateCore",
-                // ... add private dependencies that you statically link with here ...	
-            });
+				// ... add private dependencies that you statically link with here ...	
+			});
 
 
         DynamicallyLoadedModuleNames.AddRange(
-            new string[] {
-                // ... add any modules that your module loads dynamically here ...
-            });
+            new string[]
+            {
+				// ... add any modules that your module loads dynamically here ...
+			});
     }
 }

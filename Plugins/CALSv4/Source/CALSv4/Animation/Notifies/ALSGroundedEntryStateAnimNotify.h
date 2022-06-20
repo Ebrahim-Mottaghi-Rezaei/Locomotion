@@ -1,8 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Animation/AnimNotifies/AnimNotify.h"
-#include "CALSv4/Data/ALSEnums.h"
+#include <Animation/AnimNotifies/AnimNotify.h>
+#include "../../ALSEnums.h"
 #include "ALSGroundedEntryStateAnimNotify.generated.h"
 
 UCLASS()
@@ -10,7 +10,7 @@ class CALSV4_API UALSGroundedEntryStateAnimNotify : public UAnimNotify {
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditInstanceOnly)
 		EALSGroundedEntryState GroundedEntryState;
 
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;

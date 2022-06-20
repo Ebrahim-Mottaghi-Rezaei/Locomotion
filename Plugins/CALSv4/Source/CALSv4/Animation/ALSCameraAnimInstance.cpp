@@ -1,16 +1,13 @@
-#include "ALSPlayerCameraBehaviour.h"
-#include "Animation/AnimInstance.h"
-#include <Kismet/KismetSystemLibrary.h>
-#include "CALSv4/Core/Interfaces/ALSCameraInterface.h"
-#include "CALSv4/Core/Interfaces/ALSCharacterInterface.h"
-#include "CALSv4/Core/Interfaces/ALSControllerInterface.h"
 
-void UALSPlayerCameraBehaviour::NativeBeginPlay() {
-	Super::NativeBeginPlay();
-}
+
+
+#include "ALSCameraAnimInstance.h"
+#include "../Gameplay/ALSCharacterInterface.h"
+#include "../Gameplay/ALSCameraInterface.h"
+#include "../Gameplay/ALSControllerInterface.h"
 
 //Get info from the character each frame to use in the camera graph.
-void UALSPlayerCameraBehaviour::NativeUpdateAnimation(const float DeltaSeconds) {
+void UALSCameraAnimInstance::NativeUpdateAnimation(const float DeltaSeconds) {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
 	//Updating Character Info

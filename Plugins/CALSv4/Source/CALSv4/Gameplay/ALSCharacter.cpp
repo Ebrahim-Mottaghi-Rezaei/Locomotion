@@ -1,13 +1,15 @@
-#include "ALSCharacter.h"
 
-#include "ClothingSimulationFactoryNv.h"
-#include "CALSv4/Core/Animation/ALSBowAnimInstance.h"
-#include "CALSv4/Core/Interfaces/ALSControllerInterface.h"
-#include "CALSv4/Core/Utilities/ALSHelpers.h"
-#include "Components/CapsuleComponent.h"
+
+
+#include "ALSCharacter.h"
+#include "../ALSLogger.h"
+#include <ClothingSystemRuntimeNv/Public/ClothingSimulationFactoryNv.h>
+#include <Components/CapsuleComponent.h>
+
+#include "ALSControllerInterface.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Curves/CurveVector.h"
+#include <Kismet/KismetMathLibrary.h>
+#include "../Animation/ALSBowAnimInstance.h"
 
 AALSCharacter::AALSCharacter() {
 	const auto mesh = GetMesh();
@@ -78,13 +80,11 @@ AALSCharacter::AALSCharacter() {
 	SkeletalMesh->ClothingSimulationFactory = UClothingSimulationFactoryNv::StaticClass();
 	SkeletalMesh->SetCollisionProfileName(FName("NoCollision"));
 
-	SkeletalMesh->SetVisibility(false, true);
-	SkeletalMesh->SetSkeletalMesh(Bow);
-	const ConstructorHelpers::FObjectFinder<UAnimBlueprint> BowAnimBP(TEXT("AnimBlueprint'/CALSv4/CharacterLogic/Animation/BP_ALSBowAnimInstance.BP_ALSBowAnimInstance'"));
+	const ConstructorHelpers::FObjectFinder<UAnimBlueprint> BowAnimBP(TEXT("AnimBlueprint'/CALSv4/Gameplay/AnimBP_ALSBow.AnimBP_ALSBow'"));
 	if (BowAnimBP.Succeeded())
 		SkeletalMesh->SetAnimInstanceClass(BowAnimBP.Object->GetAnimBlueprintGeneratedClass());
 	else
-		UALSLogger::LogError("BowAnimInstance not found.");
+		UALSLogger::LogError("BowAnimInstance not found. Please set it at BP_ALSCharacter");
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName("StaticMesh"));
 	StaticMesh->AttachToComponent(HeldObjectRoot, FAttachmentTransformRules::KeepRelativeTransform);
@@ -108,7 +108,7 @@ AALSCharacter::AALSCharacter() {
 		UALSLogger::LogError("AnimMan not found.");
 	mesh->bUpdateJointsFromAnimation = true;
 
-	const ConstructorHelpers::FObjectFinder<UAnimBlueprint> ALSCharacterAnimBP(TEXT("AnimBlueprint'/CALSv4/CharacterLogic/Animation/BP_ALSAnimInstance.BP_ALSAnimInstance'"));
+	const ConstructorHelpers::FObjectFinder<UAnimBlueprint> ALSCharacterAnimBP(TEXT("AnimBlueprint'/CALSv4/Gameplay/AnimBP_ALSCharacter.AnimBP_ALSCharacter'"));
 	if (ALSCharacterAnimBP.Succeeded()) {
 		mesh->SetAnimInstanceClass(ALSCharacterAnimBP.Object->GetAnimBlueprintGeneratedClass());
 	} else
@@ -243,7 +243,7 @@ AALSCharacter::AALSCharacter() {
 		UALSLogger::LogError("ALS_N_LandRoll_F_Montage_2H not found.");
 #pragma endregion
 
-#pragma region MyRegion
+#pragma region Getup Montages
 	//Front
 	const ConstructorHelpers::FObjectFinder<UAnimMontage> GetupFrontDefault(TEXT("AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_CLF_GetUp_Front_Montage_Default.ALS_CLF_GetUp_Front_Montage_Default'"));
 	if (GetupFrontDefault.Succeeded())
@@ -456,9 +456,9 @@ void AALSCharacter::UpdateHeldObject() {
 	} else if (OverlayState == EALSOverlayState::ALS_Pistol1H || OverlayState == EALSOverlayState::ALS_Pistol2H) {
 		AttachToHand(nullptr, M9);
 	} else if (OverlayState == EALSOverlayState::ALS_Bow) {
-		AttachToHand(nullptr, Bow);
+		AttachToHand(nullptr, Bow, BowAnimInstance.Get(), true);
 	} else if (OverlayState == EALSOverlayState::ALS_Torch) {
-		AttachToHand(Torch,nullptr,nullptr,true,FVector::ZeroVector);
+		AttachToHand(Torch, nullptr, nullptr, true);
 	} else if (OverlayState == EALSOverlayState::ALS_Box) {
 		AttachToHand(Box, nullptr);
 	} else if (OverlayState == EALSOverlayState::ALS_Barrel) {
@@ -573,10 +573,8 @@ FALSMantleAsset AALSCharacter::GetMantleAsset(const EALSMantleType MantleType) {
 void AALSCharacter::MantleStart(const float MantleHeight, const FALSComponentAndTransform MantleLedgeWS, const EALSMantleType MantleType) {
 	Super::MantleStart(MantleHeight, MantleLedgeWS, MantleType);
 
-	if (MantleType == EALSMantleType::ALS_LowMantle)
-		return;
-
-	ClearHeldObject();
+	if (MantleType != EALSMantleType::ALS_LowMantle)
+		ClearHeldObject();
 }
 
 void AALSCharacter::MantleEnd() {
@@ -634,7 +632,6 @@ UAnimMontage* AALSCharacter::GetGetupAnimation(const bool bIsRagdollFacedUp) {
 
 void AALSCharacter::RagdollStart() {
 	Super::RagdollStart();
-	UALSLogger::LogInfo(TEXT("Calling in ALSCharacter"));
 }
 
 void AALSCharacter::RagdollEnd() {
@@ -648,7 +645,13 @@ void AALSCharacter::ToggleCharacterMesh() {
 void AALSCharacter::ChangeMannequinMeshTo(EALSMannequinMeshType MeshType) {
 	if (MeshType != CharacterModelType) {
 
-		GetMesh()->SetSkeletalMesh(MeshType == EALSMannequinMeshType::ALS_Mannequin ? MannequinMesh : DefaultMesh);
+		if (MeshType == EALSMannequinMeshType::ALS_Mannequin) {
+			BodyMesh->SetSkeletalMesh(MannequinMesh, true);
+			GetMesh()->SetVisibility(false, false);
+		} else {
+			BodyMesh->SetSkeletalMesh(DefaultMesh, true);
+			GetMesh()->SetVisibility(true, false);
+		}
 
 		CharacterModelType = MeshType;
 	}

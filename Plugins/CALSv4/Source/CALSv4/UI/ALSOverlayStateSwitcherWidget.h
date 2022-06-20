@@ -1,11 +1,13 @@
+
+
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ALSOverlayStateButtonWidget.h"
 #include "Blueprint/UserWidget.h"
-#include "CALSv4/Data/ALSEnums.h"
-#include "Components/CanvasPanel.h"
-#include "Components/VerticalBox.h"
+#include "ALSOverlayStateButtonWidget.h"
+#include <Components/CanvasPanel.h>
+#include <Components/VerticalBox.h>
+#include <Misc/EnumRange.h>
 #include "ALSOverlayStateSwitcherWidget.generated.h"
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
@@ -26,13 +28,16 @@ struct FALSOverlayStateParams {
 	}
 };
 
-ENUM_RANGE_BY_COUNT(EALSOverlayState, EALSOverlayState::ALS_Barrel)
+ENUM_RANGE_BY_COUNT(EALSOverlayState, EALSOverlayState::Count);
 
+/**
+ *
+ */
 UCLASS()
 class CALSV4_API UALSOverlayStateSwitcherWidget : public UUserWidget {
 	GENERATED_BODY()
 
-	protected:
+protected:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 		EALSOverlayState NewOverlayState;
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
@@ -42,7 +47,7 @@ class CALSV4_API UALSOverlayStateSwitcherWidget : public UUserWidget {
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 		TArray<FALSOverlayStateParams> OverlayStateButtons;
 	UVerticalBox* VerticalBox;
-	public:
+public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
@@ -52,7 +57,7 @@ class CALSV4_API UALSOverlayStateSwitcherWidget : public UUserWidget {
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Widget")
 		void CycleState(bool bUp);
 
-	protected:
+protected:
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Widget")
 		void CreateButtons();
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Widget")

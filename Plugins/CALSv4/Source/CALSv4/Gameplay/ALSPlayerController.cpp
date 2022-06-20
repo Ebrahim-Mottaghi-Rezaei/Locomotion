@@ -1,12 +1,11 @@
 #include "ALSPlayerController.h"
+
 #include "ALSBaseCharacter.h"
-#include "InputCoreTypes.h"
-#include "Blueprint/UserWidget.h"
-#include "CALSv4/Core/CameraSystem/ALSPlayerCameraManager.h"
-#include "CALSv4/Core/Utilities/ALSHelpers.h"
-#include "Components/InputComponent.h"
-#include "GameFramework/Character.h"
+#include "ALSPlayerCameraManager.h"
+#include "CALSv4/ALSLogger.h"
 #include "Kismet/GameplayStatics.h"
+#include "../UI/ALSHUDWidget.h"
+#include <Sound/SoundWave.h>
 
 AALSPlayerController::AALSPlayerController() {
 	static ConstructorHelpers::FObjectFinder<USoundWave> clickSound(TEXT("SoundWave'/Game/AdvancedLocomotionV4/Audio/UI/Click.Click'"));
@@ -15,8 +14,15 @@ AALSPlayerController::AALSPlayerController() {
 	else
 		UALSLogger::LogError("ClickSound not found.");
 
-	InputYawScale = 2.0f;
-	InputPitchScale = -2.0f;
+	/*static ConstructorHelpers::FObjectFinder<UALSHUDWidget> tmp1(TEXT("WidgetBlueprint'/CALSv4/UI/WBP_ALSHUD.WBP_ALSHUD'"));
+	if (IsValid(tmp1.Object)) {
+		ALSHudTemplate = static_cast<UWidgetBlueprint>(tmp1.Object);
+	}*/
+
+	/*if (!IsValid(ALSHudTemplate))
+		UALSLogger::LogError(TEXT("ALS HUD Template is null. Please set it in BP_ALSPlayerController blueprint."));*/
+
+	PlayerCameraManagerClass = AALSPlayerCameraManager::StaticClass();
 }
 
 void AALSPlayerController::BeginPlay() {
@@ -24,12 +30,10 @@ void AALSPlayerController::BeginPlay() {
 
 	DebugFocusCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
 
-	PlayerCameraManagerClass = AALSPlayerCameraManager::StaticClass();
-
-	if (ALSHudTemplate)
+	if (IsValid(ALSHudTemplate))
 		CreateWidget(this, ALSHudTemplate)->AddToViewport();
-	else
-		UALSLogger::LogError(TEXT("ALS HUD Template is null. Please set it in PlayerController blueprint."));
+	//else
+	//	UALSLogger::LogError(TEXT("ALS HUD Template is null. Please set it in BP_ALSPlayerController blueprint."));
 
 	//Search for all ALS Characters and populate array.
 	//Used to switch target character when viewing character info in the HUD

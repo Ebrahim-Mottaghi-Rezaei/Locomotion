@@ -1,4 +1,9 @@
+
+
+
 #include "ALSOverlayStateButtonWidget.h"
+#include <Components/TextBlock.h>
+#include <Components/Image.h>
 
 void UALSOverlayStateButtonWidget::SetUIElements(UImage* background, UTextBlock* text) {
 	Background = background;

@@ -4,6 +4,8 @@
 #include "ALSEnums.h"
 #include "Engine/DataTable.h"
 #include "Engine/EngineTypes.h"
+#include <Animation/AnimSequenceBase.h>
+#include <Curves/CurveVector.h>
 #include "ALSStructs.generated.h"
 
 class UPrimitiveComponent;
@@ -24,6 +26,8 @@ struct FALSComponentAndTransform {
 
 	FALSComponentAndTransform();
 	FALSComponentAndTransform(FTransform transform, UPrimitiveComponent* component);
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
@@ -40,6 +44,8 @@ struct FALSCameraSettings {
 		float RotationLagSpeed;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		bool DoCollisionTest;
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
@@ -54,8 +60,9 @@ struct FALSCameraSettingsGait {
 		FALSCameraSettings Sprinting;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		FALSCameraSettings Crouching;
-};
 
+	virtual FString ToString(bool bPrintToLog = false);
+};
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSCameraSettingsState {
@@ -69,6 +76,8 @@ struct FALSCameraSettingsState {
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		FALSCameraSettingsGait Aiming;
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
@@ -89,6 +98,8 @@ struct FALSDynamicMontageParams {
 
 	FALSDynamicMontageParams();
 	FALSDynamicMontageParams(UAnimSequenceBase* animation, float blendInTime, float blendOutTime, float playRate, float startTime);
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
@@ -102,6 +113,8 @@ struct FALSLeanAmount {
 
 	FALSLeanAmount();
 	FALSLeanAmount(float FB, float LR);
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
@@ -129,6 +142,8 @@ struct FALSMantleAsset {
 
 	FALSMantleAsset();
 	FALSMantleAsset(UAnimMontage* AnimMontage, UCurveVector* PositionCorrectionCurve, FVector StartingOffset, float LowHeight, float LowPlayRate, float LowStartPosition, float HighHeight, float HighPlayRate, float HighStartPosition);
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
@@ -147,9 +162,10 @@ struct FALSMantleParams {
 		FVector StartingOffset;
 
 	FALSMantleParams();
-	FALSMantleParams(UAnimMontage* animMontage, UCurveVector* positionCorrectionCurve, float startingPosition, FVector startingOffset, float playRate = 1.0);
-};
+	FALSMantleParams(UAnimMontage* animMontage, UCurveVector* positionCorrectionCurve, float startingPosition, FVector startingOffset, float playRate = 1.0f);
 
+	virtual FString ToString(bool bPrintToLog = false);
+};
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
 struct FALSMantleTraceSettings {
@@ -165,6 +181,8 @@ struct FALSMantleTraceSettings {
 		float ForwardTraceRadius;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float DownwardTraceRadius;
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
@@ -181,6 +199,8 @@ struct FALSMovementSettings {
 		UCurveVector* MovementCurve;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UCurveFloat* RotationRateCurve;
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
@@ -191,6 +211,8 @@ struct FALSMovementSettingsStance {
 		FALSMovementSettings Standing;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		FALSMovementSettings Crouching;
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
@@ -203,6 +225,8 @@ struct FALSMovementSettingsState :public FTableRowBase {
 		FALSMovementSettingsStance LookingDirection;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		FALSMovementSettingsStance Aiming;
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
@@ -221,6 +245,8 @@ struct FALSRotateInPlaceAsset {
 		float SlowPlayRate;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float FastPlayRate;
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
@@ -239,6 +265,8 @@ struct FALSTurnInPlaceAsset {
 		bool ScaleTurnAngle;
 
 	FALSTurnInPlaceAsset();
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
@@ -256,6 +284,8 @@ struct FALSVelocityBlend {
 
 	FALSVelocityBlend();
 	FALSVelocityBlend(float f, float b, float l, float r);
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 //Animation Modifiers Structures.
@@ -269,6 +299,8 @@ struct FAnimCurveCreationData {
 		float CurveValue;
 
 	FAnimCurveCreationData();
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|Animation Modifiers")
@@ -284,6 +316,8 @@ struct FALSAnimCurveCreationParams {
 		TArray<FAnimCurveCreationData> Keys;
 
 	FALSAnimCurveCreationParams();
+
+	FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|Character Information")
@@ -310,6 +344,8 @@ struct FALSCurrentState {
 		EALSOverlayState OverlayState;
 
 	FALSCurrentState();
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|Character Information")
@@ -337,8 +373,8 @@ struct FALSEssentialValues {
 
 	FALSEssentialValues();
 	FALSEssentialValues(FVector velocity, FVector acceleration, FVector movementInput, bool isMoving, bool hasMovementInput, float speed, float movementInputAmount, FRotator aimingRotation, float aimYawRate);
-	
-	FString ToString() const;
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|Debug")
@@ -364,6 +400,8 @@ struct FALSDebugInfo {
 
 	FALSDebugInfo();
 	FALSDebugInfo(ACharacter* FocusedDebugCharacter, bool DebugView, bool ShowHUD, bool ShowTraces, bool ShowDebugShapes, bool ShowLayerColors, bool SlowMotion, bool ShowCharacterInfo);
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|Camera System")
@@ -378,6 +416,8 @@ struct FALSCameraParameters {
 		bool bRightShoulder;
 	FALSCameraParameters();
 	FALSCameraParameters(float tP_FOV, float fp_FOV, bool rightShoulder);
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|Camera System")
@@ -393,6 +433,8 @@ struct FALSTraceParams {
 
 	FALSTraceParams();
 	FALSTraceParams(TEnumAsByte<ETraceTypeQuery> traceChannel, FVector traceOrigin, float traceRadius);
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|Camera System")
@@ -407,8 +449,9 @@ struct FALSCameraBehaviourResult {
 		float FOV;
 
 	FALSCameraBehaviourResult();
-
 	FALSCameraBehaviourResult(FVector location, FRotator rotation, float fov);
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 USTRUCT(BlueprintType, Category = "Advanced Locomotion System|DataStructures")
@@ -422,9 +465,13 @@ struct FALSControlVectors {
 
 	FALSControlVectors();
 	FALSControlVectors(FVector forward, FVector right);
+
+	virtual FString ToString(bool bPrintToLog = false);
 };
 
 struct FALSHitResult {
 	bool bHit;
 	FHitResult SweepHitResult;
+
+	virtual FString ToString(bool bPrintToLog = false);
 };

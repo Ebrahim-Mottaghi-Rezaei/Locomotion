@@ -1,28 +1,30 @@
 #include "ALSOverlayOverride.h"
-#include "CALSv4/Core/Interfaces/ALSAnimationInterface.h"
-#include "CALSv4/Core/Utilities/ALSHelpers.h"
+
+#include "../../ALSLogger.h"
+#include "../ALSCharacterAnimationInterface.h"
 
 FString UALSOverlayOverride::GetNotifyName_Implementation() const {
-	return  FString::Printf(TEXT("Overlay Override State: %d"), OverlayOverriderState);
+	return  FString::Printf(TEXT("#Overlay Override State: %d"), OverlayOverriderState);
 }
 
-void UALSOverlayOverride::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
-	float TotalDuration) {
+void UALSOverlayOverride::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference) {
 	if (IsValid(MeshComp) && IsValid(MeshComp->GetAnimInstance())) {
-		if (MeshComp->GetAnimInstance()->GetClass()->ImplementsInterface(UALSAnimationInterface::StaticClass())) {
-			IALSAnimationInterface::Execute_SetOverlayOverrideState(MeshComp->GetAnimInstance(), OverlayOverriderState);
+		if (MeshComp->GetAnimInstance()->GetClass()->ImplementsInterface(UALSCharacterAnimationInterface::StaticClass())) {
+			IALSCharacterAnimationInterface::Execute_SetOverlayOverrideState(MeshComp->GetAnimInstance(), OverlayOverriderState);
 		}
-	} else {
-		UALSLogger::LogError(TEXT("Mesh Component or It's Anim Instance is null."));
 	}
+	/*else {
+		UALSLogger::LogError(TEXT("Mesh Component or It's Anim Instance is null."));
+	}*/
 }
 
-void UALSOverlayOverride::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) {
+void UALSOverlayOverride::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) {
 	if (IsValid(MeshComp) && IsValid(MeshComp->GetAnimInstance())) {
-		if (MeshComp->GetAnimInstance()->GetClass()->ImplementsInterface(UALSAnimationInterface::StaticClass())) {
-			IALSAnimationInterface::Execute_SetOverlayOverrideState(MeshComp->GetAnimInstance(), 0);
+		if (MeshComp->GetAnimInstance()->GetClass()->ImplementsInterface(UALSCharacterAnimationInterface::StaticClass())) {
+			IALSCharacterAnimationInterface::Execute_SetOverlayOverrideState(MeshComp->GetAnimInstance(), 0);
 		}
-	} else {
-		UALSLogger::LogError(TEXT("Mesh Component or It's Anim Instance is null."));
 	}
+	/*else {
+		UALSLogger::LogError(TEXT("Mesh Component or It's Anim Instance is null."));
+	}*/
 }

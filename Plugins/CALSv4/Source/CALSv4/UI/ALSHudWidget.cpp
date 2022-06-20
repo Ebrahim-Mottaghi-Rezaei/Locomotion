@@ -1,19 +1,21 @@
-#include "ALSHudWidget.h"
 
+
+
+#include "ALSHUDWidget.h"
+#include <Layout/Geometry.h>
+#include "../Gameplay/ALSPlayerController.h"
+#include "../Gameplay/ALSCameraInterface.h"
+#include "../Gameplay/ALSControllerInterface.h"
 #include <Blueprint/WidgetLayoutLibrary.h>
-#include <CALSv4/Core/Interfaces/ALSCameraInterface.h>
-#include <CALSv4/Core/Interfaces/ALSCharacterInterface.h>
-#include <CALSv4/Core/Interfaces/ALSControllerInterface.h>
-#include <Components/CanvasPanelSlot.h>
-#include <GameFramework/Character.h>
-#include <Kismet/GameplayStatics.h>
+#include "../Gameplay/ALSCharacterInterface.h"
+#include "Components/CanvasPanelSlot.h"
+#include "../ALSHelpers.h"
+#include "../ALSLogger.h"
 
-#include "CALSv4/Core/Player/ALSPlayerController.h"
-
-void UALSHudWidget::NativeTick(const FGeometry& MovieSceneBlends, float InDeltaTime) {
+void UALSHUDWidget::NativeTick(const FGeometry& MovieSceneBlends, float InDeltaTime) {
 	Super::NativeTick(MovieSceneBlends, InDeltaTime);
 
-	const auto pc = static_cast<AALSPlayerController*>(GetOwningPlayer());
+	const auto pc = GetOwningPlayer();
 	if (pc->GetClass()->ImplementsInterface(UALSControllerInterface::StaticClass())) {
 		const auto info = IALSControllerInterface::Execute_GetDebugInfo(pc);
 		DebugFocusCharacter = info.DebugFocusCharacter;
@@ -27,79 +29,81 @@ void UALSHudWidget::NativeTick(const FGeometry& MovieSceneBlends, float InDeltaT
 	}
 
 	if (GetCharacterInfoVisibility() == ESlateVisibility::Visible) {
+		if (IsValid(DebugFocusCharacter))
+			if (DebugFocusCharacter->GetClass()->ImplementsInterface(UALSCameraInterface::StaticClass())) {
+				const auto transform = IALSCameraInterface::Execute_Get3PPivotTarget(DebugFocusCharacter);
 
-		if (IsValid(DebugFocusCharacter) && DebugFocusCharacter->GetClass()->ImplementsInterface(UALSCameraInterface::StaticClass())) {
-			const auto transform = IALSCameraInterface::Execute_Get3PPivotTarget(DebugFocusCharacter);
-
-			FVector2D screenpos;
-			UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(pc, transform.GetLocation() + FVector(0, 0, 100), screenpos, false);
-			UWidgetLayoutLibrary::SlotAsCanvasSlot(MovingPanel)->SetPosition(screenpos);
-		}
+				FVector2D screenpos;
+				UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(pc, transform.GetLocation() + FVector(0, 0, 100), screenpos, false);
+				UWidgetLayoutLibrary::SlotAsCanvasSlot(MovingPanel)->SetPosition(screenpos);
+			}
 	}
 }
 
-void UALSHudWidget::SetMovingPanel(UCanvasPanel* Panel) {
+void UALSHUDWidget::SetMovingPanel(UCanvasPanel* Panel) {
 	MovingPanel = Panel;
 }
 
-ESlateVisibility UALSHudWidget::GetHudVisibility() const {
+ESlateVisibility UALSHUDWidget::GetHudVisibility() const {
 	return bShowHUD ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
 }
 
-ESlateVisibility UALSHudWidget::GetCharacterInfoVisibility() const {
-	return IsValid(DebugFocusCharacter) || !bShowCharacterInfo ? ESlateVisibility::Hidden : ESlateVisibility::Visible;
+ESlateVisibility UALSHUDWidget::GetCharacterInfoVisibility() const {
+	return (IsValid(DebugFocusCharacter) && bShowCharacterInfo) ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
 }
 
-FSlateColor UALSHudWidget::GetShowHudColor() const {
-	return  bShowHUD ? EnabledColor : DisabledColor;
+FSlateColor UALSHUDWidget::GetShowHudColor() const {
+	return bShowHUD ? EnabledColor : DisabledColor;
 }
 
-FSlateColor UALSHudWidget::GetSlowMotionColor() const {
-	return  bSlowMotion ? EnabledColor : DisabledColor;
+FSlateColor UALSHUDWidget::GetSlowMotionColor() const {
+	return bSlowMotion ? EnabledColor : DisabledColor;
 }
 
-FSlateColor UALSHudWidget::GetDebugViewColor() const {
-	return  bDebugView ? EnabledColor : DisabledColor;
+FSlateColor UALSHUDWidget::GetDebugViewColor() const {
+	return bDebugView ? EnabledColor : DisabledColor;
 }
 
-FSlateColor UALSHudWidget::GetShowTracesColor() const {
-	return  bShowTraces ? EnabledColor : DisabledColor;
+FSlateColor UALSHUDWidget::GetShowTracesColor() const {
+	return bShowTraces ? EnabledColor : DisabledColor;
 }
 
-FSlateColor UALSHudWidget::GetShowDebugShapesColor() const {
+FSlateColor UALSHUDWidget::GetShowDebugShapesColor() const {
 	return bShowDebugShapes ? EnabledColor : DisabledColor;
 }
 
-FSlateColor UALSHudWidget::GetShowLayerShapesColor() const {
+FSlateColor UALSHUDWidget::GetShowLayerShapesColor() const {
 	return bShowLayerColors ? EnabledColor : DisabledColor;
 }
 
-FSlateColor UALSHudWidget::GetShowCharacterInfoColor() const {
+FSlateColor UALSHUDWidget::GetShowCharacterInfoColor() const {
 	return bShowCharacterInfo ? EnabledColor : DisabledColor;
 }
 
-FString UALSHudWidget::GetDebugCharacterName() const {
+FString UALSHUDWidget::GetDebugCharacterName() const {
 	return IsValid(DebugFocusCharacter) ? DebugFocusCharacter->GetName() : FString(TEXT("[C++ ALS v4] : No Valid Character Selected"));
 }
 
-FString UALSHudWidget::GetCharacterStates() const {
+FString UALSHUDWidget::GetCharacterStates() const {
 	if (bShowCharacterInfo && IsValid(DebugFocusCharacter) && DebugFocusCharacter->GetClass()->ImplementsInterface(UALSCharacterInterface::StaticClass())) {
 		const auto State = IALSCharacterInterface::Execute_GetCurrentState(DebugFocusCharacter);
+
 		return FString::Printf(TEXT("%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s"),
-			*UEnum::GetValueAsString(State.PawnMovementMode),
-			*UEnum::GetValueAsString(State.MovementState),
-			*UEnum::GetValueAsString(State.MovementAction),
-			*UEnum::GetValueAsString(State.RotationMode),
-			*UEnum::GetValueAsString(State.ActualGait),
-			*UEnum::GetValueAsString(State.ActualStance),
-			*UEnum::GetValueAsString(State.ViewMode),
-			*UEnum::GetValueAsString(State.OverlayState)
+			*UEnum::GetDisplayValueAsText(State.PawnMovementMode).ToString(),
+			*UEnum::GetDisplayValueAsText(State.MovementState).ToString(),
+			*UEnum::GetDisplayValueAsText(State.MovementAction).ToString(),
+			*UEnum::GetDisplayValueAsText(State.RotationMode).ToString(),
+			*UEnum::GetDisplayValueAsText(State.ActualGait).ToString(),
+			*UEnum::GetDisplayValueAsText(State.ActualStance).ToString(),
+			*UEnum::GetDisplayValueAsText(State.ViewMode).ToString(),
+			*UEnum::GetDisplayValueAsText(State.OverlayState).ToString()
 		);
 	}
+
 	return FString(TEXT(""));
 }
 
-FString UALSHudWidget::GetAnimCurvesNames() const {
+FString UALSHUDWidget::GetAnimCurvesNames() const {
 	if (!IsValid(DebugFocusCharacter))
 		return FString("[C++ ALS v4] : DebugFocusCharacter is not valid");
 
@@ -119,7 +123,7 @@ FString UALSHudWidget::GetAnimCurvesNames() const {
 	return value;
 }
 
-FText UALSHudWidget::GetAnimCurvesValues() const {
+FText UALSHUDWidget::GetAnimCurvesValues() const {
 	if (!IsValid(DebugFocusCharacter))
 		return FText::FromString(TEXT("[C++ ALS v4] : DebugFocusCharacter is not valid"));
 

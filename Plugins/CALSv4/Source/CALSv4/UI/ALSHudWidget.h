@@ -1,15 +1,20 @@
+
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/CanvasPanel.h"
-#include "Components/Image.h"
-#include "ALSHudWidget.generated.h"
+#include <Components/CanvasPanel.h>
+#include <GameFramework/Character.h>
+#include <Math/Color.h>
+#include "ALSHUDWidget.generated.h"
 
+/**
+ *
+ */
 UCLASS()
-class CALSV4_API UALSHudWidget : public UUserWidget {
+class CALSV4_API UALSHUDWidget : public UUserWidget {
 	GENERATED_BODY()
-
 protected:
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Advanced Locomotion System|HUD Widget")
 		ACharacter* DebugFocusCharacter;
@@ -28,9 +33,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Advanced Locomotion System|HUD Widget")
 		bool bShowCharacterInfo;
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Advanced Locomotion System|HUD Widget")
-		FLinearColor EnabledColor;
+		FLinearColor EnabledColor = FLinearColor::Green;
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Advanced Locomotion System|HUD Widget")
-		FLinearColor DisabledColor;
+		FLinearColor DisabledColor = FLinearColor(FVector4d(1.0f, 1.0f, 1.0f, 0.5f));
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Advanced Locomotion System|HUD Widget")
 		UCanvasPanel* MovingPanel;
 

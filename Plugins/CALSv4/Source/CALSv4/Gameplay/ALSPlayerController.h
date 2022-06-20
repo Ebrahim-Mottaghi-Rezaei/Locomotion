@@ -1,13 +1,16 @@
+
+
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CALSv4/Core/Interfaces/ALSControllerInterface.h"
-#include "CALSv4/Widgets/ALSOverlayStateSwitcherWidget.h"
+#include "CALSv4/UI/ALSOverlayStateSwitcherWidget.h"
 #include "GameFramework/PlayerController.h"
-#include "GameFramework/Character.h"
+#include "ALSControllerInterface.h"
 #include "ALSPlayerController.generated.h"
 
-//This controller is responsible for managing the debug settings, displaying the Debug HUD, and managing the Overlay State menu. All other character relevant input can be found within the ALS_Base_CharacterBP.
+/**
+ *
+ */
 UCLASS()
 class CALSV4_API AALSPlayerController : public APlayerController, public IALSControllerInterface {
 	GENERATED_BODY()
@@ -80,7 +83,7 @@ protected:
 		virtual void CycleOverlayDown();
 
 	uint8 SelectedALSCharacterIndex;
-	
+
 public:
 	UFUNCTION(BlueprintCallable, Category = "Advanced Locomotion System|Debug")
 		virtual FALSDebugInfo GetDebugInfo_Implementation() override;
