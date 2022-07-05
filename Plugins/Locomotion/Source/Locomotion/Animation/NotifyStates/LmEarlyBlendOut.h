@@ -10,19 +10,19 @@ UCLASS()
 class LOCOMOTION_API ULmEarlyBlendOut : public UAnimNotifyState {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, category = "Locomotion")
 		UAnimMontage* Montage;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, category = "Locomotion")
 		float BlendOutTime = 0.25f;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, category = "Locomotion")
 		bool bCheckMovementState;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, category = "Locomotion")
 		ELmMovementState MovementState = ELmMovementState::Lm_None;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, category = "Locomotion")
 		bool bCheckStance;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, category = "Locomotion")
 		ELmStance Stance = ELmStance::Lm_Standing;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, category = "Locomotion")
 		bool bCheckMovementInput;
 
 	virtual void NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime, const FAnimNotifyEventReference& EventReference) override;

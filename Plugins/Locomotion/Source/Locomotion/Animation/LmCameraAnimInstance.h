@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "../LmEnums.h"
+#include <GameFramework/PlayerController.h>
 #include "LmCameraAnimInstance.generated.h"
 
 /**

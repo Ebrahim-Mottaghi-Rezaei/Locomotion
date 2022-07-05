@@ -83,11 +83,11 @@ ALmCharacter::ALmCharacter() {
 	SkeletalMesh->ClothingSimulationFactory = UClothingSimulationFactoryNv::StaticClass();
 	SkeletalMesh->SetCollisionProfileName(FName("NoCollision"));
 
-	const ConstructorHelpers::FObjectFinder<UAnimBlueprint> BowAnimBP(TEXT("AnimBlueprint'/Locomotion/Gameplay/AnimBP_LmBow.AnimBP_LmBow'"));
+	/*const ConstructorHelpers::FObjectFinder<UAnimBlueprint> BowAnimBP(TEXT("AnimBlueprint'/Locomotion/Gameplay/AnimBP_LmBow.AnimBP_LmBow'"));
 	if (BowAnimBP.Succeeded())
 		SkeletalMesh->SetAnimInstanceClass(BowAnimBP.Object->GetAnimBlueprintGeneratedClass());
 	else
-		ULmLogger::LogError("BowAnimInstance not found. Please set it at BP_ALSCharacter");
+		ULmLogger::LogError("BowAnimInstance not found. Please set it at BP_ALSCharacter");*/
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName("StaticMesh"));
 	StaticMesh->AttachToComponent(HeldObjectRoot, FAttachmentTransformRules::KeepRelativeTransform);
@@ -114,11 +114,11 @@ ALmCharacter::ALmCharacter() {
 
 	mesh->bUpdateJointsFromAnimation = true;
 
-	const ConstructorHelpers::FObjectFinder<UAnimBlueprint> ALSCharacterAnimBP(TEXT("AnimBlueprint'/Locomotion/Gameplay/AnimBP_LmCharacter.AnimBP_LmCharacter'"));
-	if (ALSCharacterAnimBP.Succeeded()) {
-		mesh->SetAnimInstanceClass(ALSCharacterAnimBP.Object->GetAnimBlueprintGeneratedClass());
-	} else
-		ULmLogger::LogError("BP_AnimInstance not found.");
+	//const ConstructorHelpers::FObjectFinder<UAnimBlueprint> ALSCharacterAnimBP(TEXT("AnimBlueprint'/Locomotion/Gameplay/AnimBP_LmCharacter.AnimBP_LmCharacter'"));
+	//if (ALSCharacterAnimBP.Succeeded()) {
+	//	mesh->SetAnimInstanceClass(ALSCharacterAnimBP.Object->GetAnimBlueprintGeneratedClass());
+	//} else
+	//	ULmLogger::LogError("BP_AnimInstance not found.");
 
 #pragma region Setting up Mantles
 	//Mantle 2m Default
@@ -648,20 +648,16 @@ void ALmCharacter::ToggleCharacterMesh() {
 }
 
 void ALmCharacter::SetCharacterMesh(ELmCharacterMeshStyle MeshType) {
-	try {
-		if (CurrentMeshType != MeshType) {
-			if (MeshType == ELmCharacterMeshStyle::Lm_Skin) {
-				BodyMesh->SetSkeletalMesh(SkinMesh, true);
-				GetMesh()->SetVisibility(false, false);
-			} else {
-				BodyMesh->SetSkeletalMesh(nullptr, true);
-				GetMesh()->SetVisibility(true, false);
-			}
-
-			CurrentMeshType = MeshType;
+	if (CurrentMeshType != MeshType) {
+		if (MeshType == ELmCharacterMeshStyle::Lm_Skin) {
+			BodyMesh->SetSkeletalMesh(SkinMesh, true);
+			GetMesh()->SetVisibility(false, false);
+		} else {
+			BodyMesh->SetSkeletalMesh(nullptr, true);
+			GetMesh()->SetVisibility(true, false);
 		}
-	} catch (const std::exception&) {
-		ULmLogger::LogError(FString::Printf(TEXT("Failed to set character mesh.")));
+
+		CurrentMeshType = MeshType;
 	}
 }
 
