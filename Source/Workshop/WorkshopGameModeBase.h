@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "JunksGameModeBase.generated.h"
+#include "WorkshopGameModeBase.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class JUNKS_API AJunksGameModeBase : public AGameModeBase
+class WORKSHOP_API AWorkshopGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	

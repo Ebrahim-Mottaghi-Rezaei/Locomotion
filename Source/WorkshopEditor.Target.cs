@@ -3,12 +3,12 @@
 using UnrealBuildTool;
 using System.Collections.Generic;
 
-public class JunksEditorTarget : TargetRules
+public class WorkshopEditorTarget : TargetRules
 {
-	public JunksEditorTarget( TargetInfo Target) : base(Target)
+	public WorkshopEditorTarget( TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
-		ExtraModuleNames.AddRange( new string[] { "Junks" } );
+		ExtraModuleNames.AddRange( new string[] { "Workshop" } );
 	}
 }
