@@ -123,7 +123,7 @@ ALmCharacter::ALmCharacter() {
 #pragma region Setting up Mantles
 	//Mantle 2m Default
 	Mantle2mDefault.StartingOffset = FVector(0.0f, 65.0f, 200.0f);
-	Mantle2mDefault.LowHeight = 1250.0f;
+	Mantle2mDefault.LowHeight = 125.0f;
 	Mantle2mDefault.LowPlayRate = 1.2f;
 	Mantle2mDefault.LowStartPosition = 0.6f;
 	Mantle2mDefault.HighHeight = 200.0f;
@@ -547,6 +547,7 @@ UAnimMontage* ALmCharacter::GetRollAnimation() {
 }
 
 FLmMantleAsset ALmCharacter::GetMantleAsset(const ELmMantleType MantleType) {
+	//Check if the mantle type is falling catch or high-mantle to return the Mantle2mDefault
 	if (MantleType != ELmMantleType::Lm_LowMantle)
 		return Mantle2mDefault;
 
