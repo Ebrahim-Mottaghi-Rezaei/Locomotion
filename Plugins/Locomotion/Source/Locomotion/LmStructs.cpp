@@ -89,7 +89,7 @@ FLmMantleAsset::FLmMantleAsset(UAnimMontage* AnimMontage, UCurveVector* Position
 }
 
 FString FLmMantleAsset::ToString(bool bPrintToLog) {
-	const auto r = FString::Printf(TEXT("AnimMontage: %s, StartingOffset: %s,Height: [Low: %s, High: %s], PlayRate: [Low: %s, High: %s], StaringPosition: [Low: %s , High: %s], PositionCorrectionCurve: %s"), *AnimMontage->GetName(), *StartingOffset.ToString(), *FString::SanitizeFloat(LowHeight), *FString::SanitizeFloat(HighHeight), *FString::SanitizeFloat(LowPlayRate), *FString::SanitizeFloat(HighPlayRate), *FString::SanitizeFloat(LowStartPosition), *FString::SanitizeFloat(HighStartPosition), *StartingOffset.ToString());
+	const auto r = FString::Printf(TEXT("AnimMontage: %s, PositionCorrectionCurve: %s,\nStartingOffset: %s,Height: [Low: %s, High: %s], PlayRate: [Low: %s, High: %s], StaringPosition: [Low: %s , High: %s]"), *AnimMontage->GetName(), *PositionCorrectionCurve->GetName(), *StartingOffset.ToString(), *FString::SanitizeFloat(LowHeight), *FString::SanitizeFloat(HighHeight), *FString::SanitizeFloat(LowPlayRate), *FString::SanitizeFloat(HighPlayRate), *FString::SanitizeFloat(LowStartPosition), *FString::SanitizeFloat(HighStartPosition));
 
 	if (bPrintToLog)
 		ULmLogger::LogInfo(r);

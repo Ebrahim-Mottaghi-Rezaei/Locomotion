@@ -87,13 +87,13 @@ struct FLmDynamicMontageParams {
 		UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Locomotion|DataTypes")
 		UAnimSequenceBase* Animation;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Dynamic Montage Params")
-		float StartTime;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Dynamic Montage Params")
-		float PlayRate;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Dynamic Montage Params")
 		float BlendInTime;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Dynamic Montage Params")
 		float BlendOutTime;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Dynamic Montage Params")
+		float PlayRate;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Dynamic Montage Params")
+		float StartTime;
 	
 	FLmDynamicMontageParams();
 	FLmDynamicMontageParams(UAnimSequenceBase* animation, float blendInTime, float blendOutTime, float playRate, float startTime);
