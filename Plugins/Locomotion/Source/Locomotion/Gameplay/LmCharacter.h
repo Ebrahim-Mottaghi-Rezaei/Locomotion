@@ -36,11 +36,11 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
 		USkeletalMeshComponent* BodyMesh;
 
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Styling")
 		ELmCharacterMeshStyle CurrentMeshType = ELmCharacterMeshStyle::Lm_Default;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Styling")
 		USkeletalMesh* DefaultMesh;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Styling")
 		USkeletalMesh* SkinMesh;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Holding Objects")
