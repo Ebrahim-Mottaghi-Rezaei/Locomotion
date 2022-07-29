@@ -102,8 +102,6 @@ ALmBaseCharacter::ALmBaseCharacter() {
 	else
 		ULmLogger::LogError("Mantle_1m not found.");
 
-	DeltaTimeX = 1.0 / 30.0f;
-
 	AIControllerClass = ALmBaseAIController::StaticClass();
 
 	static ConstructorHelpers::FObjectFinder<UCurveVector> highMantle(TEXT("CurveVector'/Game/AdvancedLocomotionV4/Data/Curves/MantleCurves/Mantle_1m.Mantle_1m'"));
