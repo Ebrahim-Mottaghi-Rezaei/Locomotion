@@ -50,7 +50,7 @@ ALmBaseCharacter::ALmBaseCharacter() {
 	const auto cmc = GetCharacterMovement();
 	cmc->MaxAcceleration = 1500.0f;
 	cmc->BrakingFrictionFactor = 0.0f;
-	cmc->SetCrouchedHalfHeight(60.0f);
+	cmc->CrouchedHalfHeight = 60.0f;
 	cmc->MinAnalogWalkSpeed = 25.0f;
 	cmc->bCanWalkOffLedgesWhenCrouching = true;
 	cmc->AirControl = 0.15f;
@@ -102,7 +102,7 @@ ALmBaseCharacter::ALmBaseCharacter() {
 	else
 		ULmLogger::LogError("Mantle_1m not found.");
 
-	DeltaTimeX = 1.0 / static_cast<float>(AnimationFrameRate);
+	DeltaTimeX = 1.0 / 30.0f;
 
 	AIControllerClass = ALmBaseAIController::StaticClass();
 
@@ -862,7 +862,7 @@ void ALmBaseCharacter::UpdateGroundedRotation() {
 			//Apply the RotationAmount curve from Turn In Place Animations. The Rotation Amount curve defines how much rotation should be applied each frame, and is calculated for animations that are animated at 30fps.
 			const float curveAmount = GetAnimCurveValue(FName(TEXT("RotationAmount")));
 			if (FMath::Abs(curveAmount) > 0.001f) {
-				AddActorWorldRotation(FRotator(0.0f, curveAmount * (UGameplayStatics::GetWorldDeltaSeconds(this) / DeltaTimeX), 0.0f));
+				AddActorWorldRotation(FRotator(0.0f, curveAmount * (UGameplayStatics::GetWorldDeltaSeconds(this) / 0.033f), 0.0f));
 				TargetRotation = GetActorRotation();
 			}
 		}

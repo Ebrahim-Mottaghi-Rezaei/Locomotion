@@ -22,8 +22,6 @@ public:
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
-		uint8 AnimationFrameRate = 30;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
 		FName ProfileName = FName("ALS_Character");
 
 	//You should look it up in the GameTraceChannel in DefaultEngine.ini
@@ -345,7 +343,6 @@ protected:
 private:
 	TEnumAsByte<ETraceTypeQuery> ETT_Climbable;
 
-	float DeltaTimeX;
 	TArray<AActor*> IgnoredActors;
 
 	FTimeline mantleTimeline;
