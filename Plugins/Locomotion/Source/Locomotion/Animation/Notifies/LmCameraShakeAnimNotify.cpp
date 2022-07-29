@@ -7,7 +7,7 @@
 #include <Components/ActorComponent.h>
 #include <GameFramework/Controller.h>
 
-void ULmCameraShakeAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) {
+void ULmCameraShakeAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) {
 	if (IsValid(MeshComp) && IsValid(MeshComp->GetOwner())) {
 		auto pawn = Cast<APawn>(MeshComp->GetOwner());
 		if (IsValid(pawn)) {

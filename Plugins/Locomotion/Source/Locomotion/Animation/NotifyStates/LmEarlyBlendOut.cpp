@@ -6,7 +6,7 @@ FString ULmEarlyBlendOut::GetNotifyName_Implementation() const {
 	return TEXT("#Early Blend Out");
 }
 
-void ULmEarlyBlendOut::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime, const FAnimNotifyEventReference& EventReference) {
+void ULmEarlyBlendOut::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime) {
 	AActor* owningActor = MeshComp->GetOwner();
 	UAnimInstance* animInstance = MeshComp->GetAnimInstance();
 

@@ -25,6 +25,6 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, category = "Locomotion")
 		bool bCheckMovementInput;
 
-	virtual void NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime, const FAnimNotifyEventReference& EventReference) override;
+	virtual void NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime) override;
 	virtual FString GetNotifyName_Implementation() const override;
 };

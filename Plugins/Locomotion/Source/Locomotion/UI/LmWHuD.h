@@ -30,7 +30,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Locomotion")
 		FLinearColor EnabledColor = FLinearColor::Green;
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Locomotion")
-		FLinearColor DisabledColor = FLinearColor(FVector4d(1.0f, 1.0f, 1.0f, 0.5f));
+		FLinearColor DisabledColor = FLinearColor(FVector4(1.0f, 1.0f, 1.0f, 0.5f));
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Locomotion")
 		UCanvasPanel* MovingPanel;
 

@@ -18,6 +18,6 @@ protected:
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Locomotion")
 		float Scale = 1.f;
 public:
-	void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
+	void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
 	virtual FString GetNotifyName_Implementation() const;
 };
