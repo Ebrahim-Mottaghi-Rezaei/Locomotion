@@ -175,10 +175,6 @@ ULmCharacterAnimInstance::ULmCharacterAnimInstance() {
 
 }
 
-void ULmCharacterAnimInstance::NativeInitializeAnimation() {
-	Super::NativeInitializeAnimation();
-}
-
 void ULmCharacterAnimInstance::NativeBeginPlay() {
 	Super::NativeBeginPlay();
 
