@@ -786,7 +786,7 @@ FLmLeanAmount ULmCharacterAnimInstance::InterpLeanAmount(FLmLeanAmount& current,
 	return retValue;
 }
 
-void ULmCharacterAnimInstance::AnimNotifyPivot() {
+void ULmCharacterAnimInstance::Response_AnimNotifyPivot() {
 	bPivot = Speed < TriggerPivotSpeedLimit;
 
 	if (GetWorld()->GetTimerManager().GetTimerRemaining(AnimNotifyPivotHandle) > 0)

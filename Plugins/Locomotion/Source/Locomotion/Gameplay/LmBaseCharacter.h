@@ -34,7 +34,7 @@ protected:
 		float DoubleTapTime = 0.1f;
 	///Category=Input
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Input")
-		ELmInputProcessingMode SprintProcessingMode = ELmInputProcessingMode::Lm_DoublePress;
+		ELmInputProcessingMode SprintProcessingMode;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|Input")
 		ELmButtonPressType CameraActionPressType;

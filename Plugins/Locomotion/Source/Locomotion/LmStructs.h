@@ -106,9 +106,10 @@ struct FLmLeanAmount {
 	GENERATED_BODY()
 
 		UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lean Amount")
-		float FrontBack;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lean Amount")
 		float LeftRight;
+		UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lean Amount")
+		float FrontBack;
+	
 
 	FLmLeanAmount();
 	FLmLeanAmount(float FB, float LR);

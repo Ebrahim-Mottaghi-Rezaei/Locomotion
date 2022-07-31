@@ -13,7 +13,7 @@
 /**
  *
  */
-UCLASS()
+UCLASS(Transient, Blueprintable)
 class LOCOMOTION_API ULmCharacterAnimInstance : public UAnimInstance, public ILmCharacterAnimationInterface {
 	GENERATED_BODY()
 
@@ -390,8 +390,8 @@ protected:
 		virtual FLmVelocityBlend InterpVelocityBlend(FLmVelocityBlend current, FLmVelocityBlend target, float interpSpeed, float deltaTime);
 	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Rotation")
 		virtual FLmLeanAmount InterpLeanAmount(FLmLeanAmount& current, FLmLeanAmount& target, float interpSpeed, float deltaTime);
-	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Notify Events")
-		void AnimNotifyPivot();
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Notify Events")
+		void Response_AnimNotifyPivot();
 	//Debug
 	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Debug")
 		virtual TEnumAsByte<EDrawDebugTrace::Type> GetDebugTraceType(TEnumAsByte<EDrawDebugTrace::Type> ShowTraceType);
