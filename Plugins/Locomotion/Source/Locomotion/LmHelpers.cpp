@@ -5,8 +5,16 @@
 #include <Kismet/KismetMathLibrary.h>
 #include <Components/SkeletalMeshComponent.h>
 
+FTransform ULmHelpers::AddTransform(const FTransform A, const FTransform B) {
+	FRotator ARotator = A.Rotator();
+	FRotator BRotator = B.Rotator();
+	return FTransform(FRotator(ARotator.Pitch + BRotator.Pitch, ARotator.Yaw + BRotator.Yaw, ARotator.Roll + BRotator.Roll), A.GetLocation() + B.GetLocation(), A.GetScale3D() + B.GetScale3D());
+}
+
 FTransform ULmHelpers::SubtractTransform(const FTransform A, const FTransform B) {
-	return FTransform(FRotator(A.Rotator().Pitch - B.Rotator().Pitch, A.Rotator().Yaw - B.Rotator().Yaw, A.Rotator().Roll - B.Rotator().Roll), A.GetLocation() - B.GetLocation(), A.GetScale3D() - B.GetScale3D());
+	FRotator ARotator = A.Rotator();
+	FRotator BRotator = B.Rotator();
+	return FTransform(FRotator(ARotator.Pitch - BRotator.Pitch, ARotator.Yaw - BRotator.Yaw, ARotator.Roll - BRotator.Roll), A.GetLocation() - B.GetLocation(), A.GetScale3D() - B.GetScale3D());
 }
 
 FLmComponentAndTransform ULmHelpers::LocalSpaceToWorldSpace(const FLmComponentAndTransform LocalSpace) {

@@ -16,7 +16,10 @@ class LOCOMOTION_API ULmHelpers : public UBlueprintFunctionLibrary {
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Math")
-		static FTransform SubtractTransform(FTransform A, FTransform B);
+		static FTransform AddTransform(const FTransform A, const FTransform B);
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Math")
+		static FTransform SubtractTransform(const FTransform A, const FTransform B);
+
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Math")
 		static FLmComponentAndTransform LocalSpaceToWorldSpace(FLmComponentAndTransform LocalSpace);
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Math")
