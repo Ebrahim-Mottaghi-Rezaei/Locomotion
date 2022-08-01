@@ -50,7 +50,7 @@ ALmBaseCharacter::ALmBaseCharacter() {
 	const auto cmc = GetCharacterMovement();
 	cmc->MaxAcceleration = 1500.0f;
 	cmc->BrakingFrictionFactor = 0.0f;
-	cmc->CrouchedHalfHeight = 60.0f;
+	cmc->SetCrouchedHalfHeight(60.0f);
 	cmc->MinAnalogWalkSpeed = 25.0f;
 	cmc->bCanWalkOffLedgesWhenCrouching = true;
 	cmc->AirControl = 0.15f;
@@ -94,8 +94,8 @@ ALmBaseCharacter::ALmBaseCharacter() {
 	FallingTraceSettings.DownwardTraceRadius = 30.0f;
 
 	CurrentMovementSettings.WalkSpeed = 165.0;
-	CurrentMovementSettings.WalkSpeed = 350.0;
-	CurrentMovementSettings.WalkSpeed = 600.0;
+	CurrentMovementSettings.RunSpeed = 350.0;
+	CurrentMovementSettings.SprintSpeed = 600.0;
 	static ConstructorHelpers::FObjectFinder<UCurveVector> MovementCurve(TEXT("CurveVector'/Game/AdvancedLocomotionV4/Data/Curves/CharacterMovementCurves/NormalMovement.NormalMovement'"));
 	if (MovementCurve.Succeeded())
 		CurrentMovementSettings.MovementCurve = MovementCurve.Object;
@@ -156,11 +156,11 @@ void ALmBaseCharacter::BeginPlay() {
 	LastVelocityRotation = rotation;
 	LastMovementInputRotation = rotation;
 
-	//Setting up the time-line
+	//Setting up the mantle time-line
 	mantleTimeline.SetTimelineLengthMode(ETimelineLengthMode::TL_TimelineLength);
 
 	if (MantleTimelineCurve == nullptr) {
-		ULmLogger::LogError(TEXT("MantleTimelineCurve in ALSBaseCharacter is null"));
+		ULmLogger::LogError(TEXT("MantleTimelineCurve in LmBaseCharacter is null"));
 	} else {
 		FOnTimelineFloat MantleUpdate;
 		MantleUpdate.BindUFunction(this, FName("MantleUpdate"));
@@ -359,32 +359,25 @@ void ALmBaseCharacter::PlayerJumpPressedInput() {
 	if (MovementAction != ELmMovementAction::Lm_None)
 		return;
 
-	if (MovementState == ELmMovementState::Lm_Ragdoll) {
-
-		RagdollEnd();
-
-	} else if (MovementState != ELmMovementState::Lm_Mantling) {
-
-		if (MovementState == ELmMovementState::Lm_Grounded) {
-
-			if (bHasMovementInput) {
-				const bool MantleCheckResult = MantleCheck(GroundedTraceSettings, EDrawDebugTrace::ForDuration);
-				if (!MantleCheckResult) {
-					if (Stance == ELmStance::Lm_Standing)
-						Jump();
-					else
-						UnCrouch();
-				}
-			} else {
+	switch (MovementState) {
+		case ELmMovementState::Lm_Grounded:
+			if (bHasMovementInput || !MantleCheck(GroundedTraceSettings, EDrawDebugTrace::ForDuration)) {
 				if (Stance == ELmStance::Lm_Standing)
 					Jump();
 				else
 					UnCrouch();
 			}
-
-		} else if (MovementState == ELmMovementState::Lm_InAir) {
+			break;
+		case ELmMovementState::Lm_InAir:
 			MantleCheck(FallingTraceSettings, EDrawDebugTrace::ForDuration);
-		}
+			break;
+		case ELmMovementState::Lm_Ragdoll:
+			RagdollEnd();
+			break;
+		case ELmMovementState::Lm_Mantling:
+		case ELmMovementState::Lm_None:
+		default:
+			break;
 	}
 }
 
@@ -898,14 +891,12 @@ void ALmBaseCharacter::LimitRotation(float AimYawMin, float AimYawMax, float Int
 	SmoothCharacterRotation(FRotator(0.0f, controlYaw + deltaYaw > 0 ? AimYawMin : AimYawMax, 0.0f), 0.0f, InterpSpeed);
 }
 
-FLmHitResult ALmBaseCharacter::SetActorLocationRotationUpdateTarget(FVector NewLocation, FRotator NewRotation, bool bSweep, bool bTeleport) {
+void ALmBaseCharacter::SetActorLocationRotationUpdateTarget(FVector NewLocation, FRotator NewRotation) {
 	TargetRotation = NewRotation;
-	FLmHitResult HitResult;
 
-	const bool result = SetActorLocationAndRotation(NewLocation, NewRotation, bSweep, &HitResult.SweepHitResult);
-	HitResult.bHit = result;
+	ULmLogger::LogInfo(FString::Printf(TEXT("TargetLocation: %s, TargetRotation: %s"), *NewLocation.ToString(), *TargetRotation.ToString()), 0.0f, false);
 
-	return HitResult;
+	SetActorLocationAndRotation(NewLocation, TargetRotation, false);
 }
 
 float ALmBaseCharacter::CalculateGroundedRotationRate() {
@@ -922,7 +913,7 @@ bool ALmBaseCharacter::MantleCheck(FLmMantleTraceSettings TraceSettings, TEnumAs
 
 	const auto playerMovementInput = GetPlayerMovementInput();
 
-	const FVector capsuleTraceStart = GetCapsuleBaseLocation(2.0f) - (30.0f * playerMovementInput) + (FVector::UpVector * (TraceSettings.MaxLedgeHeight + TraceSettings.MinLedgeHeight) / 2.0f);
+	const FVector capsuleTraceStart = GetCapsuleBaseLocation(2.0f) - (30.0f * playerMovementInput) + (FVector(0.0f, 0.0f, TraceSettings.MaxLedgeHeight + TraceSettings.MinLedgeHeight) / 2.0f);
 
 	const FVector capsuleTraceEnd = capsuleTraceStart + (playerMovementInput * TraceSettings.ReachDistance);
 
@@ -930,7 +921,7 @@ bool ALmBaseCharacter::MantleCheck(FLmMantleTraceSettings TraceSettings, TEnumAs
 
 	FHitResult capsuleTraceHitResult;
 
-	UKismetSystemLibrary::CapsuleTraceSingle(this, capsuleTraceStart, capsuleTraceEnd, TraceSettings.ForwardTraceRadius, halfHeight, ETT_Climbable, false, IgnoredActors, GetTraceDebugType(DebugType), capsuleTraceHitResult, true, FLinearColor::Black, FLinearColor::White, 1.0f);
+	UKismetSystemLibrary::CapsuleTraceSingle(this, capsuleTraceStart, capsuleTraceEnd, TraceSettings.ForwardTraceRadius, halfHeight, ETT_Climbable, false, IgnoredActors, GetTraceDebugType(DebugType), capsuleTraceHitResult, true, FLinearColor::Black, FLinearColor::Black, 1.0f);
 
 	if (!(capsuleTraceHitResult.bBlockingHit && !capsuleTraceHitResult.bStartPenetrating && !GetCharacterMovement()->IsWalkable(capsuleTraceHitResult)))
 		return false;
@@ -1010,44 +1001,71 @@ void ALmBaseCharacter::MantleStart(float MantleHeight, FLmComponentAndTransform 
 	mantleTimeline.PlayFromStart();
 
 	//Step 7: Play the Anim Montage if valid.
-	if (MantleParams.AnimMontage && animInstance)
+	if (MantleParams.AnimMontage && animInstance) {
+		if (bUseSlomoOnMantling) {
+			UGameplayStatics::SetGlobalTimeDilation(this, 0.15f);
+		}
+
 		animInstance->Montage_Play(MantleParams.AnimMontage, MantleParams.PlayRate, EMontagePlayReturnType::MontageLength, MantleParams.StartingPosition, false);
+	}
 }
 
 void ALmBaseCharacter::MantleUpdate(const float BlendIn) {
-	//Step 1: Continually update the mantle target from the stored local transform to follow along with moving objects.
-	MantleTarget = ULmHelpers::LocalSpaceToWorldSpace(MantleLedgeLS).Transform;
+	/*Step 1: Continually update the mantle target from the stored local transform to follow along with moving objects.*/
+	auto mantle_target = ULmHelpers::LocalSpaceToWorldSpace(MantleLedgeLS).Transform;
 
-	//Step 2: Update the Position and Correction Alphas using the Position/Correction curve set for each Mantle.
-	const FVector VectorValue = MantleParams.PositionCorrectionCurve->GetVectorValue(MantleParams.StartingPosition + mantleTimeline.GetPlaybackPosition());
+	ULmLogger::LogWarning(FString::Printf(TEXT("mantle_target: %s"), *mantle_target.ToString()), 0.0f, false);
 
-	const float positionAlpha = VectorValue.X;
-	const float XYCorrectionAlpha = VectorValue.Y;
-	const float ZCorrection = VectorValue.Z;
+	/*Step 2: Update the Position and Correction Alphas using the Position/Correction curve set for each Mantle.*/
+	FVector alphas = MantleParams.PositionCorrectionCurve->GetVectorValue(MantleParams.StartingPosition + mantleTimeline.GetPlaybackPosition());
+	const float position_alpha = alphas.X;
+	const float xy_correction_alpha = alphas.Y;
+	const float z_correction_alpha = alphas.Z;
 
-	//Step 3: Lerp multiple transforms together for independent control over the horizontal and vertical blend to the animated capsuleTraceStart position, as well as the target position.
-	//Blend into the animated horizontal and rotation offset using the Y value of the Position/Correction Curve.
-	const auto Bh = FTransform(MantleAnimatedStartOffset.GetRotation(), FVector(MantleAnimatedStartOffset.GetLocation().X, MantleAnimatedStartOffset.GetLocation().Y, MantleActualStartOffset.GetLocation().Z));
-	const auto horizontalTransform = UKismetMathLibrary::TLerp(MantleActualStartOffset, Bh, XYCorrectionAlpha);
+	ULmLogger::LogWarning(FString::Printf(TEXT("alphas: %s"), *alphas.ToString()), 0.0f, false);
 
-	//Blend into the animated vertical offset using the Z value of the Position / Correction Curve.
-	const auto Bv = FTransform(MantleActualStartOffset.GetRotation(), FVector(MantleActualStartOffset.GetLocation().X, MantleActualStartOffset.GetLocation().Y, MantleAnimatedStartOffset.GetLocation().Z));
-	const auto verticalTransform = UKismetMathLibrary::TLerp(MantleActualStartOffset, Bv, ZCorrection);
+	/*Step 3: Lerp multiple transforms together for independent control over the horizontal and vertical blend to the animated start position, as well as the target position.*/
+	//	/*Blend into the animated horizontal and rotation offset using the Y value of the Position/Correction Curve.*/
+	auto horizontal_transform = FTransform();
+	horizontal_transform.SetLocation(FVector(MantleAnimatedStartOffset.GetLocation().X, MantleAnimatedStartOffset.GetLocation().Y, MantleActualStartOffset.GetLocation().Z));
+	horizontal_transform.SetRotation(MantleAnimatedStartOffset.GetRotation());
+	horizontal_transform.SetScale3D(FVector::OneVector);
 
-	const auto t1 = FTransform(horizontalTransform.GetRotation(), FVector(horizontalTransform.GetLocation().X, horizontalTransform.GetLocation().Y, verticalTransform.GetLocation().Z));
+	FTransform horizontal_lerp = UKismetMathLibrary::TLerp(MantleActualStartOffset, horizontal_transform, xy_correction_alpha);
+	ULmLogger::LogWarning(FString::Printf(TEXT("hLerp: %s"), *horizontal_lerp.ToString()), 0.0f, false);
 
-	//Blend from the currently blending transforms into the final mantle target using the X value of the Position/Correction Curve.
-	const auto t2 = UKismetMathLibrary::TLerp(MantleTarget + t1, MantleTarget, positionAlpha);
 
-	//Initial Blend In (controlled in the time line curve) to allow the actor to blend into the Position/Correction curve at the mid point. This prevents pops when mantling an object lower than the animated mantle.
-	const auto lerpedTarget = UKismetMathLibrary::TLerp(MantleTarget + MantleActualStartOffset, t2, BlendIn);
+	//	/*Blend into the animated vertical offset using the Z value of the Position/Correction Curve.*/
+	auto vertical_transform = FTransform();
+	vertical_transform.SetLocation(FVector(MantleActualStartOffset.GetLocation().X, MantleActualStartOffset.GetLocation().Y, MantleAnimatedStartOffset.GetLocation().Z));
+	vertical_transform.SetRotation(MantleActualStartOffset.GetRotation());
+	vertical_transform.SetScale3D(FVector::OneVector);
 
-	//Step 4: Set the actors location and rotation to the Lerped Target.
-	SetActorLocationRotationUpdateTarget(lerpedTarget.GetLocation(), lerpedTarget.Rotator(), false, false);
+	FTransform vertical_lerp = UKismetMathLibrary::TLerp(MantleActualStartOffset, vertical_transform, z_correction_alpha);
+	ULmLogger::LogWarning(FString::Printf(TEXT("vLerp: %s"), *vertical_lerp.ToString()), 0.0f, false);
+
+	//creating the mix transform
+	FTransform horizontal_vertical_mix = FTransform();
+	horizontal_vertical_mix.SetLocation(FVector(horizontal_lerp.GetLocation().X, horizontal_lerp.GetLocation().Y, vertical_lerp.GetLocation().Z));
+	horizontal_vertical_mix.SetRotation(horizontal_lerp.GetRotation());
+	horizontal_vertical_mix.SetScale3D(FVector::OneVector);
+
+	//	/*Blend from the currently blending transforms into the final mantle target using the X value of the Position/Correction Curve.*/
+	FTransform semi_final_lerp = UKismetMathLibrary::TLerp(ULmHelpers::AddTransform(mantle_target, horizontal_vertical_mix), mantle_target, position_alpha);
+	ULmLogger::LogWarning(FString::Printf(TEXT("semi-final lerp: %s"), *semi_final_lerp.ToString()), 0.0f, false);
+
+	//	/*Initial Blend In (controlled in the timeline curve) to allow the actor to blend into the Position/Correction curve at the midoint. This prevents pops when mantling an object lower than the animated mantle.*/
+	FTransform lerped_target = UKismetMathLibrary::TLerp(ULmHelpers::AddTransform(mantle_target, MantleActualStartOffset), semi_final_lerp, BlendIn);
+
+	/*Step 4: Set the actors location and rotation to the Lerped Target.*/
+	SetActorLocationRotationUpdateTarget(lerped_target.GetLocation(), lerped_target.Rotator());
 }
 
 void ALmBaseCharacter::MantleEnd() {
 	GetCharacterMovement()->SetMovementMode(MOVE_Walking, 0);
+
+	if (bUseSlomoOnMantling)
+		UGameplayStatics::SetGlobalTimeDilation(this, 1.0f);
 }
 
 bool ALmBaseCharacter::CapsuleHasRoomCheck(UCapsuleComponent* Capsule, const FVector TargetLocation, const float HeightOffset, const float RadiusOffset, const TEnumAsByte<EDrawDebugTrace::Type> DebugType) {
@@ -1151,9 +1169,9 @@ void ALmBaseCharacter::SetActorLocationDuringRagdoll() {
 
 	if (bRagdollOnGround) {
 		float Z = targetRagdollLocation.Z + GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - FMath::Abs(HitResult.ImpactPoint.Z - HitResult.TraceStart.Z) + 2;
-		SetActorLocationRotationUpdateTarget(FVector(targetRagdollLocation.X, targetRagdollLocation.Y, Z), targetRagdollRotation, false, false);
+		SetActorLocationRotationUpdateTarget(FVector(targetRagdollLocation.X, targetRagdollLocation.Y, Z), targetRagdollRotation);
 	} else {
-		SetActorLocationRotationUpdateTarget(targetRagdollLocation, targetRagdollRotation, false, false);
+		SetActorLocationRotationUpdateTarget(targetRagdollLocation, targetRagdollRotation);
 	}
 }
 
