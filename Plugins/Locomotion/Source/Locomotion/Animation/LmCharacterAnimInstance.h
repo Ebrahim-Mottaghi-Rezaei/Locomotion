@@ -21,9 +21,10 @@ public:
 	ULmCharacterAnimInstance();
 protected:
 #pragma region Variables
-	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Locomotion|General")
-		ALmBaseCharacter* Character;
 	float DeltaTimeX = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|General")
+		ALmBaseCharacter* Character;
 	//Character Information
 	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|General")
 		FRotator AimingRotation = FRotator::ZeroRotator;
@@ -44,9 +45,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|General")
 		float MovementInputAmount = 0.0f;;
 	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|General")
-		float AimYawRate = 0.0f;;
+		float AimYawRate = 0.0f;
 	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|General")
-		float ZoomAmount = 0.0f;;
+		float ZoomAmount = 0.0f;
 	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|General")
 		ELmMovementState MovementState = ELmMovementState::Lm_None;
 	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|General")
