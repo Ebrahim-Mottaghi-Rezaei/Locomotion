@@ -13,7 +13,7 @@ class LOCOMOTION_API ULmFootStepAnimNotify : public UAnimNotify {
 protected:
 	ULmFootStepAnimNotify();
 
-	UPROPERTY(BlueprintReadWrite, EditInstanceOnly, Category = "Locomotion")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Locomotion")
 		USoundBase* Sound;
 	UPROPERTY(BlueprintReadWrite, EditInstanceOnly, Category = "Locomotion")
 		FName AttachPointName = FName(TEXT("root"));
