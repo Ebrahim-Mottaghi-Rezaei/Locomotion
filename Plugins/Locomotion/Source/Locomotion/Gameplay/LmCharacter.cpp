@@ -422,8 +422,9 @@ void ALmCharacter::UpdateColoringSystem() {
 	if (IsValid(pc) && pc->GetClass()->ImplementsInterface(ULmControllerInterface::StaticClass())) {
 		const auto debugInfo = ILmControllerInterface::Execute_GetDebugInfo(pc);
 		if (debugInfo.bShowLayerColors && GetMesh()->IsVisible()) {
-			bUpdateColoringSystemDoOnceFlag = true;
 			UpdateLayeringColors();
+
+			bUpdateColoringSystemDoOnceFlag = true;
 		} else if (bUpdateColoringSystemDoOnceFlag) {
 			bUpdateColoringSystemDoOnceFlag = false;
 			SetResetColors();
@@ -437,21 +438,23 @@ void ALmCharacter::UpdateLayeringColors() {
 	Torso->SetVectorParameterValue(FName(TEXT("BaseColor")), LerpColors2Level(OverlayLayerColor, AdditiveAmountColor, BaseLayerColor, FName("Layering_Spine_Add"), FName("Layering_Spine")));
 
 	Pelvis->SetVectorParameterValue(FName(TEXT("BaseColor")), UKismetMathLibrary::LinearColorLerp(BaseLayerColor, AdditiveAmountColor, GetAnimCurveValue(FName("Layering_Pelvis"))));
-	UpperLegs->SetVectorParameterValue(FName(TEXT("BaseColor")), UKismetMathLibrary::LinearColorLerp(BaseLayerColor, AdditiveAmountColor, GetAnimCurveValue(FName("Layering_Legs"))));
-	LowerLegs->SetVectorParameterValue(FName(TEXT("BaseColor")), UKismetMathLibrary::LinearColorLerp(BaseLayerColor, AdditiveAmountColor, GetAnimCurveValue(FName("Layering_Legs"))));
-	Feet->SetVectorParameterValue(FName(TEXT("BaseColor")), UKismetMathLibrary::LinearColorLerp(BaseLayerColor, AdditiveAmountColor, GetAnimCurveValue(FName("Layering_Legs"))));
 
-	Shoulder_L->SetVectorParameterValue(FName(TEXT("BaseColor")), LerpColors2Level(OverlayLayerColor, AdditiveAmountColor, BaseLayerColor, FName("Layering_Arm_L_Add"), FName("Layering_Arm_L")));
-	UpperArm_L->SetVectorParameterValue(FName(TEXT("BaseColor")), LerpColors2Level(OverlayLayerColor, AdditiveAmountColor, BaseLayerColor, FName("Layering_Arm_L_Add"), FName("Layering_Arm_L")));
-	LowerArm_L->SetVectorParameterValue(FName(TEXT("BaseColor")), LerpColors2Level(OverlayLayerColor, AdditiveAmountColor, BaseLayerColor, FName("Layering_Arm_L_Add"), FName("Layering_Arm_L")));
-	const auto A = LowerArm_L->K2_GetVectorParameterValue(FName("BaseColor"));
-	Hand_L->SetVectorParameterValue(FName(TEXT("BaseColor")), LerpColors2Level(A, HandColor, HandIKColor, FName("Layering_Hand_L"), FName("Enable_HandIK_L")));
+	const auto lower_body_color = UKismetMathLibrary::LinearColorLerp(BaseLayerColor, AdditiveAmountColor, GetAnimCurveValue(FName("Layering_Legs")));
+	UpperLegs->SetVectorParameterValue(FName(TEXT("BaseColor")), lower_body_color);
+	LowerLegs->SetVectorParameterValue(FName(TEXT("BaseColor")), lower_body_color);
+	Feet->SetVectorParameterValue(FName(TEXT("BaseColor")), lower_body_color);
 
-	Shoulder_R->SetVectorParameterValue(FName(TEXT("BaseColor")), LerpColors2Level(OverlayLayerColor, AdditiveAmountColor, BaseLayerColor, FName("Layering_Arm_R_Add"), FName("Layering_Arm_R")));
-	UpperArm_R->SetVectorParameterValue(FName(TEXT("BaseColor")), LerpColors2Level(OverlayLayerColor, AdditiveAmountColor, BaseLayerColor, FName("Layering_Arm_R_Add"), FName("Layering_Arm_R")));
-	LowerArm_R->SetVectorParameterValue(FName(TEXT("BaseColor")), LerpColors2Level(OverlayLayerColor, AdditiveAmountColor, BaseLayerColor, FName("Layering_Arm_R_Add"), FName("Layering_Arm_R")));
-	const auto B = LowerArm_R->K2_GetVectorParameterValue(FName("BaseColor"));
-	Hand_R->SetVectorParameterValue(FName(TEXT("BaseColor")), LerpColors2Level(B, HandColor, HandIKColor, FName("Layering_Hand_R"), FName("Enable_HandIK_R")));
+	const auto upper_body_left_color = LerpColors2Level(OverlayLayerColor, AdditiveAmountColor, BaseLayerColor, FName("Layering_Arm_L_Add"), FName("Layering_Arm_L"));
+	Shoulder_L->SetVectorParameterValue(FName(TEXT("BaseColor")), upper_body_left_color);
+	UpperArm_L->SetVectorParameterValue(FName(TEXT("BaseColor")), upper_body_left_color);
+	LowerArm_L->SetVectorParameterValue(FName(TEXT("BaseColor")), upper_body_left_color);
+	Hand_L->SetVectorParameterValue(FName(TEXT("BaseColor")), LerpColors2Level2(upper_body_left_color, HandColor, HandIKColor, FName("Layering_Hand_L"), FName("Enable_HandIK_L")));
+
+	const auto upper_body_right_color = LerpColors2Level(OverlayLayerColor, AdditiveAmountColor, BaseLayerColor, FName("Layering_Arm_R_Add"), FName("Layering_Arm_R"));
+	Shoulder_R->SetVectorParameterValue(FName(TEXT("BaseColor")), upper_body_right_color);
+	UpperArm_R->SetVectorParameterValue(FName(TEXT("BaseColor")), upper_body_right_color);
+	LowerArm_R->SetVectorParameterValue(FName(TEXT("BaseColor")), upper_body_right_color);
+	Hand_R->SetVectorParameterValue(FName(TEXT("BaseColor")), LerpColors2Level2(upper_body_right_color, HandColor, HandIKColor, FName("Layering_Hand_R"), FName("Enable_HandIK_R")));
 }
 
 void ALmCharacter::UpdateHeldObject() {
@@ -666,6 +669,14 @@ FLinearColor ALmCharacter::LerpColors2Level(const FLinearColor L1A, const FLinea
 	const float alpha1 = GetAnimCurveValue(L1Name);
 	const float alpha2 = GetAnimCurveValue(L2Name);
 
-	const auto tmpColor = UKismetMathLibrary::LinearColorLerp(L1A, L2A, alpha1);
-	return UKismetMathLibrary::LinearColorLerp(L2A, tmpColor, alpha2);
+	const auto l2_b = UKismetMathLibrary::LinearColorLerp(L1A, L1B, alpha1);
+	return UKismetMathLibrary::LinearColorLerp(L2A, l2_b, alpha2);
+}
+
+FLinearColor ALmCharacter::LerpColors2Level2(const FLinearColor L1A, const FLinearColor L1B, const FLinearColor L2B, const FName L1Name, const FName L2Name) {
+	const float alpha1 = GetAnimCurveValue(L1Name);
+	const float alpha2 = GetAnimCurveValue(L2Name);
+
+	const auto l2_a = UKismetMathLibrary::LinearColorLerp(L1A, L1B, alpha1);
+	return UKismetMathLibrary::LinearColorLerp(l2_a, L2B, alpha2);
 }

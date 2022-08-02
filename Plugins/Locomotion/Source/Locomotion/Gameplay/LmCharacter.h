@@ -83,13 +83,13 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Locomotion|Styling|Colors")
 		FLinearColor GlovesColor = FColor::FromHex("A0AF84FF");
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Locomotion|Styling|Colors")
-		FLinearColor BaseLayerColor = FLinearColor::White;
+		FLinearColor BaseLayerColor = FLinearColor::Black;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Locomotion|Styling|Colors")
-		FLinearColor OverlayLayerColor = FLinearColor(0.027282f, 0.840056f, 1.0f);
+		FLinearColor OverlayLayerColor = FLinearColor::White;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Locomotion|Styling|Colors")
-		FLinearColor AdditiveAmountColor = FLinearColor(1.0f, 0.889943f, 0.108294f);
+		FLinearColor AdditiveAmountColor = FLinearColor::Red;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Locomotion|Styling|Colors")
-		FLinearColor HandColor = FLinearColor(0.583333f, 0.18893f, 0.115451f);
+		FLinearColor HandColor = FColor::FromHex(TEXT("00D5FFFF"));
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Locomotion|Styling|Colors")
 		FLinearColor HandIKColor = FColor::Green;
 
@@ -192,7 +192,8 @@ protected:
 	virtual void RagdollEnd() override;
 	virtual void ToggleCharacterMesh();
 	virtual void SetCharacterMesh(ELmCharacterMeshStyle MeshType);
-	virtual FLinearColor LerpColors2Level(FLinearColor L1A, FLinearColor L1B, FLinearColor L2A, FName L1Name, FName L2Name);
+	virtual FLinearColor LerpColors2Level(const FLinearColor L1A, const  FLinearColor L1B, const  FLinearColor L2A, const  FName L1Name, const  FName L2Name);
+	virtual FLinearColor LerpColors2Level2(const FLinearColor L1A, const FLinearColor L1B, const FLinearColor L2B, const FName L1Name, const FName L2Name);
 private:
 	bool bUpdateColoringSystemDoOnceFlag;
 };
