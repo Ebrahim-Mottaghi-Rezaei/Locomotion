@@ -893,9 +893,6 @@ void ALmBaseCharacter::LimitRotation(float AimYawMin, float AimYawMax, float Int
 
 void ALmBaseCharacter::SetActorLocationRotationUpdateTarget(FVector NewLocation, FRotator NewRotation) {
 	TargetRotation = NewRotation;
-
-	ULmLogger::LogInfo(FString::Printf(TEXT("TargetLocation: %s, TargetRotation: %s"), *NewLocation.ToString(), *TargetRotation.ToString()), 0.0f, false);
-
 	SetActorLocationAndRotation(NewLocation, TargetRotation, false);
 }
 
@@ -1014,15 +1011,11 @@ void ALmBaseCharacter::MantleUpdate(const float BlendIn) {
 	/*Step 1: Continually update the mantle target from the stored local transform to follow along with moving objects.*/
 	auto mantle_target = ULmHelpers::LocalSpaceToWorldSpace(MantleLedgeLS).Transform;
 
-	ULmLogger::LogWarning(FString::Printf(TEXT("mantle_target: %s"), *mantle_target.ToString()), 0.0f, false);
-
 	/*Step 2: Update the Position and Correction Alphas using the Position/Correction curve set for each Mantle.*/
 	FVector alphas = MantleParams.PositionCorrectionCurve->GetVectorValue(MantleParams.StartingPosition + mantleTimeline.GetPlaybackPosition());
 	const float position_alpha = alphas.X;
 	const float xy_correction_alpha = alphas.Y;
 	const float z_correction_alpha = alphas.Z;
-
-	ULmLogger::LogWarning(FString::Printf(TEXT("alphas: %s"), *alphas.ToString()), 0.0f, false);
 
 	/*Step 3: Lerp multiple transforms together for independent control over the horizontal and vertical blend to the animated start position, as well as the target position.*/
 	//	/*Blend into the animated horizontal and rotation offset using the Y value of the Position/Correction Curve.*/
@@ -1032,8 +1025,6 @@ void ALmBaseCharacter::MantleUpdate(const float BlendIn) {
 	horizontal_transform.SetScale3D(FVector::OneVector);
 
 	FTransform horizontal_lerp = UKismetMathLibrary::TLerp(MantleActualStartOffset, horizontal_transform, xy_correction_alpha);
-	ULmLogger::LogWarning(FString::Printf(TEXT("hLerp: %s"), *horizontal_lerp.ToString()), 0.0f, false);
-
 
 	//	/*Blend into the animated vertical offset using the Z value of the Position/Correction Curve.*/
 	auto vertical_transform = FTransform();
@@ -1042,7 +1033,6 @@ void ALmBaseCharacter::MantleUpdate(const float BlendIn) {
 	vertical_transform.SetScale3D(FVector::OneVector);
 
 	FTransform vertical_lerp = UKismetMathLibrary::TLerp(MantleActualStartOffset, vertical_transform, z_correction_alpha);
-	ULmLogger::LogWarning(FString::Printf(TEXT("vLerp: %s"), *vertical_lerp.ToString()), 0.0f, false);
 
 	//creating the mix transform
 	FTransform horizontal_vertical_mix = FTransform();
@@ -1052,7 +1042,6 @@ void ALmBaseCharacter::MantleUpdate(const float BlendIn) {
 
 	//	/*Blend from the currently blending transforms into the final mantle target using the X value of the Position/Correction Curve.*/
 	FTransform semi_final_lerp = UKismetMathLibrary::TLerp(ULmHelpers::AddTransform(mantle_target, horizontal_vertical_mix), mantle_target, position_alpha);
-	ULmLogger::LogWarning(FString::Printf(TEXT("semi-final lerp: %s"), *semi_final_lerp.ToString()), 0.0f, false);
 
 	//	/*Initial Blend In (controlled in the timeline curve) to allow the actor to blend into the Position/Correction curve at the midoint. This prevents pops when mantling an object lower than the animated mantle.*/
 	FTransform lerped_target = UKismetMathLibrary::TLerp(ULmHelpers::AddTransform(mantle_target, MantleActualStartOffset), semi_final_lerp, BlendIn);
