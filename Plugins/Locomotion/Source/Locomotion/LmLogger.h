@@ -6,6 +6,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "LmLogger.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LocomotionPlugin, All, All);
+
 UCLASS()
 class LOCOMOTION_API ULmLogger : public UBlueprintFunctionLibrary {
 	GENERATED_BODY()

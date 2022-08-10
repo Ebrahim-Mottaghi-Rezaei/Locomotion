@@ -65,4 +65,9 @@ protected:
 		FString GetAnimCurvesNames() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Locomotion")
 		FText GetAnimCurvesValues() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Locomotion")
+		FText GetFrameRate() const;
+
+private:
+	float dt;
 };

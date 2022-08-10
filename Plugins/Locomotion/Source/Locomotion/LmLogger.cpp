@@ -1,22 +1,24 @@
 #include "LMLogger.h"
 
+DEFINE_LOG_CATEGORY(LocomotionPlugin);
+
 void ULmLogger::LogInfo(const FString Message, const float duration, const bool PrintOnScreen) {
 	if (GEngine && PrintOnScreen)
-		GEngine->AddOnScreenDebugMessage(-1, duration, FColor::Cyan, FString::Printf(TEXT("Locomotion plugin| %s"), *Message));
+		GEngine->AddOnScreenDebugMessage(-1, duration, FColor::Cyan, *Message);
 
-	UE_LOG(LogTemp, Display, TEXT("Locomotion plugin| %s"), *Message);
+	UE_LOG(LocomotionPlugin, Display, TEXT("%s"), *Message);
 }
 
 void ULmLogger::LogWarning(const FString Message, const float duration, const bool PrintOnScreen) {
 	if (GEngine && PrintOnScreen)
-		GEngine->AddOnScreenDebugMessage(-1, duration, FColor::Orange, FString::Printf(TEXT("Locomotion plugin| %s"), *Message));
+		GEngine->AddOnScreenDebugMessage(-1, duration, FColor::Orange, *Message);
 
-	UE_LOG(LogTemp, Warning, TEXT("Locomotion plugin| %s"), *Message);
+	UE_LOG(LocomotionPlugin, Warning, TEXT("%s"), *Message);
 }
 
 void ULmLogger::LogError(const FString Message, const float duration, const bool PrintOnScreen) {
 	if (GEngine && PrintOnScreen)
-		GEngine->AddOnScreenDebugMessage(-1, duration, FColor::Red, FString::Printf(TEXT("Locomotion plugin| %s"), *Message));
+		GEngine->AddOnScreenDebugMessage(-1, duration, FColor::Red, *Message);
 
-	UE_LOG(LogTemp, Error, TEXT("Locomotion plugin| %s"), *Message);
+	UE_LOG(LocomotionPlugin, Error, TEXT("%s"), *Message);
 }

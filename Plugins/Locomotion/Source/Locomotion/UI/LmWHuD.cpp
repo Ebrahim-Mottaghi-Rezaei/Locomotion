@@ -14,6 +14,8 @@
 void ULmWHuD::NativeTick(const FGeometry& MovieSceneBlends, float InDeltaTime) {
 	Super::NativeTick(MovieSceneBlends, InDeltaTime);
 
+	dt = InDeltaTime;
+
 	const auto pc = GetOwningPlayer();
 	if (pc->GetClass()->ImplementsInterface(ULmControllerInterface::StaticClass())) {
 		const auto info = ILmControllerInterface::Execute_GetDebugInfo(pc);
@@ -142,4 +144,8 @@ FText ULmWHuD::GetAnimCurvesValues() const {
 	}
 
 	return FText::FromString(value);
+}
+
+FText ULmWHuD::GetFrameRate() const {
+	return FText::FromString(FString::SanitizeFloat(FMath::Floor(1.0f / dt)));
 }
