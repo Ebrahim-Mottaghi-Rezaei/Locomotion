@@ -1,6 +1,3 @@
-
-
-
 #include "LmHelpers.h"
 #include <Kismet/KismetMathLibrary.h>
 #include <Components/SkeletalMeshComponent.h>
@@ -40,22 +37,18 @@ float ULmHelpers::GetDistanceBetweenTwoSocketsAndMapRange(const USkeletalMeshCom
 	return 0.f;
 }
 
-void ULmHelpers::SetFVectorByRef(FVector& Vector, FVector NewValue) {
-	Vector.X = NewValue.X;
-	Vector.Y = NewValue.Y;
-	Vector.Z = NewValue.Z;
-}
-
-void ULmHelpers::SetFRotatorByRef(FRotator& Rotator, FRotator NewValue) {
-	Rotator.Pitch = NewValue.Pitch;
-	Rotator.Roll = NewValue.Roll;
-	Rotator.Yaw = NewValue.Yaw;
-}
-
 FString ULmHelpers::Bool2String(bool bValue) {
 	return bValue ? TEXT("Yes") : TEXT("No");
 }
 
 FString ULmHelpers::Bool2String(bool bValue, FString trueText, FString falseText) {
 	return bValue ? trueText : falseText;
+}
+
+ELmStateTracking ULmHelpers::GetStateTracking(bool now, bool former) {
+	if (now == former) {
+		return now ? ELmStateTracking::Lm_WhileTrue : ELmStateTracking::Lm_WhileFalse;
+	}
+
+	return now ? ELmStateTracking::Lm_ChangedToTrue : ELmStateTracking::Lm_ChangedToFalse;
 }

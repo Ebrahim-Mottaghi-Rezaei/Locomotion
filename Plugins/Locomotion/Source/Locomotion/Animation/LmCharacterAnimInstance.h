@@ -21,7 +21,7 @@ public:
 	ULmCharacterAnimInstance();
 protected:
 #pragma region Variables
-	float DeltaTimeX = 0.0f;
+	float delta_time = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|General")
 		ALmBaseCharacter* Character;
@@ -186,27 +186,15 @@ protected:
 		float Head_Add = 0.0f;
 	//Anim Graph - Foot IK
 	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|Anim Graph - Foot IK")
-		float FootLock_L_Alpha = 0.0f;
+		FLmFootLock FootLock_L;
 	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|Anim Graph - Foot IK")
-		float FootLock_R_Alpha = 0.0f;
+		FLmFootLock FootLock_R;
 	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|Anim Graph - Foot IK")
-		FVector FootLock_L_Location = FVector::ZeroVector;
+		FLmFootOffset FootOffsets_L;
 	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|Anim Graph - Foot IK")
-		FVector FootLock_R_Location = FVector::ZeroVector;
+		FLmFootOffset FootOffsets_R;
 	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|Anim Graph - Foot IK")
-		FRotator FootLock_L_Rotation = FRotator::ZeroRotator;
-	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|Anim Graph - Foot IK")
-		FRotator FootLock_R_Rotation = FRotator::ZeroRotator;
-	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|Anim Graph - Foot IK")
-		FVector FootOffset_L_Location = FVector::ZeroVector;
-	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|Anim Graph - Foot IK")
-		FVector FootOffset_R_Location = FVector::ZeroVector;
-	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|Anim Graph - Foot IK")
-		FRotator FootOffset_L_Rotation = FRotator::ZeroRotator;
-	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|Anim Graph - Foot IK")
-		FRotator FootOffset_R_Rotation = FRotator::ZeroRotator;
-	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|Anim Graph - Foot IK")
-		FVector PelvisOffset = FVector::ZeroVector;
+		FVector PelvisOffset;
 	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|Anim Graph - Foot IK")
 		float PelvisAlpha = 0.0f;
 	//Turn In Place
@@ -316,85 +304,83 @@ protected:
 	//Global Scope
 	virtual void ResetIKOffsets();
 	//Update Values
-	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Update Values")
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Update Values")
 		virtual void UpdateCharacterInfo();
-	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Update Values")
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Update Values")
 		virtual void UpdateAimingValues();
-	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Update Values")
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Update Values")
 		virtual void UpdateLayerValues();
-	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Update Values")
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Update Values")
 		virtual void UpdateFootIK();
-	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Update Values")
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Update Values")
 		virtual void UpdateMovementValues();
-	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Update Values")
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Update Values")
 		virtual void UpdateRotationValues();
-	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Update Values")
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Update Values")
 		virtual void UpdateInAirValues();
-	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Update Values")
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Update Values")
 		virtual void UpdateRagdollValues();
 	//Grounded
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Grounded")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Grounded")
 		virtual bool ShouldMoveCheck();
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Grounded")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Grounded")
 		virtual bool CanTurnInPlace();
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Grounded")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Grounded")
 		virtual bool CanRotateInPlace();
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Grounded")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Grounded")
 		virtual bool CanDynamicTransition();
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Grounded")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Grounded")
 		virtual bool CanOverlayTransition();
-	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Grounded")
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Grounded")
 		virtual void TurnInPlace(FRotator TargetRotation, float PlayRateScale, float StartTime, bool bOverrideCurrent);
-	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Grounded")
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Grounded")
 		virtual void TurnInPlaceCheck();
-	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Grounded")
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Grounded")
 		virtual void RotateInPlaceCheck();
-	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Grounded")
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Grounded")
 		virtual void DynamicTransitionCheck();
 	//Movement
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Movement")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Movement")
 		virtual FLmVelocityBlend CalculateVelocityBlend();
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Movement")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Movement")
 		virtual float CalculateDiagonalScaleAmount();
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Movement")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Movement")
 		virtual FVector CalculateRelativeAccelerationAmount();
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Movement")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Movement")
 		virtual float CalculateWalkRunBlend();
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Movement")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Movement")
 		virtual float CalculateStrideBlend();
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Movement")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Movement")
 		virtual float CalculateStandingPlayRate();
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Movement")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Movement")
 		virtual float CalculateCrouchingPlayRate();
 	//In Air
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|In Air")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|In Air")
 		virtual float CalculateLandPrediction();
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|In Air")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|In Air")
 		virtual FLmLeanAmount CalculateInAirLeanAmount();
 	//Foot IK
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Foot IK")
-		virtual void SetFootOffsets(FName EnableFootIKCurve, FName IKFootBone, FName RootBone, FVector& CurrentLocationTarget, FVector& CurrentLocationOffset, FRotator& CurrentRotationOffset);
+		virtual FLmFootOffset SetFootOffsets(FName EnableFootIKCurve, FName IKFootBone, FName RootBone, FLmFootOffset params);
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Foot IK")
-		virtual void SetPelvisIKOffset(FVector FootOffset_L_Target, FVector FootOffset_R_Target);
+		virtual void UpdatePelvisIKOffset(FVector FootOffset_L_Target, FVector FootOffset_R_Target);
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Foot IK")
-		virtual void SetFootLocking(FName Enable_FootIK_Curve, FName FootLockCurve, FName IKFootBone, float& CurrentFootLockAlpha, FVector& CurrentFootLockLocation, FRotator& CurrentFootLockRotation);
-	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Foot IK")
-		virtual void SetFootLockOffsets(FVector& LocalLocation, FRotator& LocalRotation);
+		virtual FLmFootLock UpdateFootLock(FName Enable_FootIK_Curve, FName FootLockCurve, FName IKFootBone, FLmFootLock lastValue);
 	//Rotation
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Rotation")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Rotation")
 		virtual ELmMovementDirection CalculateMovementDirection();
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Rotation")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Rotation")
 		virtual ELmMovementDirection CalculateQuadrant(ELmMovementDirection Current, float FR_Threshold, float FL_Threshold, float BR_Threshold, float BL_Threshold, float buffer, float angle);
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Rotation")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Rotation")
 		virtual bool AngleInRange(float angle, float minAngle, float maxAngle, float buffer, bool IncreaseBuffer);
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Rotation")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Rotation")
 		virtual FLmVelocityBlend InterpVelocityBlend(FLmVelocityBlend current, FLmVelocityBlend target, float interpSpeed, float deltaTime);
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Rotation")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Rotation")
 		virtual FLmLeanAmount InterpLeanAmount(FLmLeanAmount& current, FLmLeanAmount& target, float interpSpeed, float deltaTime);
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Notify Events")
 		void Response_AnimNotifyPivot();
 	//Debug
-	UFUNCTION(BlueprintPure, Category = "Locomotion|Anim Instance|Debug")
+	UFUNCTION(BlueprintPure, Category = "Locomotion|Debug")
 		virtual TEnumAsByte<EDrawDebugTrace::Type> GetDebugTraceType(TEnumAsByte<EDrawDebugTrace::Type> ShowTraceType);
 
 	//Custom Events
@@ -404,23 +390,21 @@ protected:
 	FTimerHandle JumpedHandle;
 
 	//Play Additive Transition Animation
-	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Custom Events")
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Custom Events")
 		void PlayTransition(FLmDynamicMontageParams params);
 	//Play Dynamic Additive Transition Animation
-	UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Custom Events")
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Custom Events")
 		void PlayDynamicTransition(float ReTriggerDelay, FLmDynamicMontageParams Parameters);
 	//Interface Events
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Locomotion|Anim Instance|Interface Calls")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Locomotion|Interface Calls")
 		void Jumped();
 	virtual void Jumped_Implementation() override;
-	/*UFUNCTION(BlueprintCallable, Category = "Locomotion|Anim Instance|Interface Calls")
-		void JumpedReset();*/
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Locomotion|Anim Instance|Interface Calls")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Locomotion|Interface Calls")
 		void SetGroundedEntryState(ELmGroundedEntryState NewState);
 	virtual void SetGroundedEntryState_Implementation(ELmGroundedEntryState NewState) override;
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Locomotion|Anim Instance|Interface Calls")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Locomotion|Interface Calls")
 		void SetOverlayOverrideState(int NewState);
 	virtual void SetOverlayOverrideState_Implementation(int NewState) override;
 

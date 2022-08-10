@@ -23,8 +23,10 @@ public:
 protected:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
 		FName ProfileName = FName("ALS_Character");
+
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
-		bool bUseSlomoOnMantling;
+		UTimelineComponent* mantleTimeline;
+
 	//You should look it up in the GameTraceChannel in DefaultEngine.ini
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
 		TEnumAsByte<ECollisionChannel> ECC_Climbable = ECollisionChannel::ECC_GameTraceChannel2;
@@ -240,9 +242,8 @@ protected:
 	virtual void UpdateGroundedRotation();
 	virtual void UpdateInAirRotation();
 	virtual void SmoothCharacterRotation(FRotator Target, float TargetInterpSpeedConst, float ActorInterpSpeedSmooth);
-	virtual void AddToCharacterRotation(FRotator DeltaRotation);
 	virtual void LimitRotation(float AimYawMin, float AimYawMax, float InterpSpeed);
-	virtual void SetActorLocationRotationUpdateTarget(FVector NewLocation, FRotator NewRotation);
+	virtual FLmHitResult SetActorLocationRotationUpdateTarget(FVector NewLocation, FRotator NewRotation, bool bSweep, bool bTeleport);
 	UFUNCTION(BlueprintGetter, Category = "Locomotion|Rotation System")
 		virtual float CalculateGroundedRotationRate();
 	UFUNCTION(BlueprintGetter, Category = "Locomotion|Rotation System")
@@ -346,7 +347,6 @@ private:
 
 	TArray<AActor*> IgnoredActors;
 
-	FTimeline mantleTimeline;
 	UAnimInstance* animInstance;
 
 	FTimerHandle timerHandle_Landing;

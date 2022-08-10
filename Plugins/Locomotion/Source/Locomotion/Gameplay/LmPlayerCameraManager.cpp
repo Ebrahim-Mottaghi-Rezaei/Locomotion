@@ -56,7 +56,7 @@ TEnumAsByte<EDrawDebugTrace::Type> ALmPlayerCameraManager::GetDebugTraceType(con
 //Get an Anim Curve value from the Player Camera Behavior AnimBP to use as a parameter in the custom camera behavior calculations
 float ALmPlayerCameraManager::GetCameraBehaviourParam(const FName CurveName) const {
 	if (!CameraBehaviour) {
-		ULmLogger::LogError(TEXT("AALSPlayerCameraManager | Camera Behaviour is null."));
+		ULmLogger::LogError(TEXT("ALmPlayerCameraManager | Camera Behaviour is null."));
 		return 0.0f;
 	}
 

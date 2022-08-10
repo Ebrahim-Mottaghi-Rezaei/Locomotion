@@ -18,8 +18,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Math")
 		static FTransform AddTransform(const FTransform A, const FTransform B);
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Math")
-		static FTransform SubtractTransform(const FTransform A, const FTransform B);
-
+		static FTransform SubtractTransform(FTransform A, FTransform B);
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Math")
 		static FLmComponentAndTransform LocalSpaceToWorldSpace(FLmComponentAndTransform LocalSpace);
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Math")
@@ -42,9 +41,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Animation")
 		static float GetDistanceBetweenTwoSocketsAndMapRange(const USkeletalMeshComponent* Component, const FName SocketOrBoneNameA, ERelativeTransformSpace SocketSpaceA, const FName SocketOrBoneNameB, ERelativeTransformSpace SocketSpaceB, bool bRemapRange, float InRangeMin, float InRangeMax, float OutRangeMin, float OutRangeMax);
 
-	static void SetFVectorByRef(FVector& Vector, FVector NewValue);
-	static void SetFRotatorByRef(FRotator& Rotator, FRotator NewValue);
-
 	static FString Bool2String(bool bValue);
 	static FString Bool2String(bool bValue, FString trueText, FString falseText);
+
+	static ELmStateTracking GetStateTracking(bool now, bool former);
 };

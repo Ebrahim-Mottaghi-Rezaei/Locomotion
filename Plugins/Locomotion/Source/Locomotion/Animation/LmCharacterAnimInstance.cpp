@@ -192,10 +192,10 @@ void ULmCharacterAnimInstance::NativeUpdateAnimation(const float DeltaSeconds) {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
 	//Only update if character is valid
-	if (DeltaSeconds <= 0.001f || !IsValid(Character))
+	if (DeltaSeconds == 0.f || !IsValid(Character))
 		return;
 
-	DeltaTimeX = DeltaSeconds;
+	delta_time = DeltaSeconds;
 
 	//Do Every Frame
 	UpdateCharacterInfo();
@@ -203,70 +203,75 @@ void ULmCharacterAnimInstance::NativeUpdateAnimation(const float DeltaSeconds) {
 	UpdateLayerValues();
 	UpdateFootIK();
 
-	if (MovementState == ELmMovementState::Lm_Grounded) {
-		bShouldMove = ShouldMoveCheck();
+	//ULmLogger::LogInfo(FString::Printf(TEXT("state: %s"), *UEnum::GetValueAsString(MovementState)), 0.1f);
 
-		if (bShouldMove == bShouldMove_Last) {
-			if (bShouldMove) {
-				//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, TEXT("While True"));
+	/*Check Movement Mode*/
+	switch (MovementState) {
+		case ELmMovementState::Lm_Grounded:
+			//Check If Moving Or Not
+			bShouldMove = ShouldMoveCheck();
 
-				//Do While Moving
-				UpdateMovementValues();
-				UpdateRotationValues();
-			} else {
-				//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, TEXT("While False"));
+			switch (ULmHelpers::GetStateTracking(bShouldMove, bShouldMove_Last)) {
+				case ELmStateTracking::Lm_WhileTrue:	/*Do While Moving*/
+					UpdateMovementValues();
+					UpdateRotationValues();
+					break;
+				case ELmStateTracking::Lm_WhileFalse:	/*Do While Not Moving*/
+					if (CanRotateInPlace()) {
+						RotateInPlaceCheck();
+					} else {
+						bRotateL = false;
+						bRotateR = false;
+					}
 
-				//Do While Not Moving
-				if (CanRotateInPlace()) {
-					RotateInPlaceCheck();
-				} else {
+					if (CanTurnInPlace()) {
+						TurnInPlaceCheck();
+					} else {
+						ElapsedDelayTime = 0.0f;
+					}
+
+					if (CanDynamicTransition()) {
+						DynamicTransitionCheck();
+					}
+					break;
+				case ELmStateTracking::Lm_ChangedToTrue:	/*Do When Starting To Move*/
+
+					ElapsedDelayTime = 0.0f;
 					bRotateL = false;
 					bRotateR = false;
-				}
-
-				if (CanTurnInPlace()) {
-					TurnInPlaceCheck();
-				} else {
-					ElapsedDelayTime = 0.0f;
-				}
-
-				if (CanDynamicTransition()) {
-					DynamicTransitionCheck();
-				}
+					break;
+				case ELmStateTracking::Lm_ChangedToFalse:
+				default:
+					break;
 			}
-		} else {
-			if (bShouldMove) {
-				//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Emerald, TEXT("Changed to True"));
 
-				//Do When Starting To Move
-				ElapsedDelayTime = 0.0f;
-				bRotateL = false;
-				bRotateR = false;
-			}
-		}
-
-		bShouldMove_Last = bShouldMove;
-
-	} else if (MovementState == ELmMovementState::Lm_InAir) {
-		//Do While InAir
-		UpdateInAirValues();
-	} else if (MovementState == ELmMovementState::Lm_Ragdoll) {
-		//Do While Rag-dolling
-		UpdateRagdollValues();
+			bShouldMove_Last = bShouldMove;
+			break;
+		case ELmMovementState::Lm_InAir:
+			//Do While InAir
+			UpdateInAirValues();
+			break;
+		case ELmMovementState::Lm_Ragdoll:
+			//Do While Rag-dolling
+			UpdateRagdollValues();
+			break;
+		case ELmMovementState::Lm_None:
+		case ELmMovementState::Lm_Mantling:
+		default:
+			break;
 	}
 }
 
 float ULmCharacterAnimInstance::GetAnimCurveClamped(const FName Name, const float Bias, const float ClampMin, const float ClampMax) {
-	const float value = GetCurveValue(Name);
-	;	return FMath::Clamp(value + Bias, ClampMin, ClampMax);
+	return FMath::Clamp(GetCurveValue(Name) + Bias, ClampMin, ClampMax);
 }
 
 void ULmCharacterAnimInstance::ResetIKOffsets() {
-	FootOffset_L_Location = UKismetMathLibrary::VInterpTo(FootOffset_L_Location, FVector::ZeroVector, DeltaTimeX, 15.0f);
-	FootOffset_R_Location = UKismetMathLibrary::VInterpTo(FootOffset_R_Location, FVector::ZeroVector, DeltaTimeX, 15.0f);
+	FootOffsets_L.LocationOffset = UKismetMathLibrary::VInterpTo(FootOffsets_L.LocationOffset, FVector::ZeroVector, delta_time, 15.0f);
+	FootOffsets_R.LocationOffset = UKismetMathLibrary::VInterpTo(FootOffsets_R.LocationOffset, FVector::ZeroVector, delta_time, 15.0f);
 
-	FootOffset_L_Rotation = UKismetMathLibrary::RInterpTo(FootOffset_L_Rotation, FRotator::ZeroRotator, DeltaTimeX, 15.0f);
-	FootOffset_R_Rotation = UKismetMathLibrary::RInterpTo(FootOffset_R_Rotation, FRotator::ZeroRotator, DeltaTimeX, 15.0f);
+	FootOffsets_L.RotationOffset = UKismetMathLibrary::RInterpTo(FootOffsets_L.RotationOffset, FRotator::ZeroRotator, delta_time, 15.0f);
+	FootOffsets_R.RotationOffset = UKismetMathLibrary::RInterpTo(FootOffsets_R.RotationOffset, FRotator::ZeroRotator, delta_time, 15.0f);
 }
 
 void ULmCharacterAnimInstance::UpdateCharacterInfo() {
@@ -296,7 +301,7 @@ void ULmCharacterAnimInstance::UpdateCharacterInfo() {
 
 void ULmCharacterAnimInstance::UpdateAimingValues() {
 	//Interp the Aiming Rotation value to achieve smooth aiming rotation changes. Interpolating the rotation before calculating the angle ensures the value is not affected by changes in actor rotation, allowing slow aiming rotation changes with fast actor rotation changes.
-	SmoothAimingRotation = UKismetMathLibrary::RInterpTo(SmoothAimingRotation, AimingRotation, DeltaTimeX, SmoothedAimingRotationInterpSpeed);
+	SmoothAimingRotation = UKismetMathLibrary::RInterpTo(SmoothAimingRotation, AimingRotation, delta_time, SmoothedAimingRotationInterpSpeed);
 
 	//Calculate the Aiming angle and Smoothed Aiming Angle by getting the delta between the aiming rotation and the actor rotation.
 	const FRotator actorRotation = Character->GetActorRotation();
@@ -315,7 +320,7 @@ void ULmCharacterAnimInstance::UpdateAimingValues() {
 		if (bHasMovementInput) {
 			const FRotator delta3 = UKismetMathLibrary::NormalizedDeltaRotator(MovementInput.ToOrientationRotator(), actorRotation);
 			const float target = UKismetMathLibrary::MapRangeClamped(delta3.Yaw, -180.0f, 180.0f, 0.0f, 1.0f);
-			InputYawOffsetTime = UKismetMathLibrary::FInterpTo(InputYawOffsetTime, target, DeltaTimeX, InputYawOffsetInterpSpeed);
+			InputYawOffsetTime = UKismetMathLibrary::FInterpTo(InputYawOffsetTime, target, delta_time, InputYawOffsetInterpSpeed);
 		}
 	}
 
@@ -356,26 +361,34 @@ void ULmCharacterAnimInstance::UpdateLayerValues() {
 
 void ULmCharacterAnimInstance::UpdateFootIK() {
 	//Update Foot Locking values.
-	SetFootLocking(FName(TEXT("Enable_FootIK_L")), FName(TEXT("FootLock_L")), FName(TEXT("ik_foot_l")), FootLock_L_Alpha, FootLock_L_Location, FootLock_L_Rotation);
-	SetFootLocking(FName(TEXT("Enable_FootIK_R")), FName(TEXT("FootLock_R")), FName(TEXT("ik_foot_r")), FootLock_R_Alpha, FootLock_R_Location, FootLock_R_Rotation);
+		//Step 1	Updating FootLockings for L/R feet and cache the results
+	FootLock_L = UpdateFootLock(FName(TEXT("Enable_FootIK_L")), FName(TEXT("FootLock_L")), FName(TEXT("ik_foot_l")), FootLock_L);
+	FootLock_R = UpdateFootLock(FName(TEXT("Enable_FootIK_R")), FName(TEXT("FootLock_R")), FName(TEXT("ik_foot_r")), FootLock_R);
 
-	if (MovementState == ELmMovementState::Lm_InAir) {
-		SetPelvisIKOffset(FVector::ZeroVector, FVector::ZeroVector);
-		ResetIKOffsets();
-	} else if (MovementState != ELmMovementState::Lm_Ragdoll) {
-		FVector FootOffsetRTarget;
-		FVector FootOffsetLTarget;
+	switch (MovementState) {
+		case ELmMovementState::Lm_None:
+		case ELmMovementState::Lm_Grounded:
+		case ELmMovementState::Lm_Mantling:
+			//Step 2	Setting FootOffsets for L/R feet and cache the results
+			FootOffsets_L = SetFootOffsets(FName(TEXT("Enable_FootIK_L")), FName(TEXT("ik_foot_l")), FName(TEXT("root")), FootOffsets_L);
+			FootOffsets_R = SetFootOffsets(FName(TEXT("Enable_FootIK_R")), FName(TEXT("ik_foot_r")), FName(TEXT("root")), FootOffsets_R);
 
-		SetFootOffsets(FName(TEXT("Enable_FootIK_L")), FName(TEXT("ik_foot_l")), FName(TEXT("root")), FootOffsetLTarget, FootOffset_L_Location, FootOffset_L_Rotation);
-		SetFootOffsets(FName(TEXT("Enable_FootIK_R")), FName(TEXT("ik_foot_r")), FName(TEXT("root")), FootOffsetRTarget, FootOffset_R_Location, FootOffset_R_Rotation);
-
-		SetPelvisIKOffset(FootOffsetLTarget, FootOffsetRTarget);
+			//Step 3	Setting PelvisIKOffsets using previously cached results
+			UpdatePelvisIKOffset(FootOffsets_L.LocationTarget, FootOffsets_R.LocationTarget);
+			break;
+		case ELmMovementState::Lm_InAir:
+			UpdatePelvisIKOffset(FVector::ZeroVector, FVector::ZeroVector);
+			ResetIKOffsets();
+			break;
+		case ELmMovementState::Lm_Ragdoll:
+		default:
+			break;
 	}
 }
 
 void ULmCharacterAnimInstance::UpdateMovementValues() {
 	//Interp and set the Velocity Blend.
-	VelocityBlend = InterpVelocityBlend(VelocityBlend, CalculateVelocityBlend(), VelocityBlendInterpSpeed, DeltaTimeX);
+	VelocityBlend = InterpVelocityBlend(VelocityBlend, CalculateVelocityBlend(), VelocityBlendInterpSpeed, delta_time);
 
 	//Set the Diagonal Scale Amount.
 	DiagonalScaleAmount = CalculateDiagonalScaleAmount();
@@ -383,7 +396,7 @@ void ULmCharacterAnimInstance::UpdateMovementValues() {
 	//Set the Relative Acceleration Amount and Interpolation the Lean Amount.
 	RelativeAccelerationAmount = CalculateRelativeAccelerationAmount();
 	auto leanAmountTarget = FLmLeanAmount(RelativeAccelerationAmount.X, RelativeAccelerationAmount.Y);
-	LeanAmount = InterpLeanAmount(LeanAmount, leanAmountTarget, GroundedLeanInterpSpeed, DeltaTimeX);
+	LeanAmount = InterpLeanAmount(LeanAmount, leanAmountTarget, GroundedLeanInterpSpeed, delta_time);
 
 	//Set the Walk Run Blend
 	WalkRunBlend = CalculateWalkRunBlend();
@@ -424,7 +437,7 @@ void ULmCharacterAnimInstance::UpdateInAirValues() {
 
 	//Interp and set the In Air Lean Amount
 	auto inAirLeanAmount = CalculateInAirLeanAmount();
-	LeanAmount = InterpLeanAmount(LeanAmount, inAirLeanAmount, InAirLeanInterpSpeed, DeltaTimeX);
+	LeanAmount = InterpLeanAmount(LeanAmount, inAirLeanAmount, InAirLeanInterpSpeed, delta_time);
 }
 
 void ULmCharacterAnimInstance::UpdateRagdollValues() {
@@ -511,7 +524,7 @@ void ULmCharacterAnimInstance::TurnInPlaceCheck() {
 	If so, begin counting the Elapsed Delay Time. If not, reset the Elapsed Delay Time.
 	This ensures the conditions remain true for a sustained peroid of time before turning in place.*/
 	if (AimYawRate < AimYawRateLimit && FMath::Abs(AimingAngle.X)>TurnCheckMinAngle) {
-		ElapsedDelayTime += DeltaTimeX;
+		ElapsedDelayTime += delta_time;
 
 		//Step 2: Check if the Elapsed Delay time exceeds the set delay (mapped to the turn angle range). If so, trigger a Turn In Place.
 		const float tmp = UKismetMathLibrary::MapRangeClamped(FMath::Abs(AimingAngle.X), TurnCheckMinAngle, 180.0f, MinAngleDelay, MaxAngleDelay);
@@ -556,7 +569,6 @@ FLmVelocityBlend ULmCharacterAnimInstance::CalculateVelocityBlend() {
 	const FVector RelativeDirection = LocRelativeVelocityDir / Sum;
 
 	return FLmVelocityBlend(FMath::Clamp(RelativeDirection.X, 0.0f, 1.0f), FMath::Abs(FMath::Clamp(RelativeDirection.X, -1.0f, 0.0f)), FMath::Abs(FMath::Clamp(RelativeDirection.Y, -1.0f, 0.0f)), FMath::Clamp(RelativeDirection.Y, 0.0f, 1.0f));
-
 }
 
 float ULmCharacterAnimInstance::CalculateDiagonalScaleAmount() {
@@ -622,8 +634,7 @@ float ULmCharacterAnimInstance::CalculateLandPrediction() {
 	UKismetSystemLibrary::CapsuleTraceSingleByProfile(this, start, end, capsule->GetUnscaledCapsuleRadius(), capsule->GetUnscaledCapsuleHalfHeight(), FName(TEXT("ALS_Character")), false, toIgnore, GetDebugTraceType(EDrawDebugTrace::ForOneFrame), HitResult, true);
 
 	if (HitResult.bBlockingHit && Character->GetCharacterMovement()->IsWalkable(HitResult))
-		return FMath::Lerp(LandPredictionCurve->GetFloatValue(HitResult.Time), 0.0f,
-			GetCurveValue(FName(TEXT("Mask_LandPrediction"))));
+		return FMath::Lerp(LandPredictionCurve->GetFloatValue(HitResult.Time), 0.0f, GetCurveValue(FName(TEXT("Mask_LandPrediction"))));
 	return 0.0f;
 }
 
@@ -636,45 +647,45 @@ FLmLeanAmount ULmCharacterAnimInstance::CalculateInAirLeanAmount() {
 	return FLmLeanAmount(tmp2.Y, tmp2.X);
 }
 
-void ULmCharacterAnimInstance::SetFootOffsets(FName EnableFootIKCurve, FName IKFootBone, FName RootBone, FVector& CurrentLocationTarget, FVector& CurrentLocationOffset, FRotator& CurrentRotationOffset) {
+FLmFootOffset ULmCharacterAnimInstance::SetFootOffsets(FName EnableFootIKCurve, FName IKFootBone, FName RootBone, FLmFootOffset params) {
 	//Only update Foot IK offset values if the Foot IK curve has a weight. If it equals 0, clear the offset values.
-	if (GetCurveValue(EnableFootIKCurve) <= 0.0f) {
-		ULmHelpers::SetFVectorByRef(CurrentLocationOffset, FVector::ZeroVector);
-		ULmHelpers::SetFRotatorByRef(CurrentRotationOffset, FRotator::ZeroRotator);
-		return;
+	if (GetCurveValue(EnableFootIKCurve) > 0.0f) {
+
+		//Step 1: Trace downward from the foot location to find the geometry. If the surface is walkable, save the Impact Location and Normal.
+		FRotator TargetRotationOffset = FRotator(0.0f, 0.0f, 0.0f);
+
+		const auto tmp = GetOwningComponent()->GetSocketLocation(IKFootBone);
+		const auto IKFootFloorLocation = FVector(tmp.X, tmp.Y, GetOwningComponent()->GetSocketLocation(RootBone).Z);
+		const auto channel = UEngineTypes::ConvertToTraceType(ECC_Visibility);
+
+		FHitResult HitResult;
+		const TArray<AActor*> toIgnore;
+
+		UKismetSystemLibrary::LineTraceSingle(this, IKFootFloorLocation + FVector(0.0f, 0.0f, IK_TraceDistanceAboveFoot), IKFootFloorLocation - FVector(0.0f, 0.0f, IK_TraceDistanceBelowFoot), channel, false, toIgnore, GetDebugTraceType(EDrawDebugTrace::ForOneFrame), HitResult, true);
+
+		if (Character->GetCharacterMovement()->IsWalkable(HitResult)) {
+			//Step 1.1: Find the difference in location from the Impact point and the expected (flat) floor location. These values are offset by the normal multiplied by the foot height to get better behavior on angled surfaces.
+			params.LocationTarget = HitResult.ImpactPoint + HitResult.ImpactNormal * FootHeight - (IKFootFloorLocation + FVector::UpVector * FootHeight);
+
+			//Step 1.2: Calculate the Rotation offset by getting the Atan2 of the Impact Normal.
+			TargetRotationOffset = FRotator(-UKismetMathLibrary::DegAtan2(HitResult.ImpactNormal.X, HitResult.ImpactNormal.Z), 0.0f, UKismetMathLibrary::DegAtan2(HitResult.ImpactNormal.Y, HitResult.ImpactNormal.Z));
+		}
+
+		//Step 2: Interp the Current Location Offset to the new target value. Interpolate at different speeds based on whether the new target is above or below the current one.
+		params.LocationOffset = UKismetMathLibrary::VInterpTo(params.LocationOffset, params.LocationTarget, delta_time, params.LocationOffset.Z > params.LocationTarget.Z ? 30.0f : 15.0f);
+
+		//Step 3: Interp the Current Rotation Offset to the new target value.
+		params.RotationOffset = UKismetMathLibrary::RInterpTo(params.RotationOffset, TargetRotationOffset, delta_time, 30.0f);
+
+	} else {
+		params.LocationOffset = FVector::ZeroVector;
+		params.RotationOffset = FRotator::ZeroRotator;
 	}
 
-
-	//Step 1: Trace downward from the foot location to find the geometry. If the surface is walkable, save the Impact Location and Normal.
-	FRotator TargetRotationOffset = FRotator(0.0f, 0.0f, 0.0f);
-
-	const auto tmp = GetOwningComponent()->GetSocketLocation(IKFootBone);
-	const auto IKFootFloorLocation = FVector(tmp.X, tmp.Y, GetOwningComponent()->GetSocketLocation(RootBone).Z);
-	const auto channel = UEngineTypes::ConvertToTraceType(ECC_Visibility);
-
-	FHitResult HitResult;
-	const TArray<AActor*> toIgnore;
-
-	UKismetSystemLibrary::LineTraceSingle(this, IKFootFloorLocation + FVector(0.0f, 0.0f, IK_TraceDistanceAboveFoot), IKFootFloorLocation - FVector(0.0f, 0.0f, IK_TraceDistanceBelowFoot), channel, false, toIgnore, GetDebugTraceType(EDrawDebugTrace::ForOneFrame), HitResult, true);
-
-	if (Character->GetCharacterMovement()->IsWalkable(HitResult)) {
-		//Step 1.1: Find the difference in location from the Impact point and the expected (flat) floor location. These values are offset by the normal multiplied by the foot height to get better behavior on angled surfaces.
-		const auto tmpVector = HitResult.ImpactPoint + HitResult.ImpactNormal * FootHeight - (IKFootFloorLocation + FVector::UpVector * FootHeight);
-
-		ULmHelpers::SetFVectorByRef(CurrentLocationTarget, tmpVector);
-
-		//Step 1.2: Calculate the Rotation offset by getting the Atan2 of the Impact Normal.
-		TargetRotationOffset = FRotator(-UKismetMathLibrary::DegAtan2(HitResult.ImpactNormal.X, HitResult.ImpactNormal.Z), 0.0f, UKismetMathLibrary::DegAtan2(HitResult.ImpactNormal.Y, HitResult.ImpactNormal.Z));
-	}
-
-	//Step 2: Interp the Current Location Offset to the new target value. Interpolate at different speeds based on whether the new target is above or below the current one.
-	ULmHelpers::SetFVectorByRef(CurrentLocationOffset, UKismetMathLibrary::VInterpTo(CurrentLocationOffset, CurrentLocationTarget, DeltaTimeX, CurrentLocationOffset.Z > CurrentLocationTarget.Z ? 30.0f : 15.0f));
-
-	//Step 3: Interp the Current Rotation Offset to the new target value.
-	ULmHelpers::SetFRotatorByRef(CurrentRotationOffset, UKismetMathLibrary::RInterpTo(CurrentRotationOffset, TargetRotationOffset, DeltaTimeX, 30.0f));
+	return params;
 }
 
-void ULmCharacterAnimInstance::SetPelvisIKOffset(FVector FootOffset_L_Target, FVector FootOffset_R_Target) {
+void ULmCharacterAnimInstance::UpdatePelvisIKOffset(FVector FootOffset_L_Target, FVector FootOffset_R_Target) {
 	//Calculate the Pelvis Alpha by finding the average Foot IK weight. If the alpha is 0, clear the offset.
 	PelvisAlpha = (GetCurveValue(FName(TEXT("Enable_FootIK_L"))) + GetCurveValue(FName(TEXT("Enable_FootIK_R")))) / 2.0f;
 
@@ -684,52 +695,51 @@ void ULmCharacterAnimInstance::SetPelvisIKOffset(FVector FootOffset_L_Target, FV
 		const FVector PelvisTarget = FootOffset_L_Target.Z < FootOffset_R_Target.Z ? FootOffset_L_Target : FootOffset_R_Target;
 
 		//Step 2: Interp the Current Pelvis Offset to the new target value. Interpolate at different speeds based on whether the new target is above or below the current one.
-		PelvisOffset = UKismetMathLibrary::VInterpTo(PelvisOffset, PelvisTarget, DeltaTimeX, PelvisTarget.Z > PelvisOffset.Z ? 10.0f : 15.0f);
+		PelvisOffset = UKismetMathLibrary::VInterpTo(PelvisOffset, PelvisTarget, delta_time, PelvisTarget.Z > PelvisOffset.Z ? 10.0f : 15.0f);
 
 	} else {
 		PelvisOffset = FVector::ZeroVector;
 	}
 }
 
-void ULmCharacterAnimInstance::SetFootLocking(FName Enable_FootIK_Curve, FName FootLockCurve, FName IKFootBone, float& CurrentFootLockAlpha, FVector& CurrentFootLockLocation, FRotator& CurrentFootLockRotation) {
-	//Only update values if FootIK curve has a weight.
-	if (GetCurveValue(Enable_FootIK_Curve) <= 0)
-		return;
+FLmFootLock ULmCharacterAnimInstance::UpdateFootLock(FName Enable_FootIK_Curve, FName FootLockCurve, FName IKFootBone, FLmFootLock lastValue) {
+	if (GetCurveValue(Enable_FootIK_Curve) > 0.f) {
+		float FootLockCurveValue = GetCurveValue(FootLockCurve);
 
-	//Step 1: Set Local FootLock Curve value
-	const float FootLockCurveValue = GetCurveValue(FootLockCurve);
+		if (FootLockCurveValue < lastValue.Alpha || FootLockCurveValue >= 0.99f)
+			lastValue.Alpha = FootLockCurveValue;
 
-	//Step 2: Only update the FootLock Alpha if the new value is less than the current, or it equals 1. This makes it so that the foot can only blend out of the locked position or lock to a new position, and never blend in.
-	if (FootLockCurveValue >= 0.99f || FootLockCurveValue < CurrentFootLockAlpha)
-		CurrentFootLockAlpha = FootLockCurveValue;
+		if (lastValue.Alpha >= 0.99f) {
+			FTransform tmp = GetOwningComponent()->GetSocketTransform(IKFootBone, RTS_Component);
+			lastValue.Location = tmp.GetLocation();
+			lastValue.Rotation = tmp.Rotator();
+		}
 
-	//Step 3: If the Foot Lock curve equals 1, save the new lock location and rotation in component space.
-	if (CurrentFootLockAlpha >= 0.99f) {
-		const auto tmpTransform = GetOwningComponent()->GetSocketTransform(IKFootBone, RTS_Component);
-		ULmHelpers::SetFVectorByRef(CurrentFootLockLocation, tmpTransform.GetLocation());
-		ULmHelpers::SetFRotatorByRef(CurrentFootLockRotation, tmpTransform.GetRotation().Rotator());
+		if (lastValue.Alpha > 0) {
+
+			FRotator rotation_diff = FRotator::ZeroRotator;
+			FVector location_diff = FVector::Zero();
+
+			if (Character->GetCharacterMovement()->IsMovingOnGround()) {
+				rotation_diff = Character->GetActorRotation() - Character->GetCharacterMovement()->GetLastUpdateRotation();
+				rotation_diff.Normalize();
+			}
+
+			/*if (FMath::Abs(rotation_diff.Yaw) > 8.f) {
+				ULmLogger::LogWarning(FString::Printf(TEXT("ar: %s, lur: %s"), *Character->GetActorRotation().ToString(), *Character->GetCharacterMovement()->GetLastUpdateRotation().ToString()), 0.1f);
+			}*/
+
+			location_diff = GetOwningComponent()->GetComponentRotation().UnrotateVector(Velocity * GetWorld()->GetDeltaSeconds());
+
+			//ULmLogger::LogWarning(FString::Printf(TEXT("YAW: %s"), *FString::SanitizeFloat(rotation_diff.Yaw)), 0.1f);
+			//if (FMath::Abs(rotation_diff.Yaw) < 8.f) {
+			lastValue.Location = UKismetMathLibrary::RotateAngleAxis(lastValue.Location - location_diff, rotation_diff.Yaw, FVector::DownVector);
+			lastValue.Rotation = lastValue.Rotation - rotation_diff;
+			lastValue.Rotation.Normalize();
+			//}
+		}
 	}
-
-	//Step 4: If the Foot Lock Alpha has a weight, update the Foot Lock offsets to keep the foot planted in place while the capsule moves.
-	if (CurrentFootLockAlpha > 0.0f)
-		SetFootLockOffsets(CurrentFootLockLocation, CurrentFootLockRotation);
-}
-
-void ULmCharacterAnimInstance::SetFootLockOffsets(FVector& LocalLocation, FRotator& LocalRotation) {
-	FRotator RotationDifference;
-
-	//Use the delta between the current and last updated rotation to find how much the foot should be rotated to remain planted on the ground.
-	if (Character->GetCharacterMovement()->IsMovingOnGround())
-		RotationDifference = UKismetMathLibrary::NormalizedDeltaRotator(Character->GetActorRotation(), Character->GetCharacterMovement()->GetLastUpdateRotation());
-
-	//Get the distance traveled between frames relative to the mesh rotation to find how much the foot should be offset to remain planted on the ground.
-	const FVector LocationDifference = GetOwningComponent()->GetComponentRotation().UnrotateVector(Velocity * UGameplayStatics::GetWorldDeltaSeconds(this));
-
-	//Subtract the location difference from the current local location and rotate it by the rotation difference to keep the foot planted in component space.
-	ULmHelpers::SetFVectorByRef(LocalLocation, UKismetMathLibrary::RotateAngleAxis(LocalLocation - LocationDifference, RotationDifference.Yaw, FVector::DownVector));
-
-	//Subtract the Rotation Difference from the current Local Rotation to get the new local rotation.
-	ULmHelpers::SetFRotatorByRef(LocalRotation, UKismetMathLibrary::NormalizedDeltaRotator(LocalRotation, RotationDifference));
+	return lastValue;
 }
 
 ELmMovementDirection ULmCharacterAnimInstance::CalculateMovementDirection() {
@@ -796,7 +806,7 @@ void ULmCharacterAnimInstance::Response_AnimNotifyPivot() {
 	PivotDel.BindLambda([this] {
 		GetWorld()->GetTimerManager().ClearTimer(AnimNotifyPivotHandle);
 		bPivot = false;
-		});
+	});
 	GetWorld()->GetTimerManager().SetTimer(AnimNotifyPivotHandle, PivotDel, 0.1f, false);
 }
 
@@ -827,7 +837,7 @@ void ULmCharacterAnimInstance::PlayDynamicTransition(const float ReTriggerDelay,
 		//Binding the function with specific values
 		DynamicTransitionDel.BindLambda([this] {
 			bDynamicTransitionGate_IsOpen = true;
-			});
+		});
 
 		GetWorld()->GetTimerManager().SetTimer(DynamicTransitionHandle, DynamicTransitionDel, ReTriggerDelay, false);
 	}

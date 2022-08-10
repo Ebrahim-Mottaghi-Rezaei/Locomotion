@@ -94,9 +94,9 @@ struct FLmDynamicMontageParams {
 		float PlayRate;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Dynamic Montage Params")
 		float StartTime;
-	
+
 	FLmDynamicMontageParams();
-	FLmDynamicMontageParams(UAnimSequenceBase* animation, float blendInTime, float blendOutTime, float playRate, float startTime);
+	FLmDynamicMontageParams(UAnimSequenceBase* animation, float blendInTime = 0.2f, float blendOutTime = 0.2f, float playRate = 1.5f, float = 0.2f);
 
 	virtual FString ToString(bool bPrintToLog = false);
 };
@@ -107,9 +107,9 @@ struct FLmLeanAmount {
 
 		UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lean Amount")
 		float LeftRight;
-		UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lean Amount")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lean Amount")
 		float FrontBack;
-	
+
 
 	FLmLeanAmount();
 	FLmLeanAmount(float FB, float LR);
@@ -473,6 +473,44 @@ struct FLmControlVectors {
 struct FLmHitResult {
 	bool bHit;
 	FHitResult SweepHitResult;
+
+	virtual FString ToString(bool bPrintToLog = false);
+};
+
+USTRUCT(BlueprintType, Category = "Locomotion|DataTypes")
+struct FLmFootLock {
+
+	GENERATED_BODY()
+
+		UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Foot IK")
+		float Alpha;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Foot IK")
+		FVector Location;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Foot IK")
+		FRotator Rotation;
+
+	FLmFootLock();
+	FLmFootLock(FVector location, FRotator rotation, float alpha);
+
+	virtual FString ToString(bool bPrintToLog = false);
+};
+
+USTRUCT(BlueprintType, Category = "Locomotion|DataTypes")
+struct FLmFootOffset {
+	GENERATED_BODY()
+		UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Foot Offset")
+		FVector LocationTarget;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Foot Offset")
+		FVector LocationOffset;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Foot Offset")
+		FRotator RotationOffset;
+
+	FLmFootOffset();
+	FLmFootOffset(FVector target_location, FVector offset_location, FRotator offset_rotation);
 
 	virtual FString ToString(bool bPrintToLog = false);
 };

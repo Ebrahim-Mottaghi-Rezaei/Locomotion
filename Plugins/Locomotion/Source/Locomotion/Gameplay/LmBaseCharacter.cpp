@@ -4,7 +4,6 @@
 #include "../LmLogger.h"
 #include <ClothingSystemRuntimeNv/Public/ClothingSimulationFactoryNv.h>
 #include <GameFramework/CharacterMovementComponent.h>
-#include "../AI/LmBaseAIController.h"
 #include <GameFramework/Character.h>
 #include <Kismet/KismetMathLibrary.h>
 #include <Kismet/GameplayStatics.h>
@@ -16,12 +15,15 @@
 #include <GameFramework/Pawn.h>
 #include <GameFramework/Actor.h>
 
-
 ALmBaseCharacter::ALmBaseCharacter() {
 	PrimaryActorTick.bCanEverTick = true;
 	bUseControllerRotationYaw = false;
 
 	Tags.Add(TEXT("ALS_Character"));
+
+	mantleTimeline = CreateDefaultSubobject<UTimelineComponent>(FName("MantleTimeline"));
+	mantleTimeline->SetTimelineLengthMode(ETimelineLengthMode::TL_TimelineLength);
+	mantleTimeline->SetTickGroup(ETickingGroup::TG_PrePhysics);
 
 	const auto capsule = GetCapsuleComponent();
 	capsule->SetCapsuleHalfHeight(90.0f);
@@ -58,6 +60,10 @@ ALmBaseCharacter::ALmBaseCharacter() {
 	cmc->GetNavAgentPropertiesRef().bCanFly = true;
 	cmc->bRequestedMoveUseAcceleration = false;
 	cmc->bRequestedMoveUseAcceleration = true;
+	cmc->bRunPhysicsWithNoController = true;
+	cmc->PerchRadiusThreshold = 20.0f;
+	cmc->PerchAdditionalHeight = 0.0f;
+	cmc->LedgeCheckThreshold = 4.0f;
 
 	static ConstructorHelpers::FObjectFinder<UDataTable> MovementDataModel(TEXT("DataTable'/Locomotion/Data/MovementModelTable.MovementModelTable'"));
 	if (MovementDataModel.Succeeded()) {
@@ -101,8 +107,6 @@ ALmBaseCharacter::ALmBaseCharacter() {
 		CurrentMovementSettings.MovementCurve = MovementCurve.Object;
 	else
 		ULmLogger::LogError("Mantle_1m not found.");
-
-	AIControllerClass = ALmBaseAIController::StaticClass();
 
 	static ConstructorHelpers::FObjectFinder<UCurveVector> highMantle(TEXT("CurveVector'/Game/AdvancedLocomotionV4/Data/Curves/MantleCurves/Mantle_1m.Mantle_1m'"));
 	if (highMantle.Succeeded())
@@ -157,18 +161,16 @@ void ALmBaseCharacter::BeginPlay() {
 	LastMovementInputRotation = rotation;
 
 	//Setting up the mantle time-line
-	mantleTimeline.SetTimelineLengthMode(ETimelineLengthMode::TL_TimelineLength);
-
 	if (MantleTimelineCurve == nullptr) {
 		ULmLogger::LogError(TEXT("MantleTimelineCurve in LmBaseCharacter is null"));
 	} else {
 		FOnTimelineFloat MantleUpdate;
 		MantleUpdate.BindUFunction(this, FName("MantleUpdate"));
-		mantleTimeline.AddInterpFloat(MantleTimelineCurve, MantleUpdate);
+		mantleTimeline->AddInterpFloat(MantleTimelineCurve, MantleUpdate);
 
 		FOnTimelineEvent mantleTimelineFinished;
 		mantleTimelineFinished.BindUFunction(this, FName("MantleEnd"));
-		mantleTimeline.SetTimelineFinishedFunc(mantleTimelineFinished);
+		mantleTimeline->SetTimelineFinishedFunc(mantleTimelineFinished);
 	}
 }
 
@@ -182,7 +184,8 @@ void ALmBaseCharacter::Tick(const float DeltaTime) {
 			UpdateCharacterMovement();
 			UpdateGroundedRotation();
 			break;
-
+		case ELmMovementState::Lm_Mantling:
+			break;
 		case ELmMovementState::Lm_InAir:
 			//Do while In Air
 			UpdateInAirRotation();
@@ -190,13 +193,10 @@ void ALmBaseCharacter::Tick(const float DeltaTime) {
 			if (bHasMovementInput)
 				MantleCheck(FallingTraceSettings, EDrawDebugTrace::ForOneFrame);
 			break;
-
 		case ELmMovementState::Lm_Ragdoll:
 			//Do while in Rag-doll
 			RagdollUpdate();
 			break;
-		case ELmMovementState::Lm_Mantling:
-			mantleTimeline.TickTimeline(DeltaTime);
 		case ELmMovementState::Lm_None:
 		default:;
 			break;
@@ -278,11 +278,13 @@ void ALmBaseCharacter::Landed(const FHitResult& Hit) {
 
 		FTimerDelegate timerDel;
 
+		//Retriggering Delay
+		if (GetWorldTimerManager().IsTimerActive(timerHandle_Landing))
+			GetWorldTimerManager().ClearTimer(timerHandle_Landing);
+
 		timerDel.BindLambda([this] {
-			if (GetWorldTimerManager().IsTimerActive(timerHandle_Landing))
-				GetWorldTimerManager().ClearTimer(timerHandle_Landing);
 			GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
-			});
+		});
 
 		GetWorldTimerManager().SetTimer(timerHandle_Landing, timerDel, 0.5f, false);
 	}
@@ -294,8 +296,7 @@ void ALmBaseCharacter::OnJumped_Implementation() {
 	//On Jumped: Set the new In Air Rotation to the velocity rotation if speed is greater than 100.
 	InAirRotation = Speed > 100.0f ? LastVelocityRotation : GetActorRotation();
 	if (IsValid(animInstance) && animInstance->GetClass()->ImplementsInterface(ULmCharacterAnimationInterface::StaticClass())) {
-		const auto Interface = Cast<ILmCharacterAnimationInterface>(animInstance);
-		Interface->Jumped_Implementation();
+		ILmCharacterAnimationInterface::Execute_Jumped(animInstance);
 	}
 }
 
@@ -359,25 +360,32 @@ void ALmBaseCharacter::PlayerJumpPressedInput() {
 	if (MovementAction != ELmMovementAction::Lm_None)
 		return;
 
-	switch (MovementState) {
-		case ELmMovementState::Lm_Grounded:
-			if (bHasMovementInput || !MantleCheck(GroundedTraceSettings, EDrawDebugTrace::ForDuration)) {
+	if (MovementState == ELmMovementState::Lm_Ragdoll) {
+
+		RagdollEnd();
+
+	} else if (MovementState != ELmMovementState::Lm_Mantling) {
+
+		if (MovementState == ELmMovementState::Lm_Grounded) {
+
+			if (bHasMovementInput) {
+				const bool MantleCheckResult = MantleCheck(GroundedTraceSettings, EDrawDebugTrace::ForDuration);
+				if (!MantleCheckResult) {
+					if (Stance == ELmStance::Lm_Standing)
+						Jump();
+					else
+						UnCrouch();
+				}
+			} else {
 				if (Stance == ELmStance::Lm_Standing)
 					Jump();
 				else
 					UnCrouch();
 			}
-			break;
-		case ELmMovementState::Lm_InAir:
+
+		} else if (MovementState == ELmMovementState::Lm_InAir) {
 			MantleCheck(FallingTraceSettings, EDrawDebugTrace::ForDuration);
-			break;
-		case ELmMovementState::Lm_Ragdoll:
-			RagdollEnd();
-			break;
-		case ELmMovementState::Lm_Mantling:
-		case ELmMovementState::Lm_None:
-		default:
-			break;
+		}
 	}
 }
 
@@ -411,7 +419,7 @@ void ALmBaseCharacter::PlayerStanceActionInput(FKey key) {
 						GetWorldTimerManager().ClearTimer(ResetBreakFall_th);
 
 					bBreakFall = false;
-					});
+				});
 
 				if (GetWorldTimerManager().IsTimerActive(ResetBreakFall_th))
 					GetWorldTimerManager().ClearTimer(ResetBreakFall_th);
@@ -425,7 +433,7 @@ void ALmBaseCharacter::PlayerStanceActionInput(FKey key) {
 		}
 
 		this->StanceActionInputCounter = 0;
-		});
+	});
 
 	GetWorldTimerManager().SetTimer(StanceAction_th, timerDel, 0.3f, false);
 }
@@ -463,7 +471,7 @@ void ALmBaseCharacter::PlayerSprintBegin() {
 				//ULmLogger::LogInfo(TEXT("Walking"));
 				DesiredGait = ELmGait::Lm_Walking;
 			}
-			});
+		});
 
 		GetWorldTimerManager().SetTimer(Sprint_Handle, del, DoubleTapTime, false);
 	}
@@ -484,7 +492,7 @@ void ALmBaseCharacter::PlayerSprintEnd() {
 
 			SprintTapCounter = 0;
 			DesiredGait = ELmGait::Lm_Running;
-			});
+		});
 
 		GetWorldTimerManager().SetTimer(Sprint_Handle, del, DoubleTapTime, false);
 	}
@@ -532,7 +540,7 @@ void ALmBaseCharacter::CameraActionBegin() {
 				ILmCharacterInterface::Execute_SetViewMode(this, ViewMode == ELmViewMode::Lm_TPS ? ELmViewMode::Lm_FPS : ELmViewMode::Lm_TPS);
 			}
 		}
-		});
+	});
 
 	GetWorldTimerManager().SetTimer(cameraAction_th, holdAction, 0.2f, false);
 }
@@ -578,8 +586,7 @@ void ALmBaseCharacter::SetEssentialValues() {
 	Acceleration = CalculateAcceleration();
 
 	//Determine if the character is moving by getting it's speed. The Speed equals the length of the horizontal (x y) velocity, so it does not take vertical movement into account. If the character is moving, update the last velocity rotation. This value is saved because it might be useful to know the last orientation of movement even after the character has stopped.
-	FVector nonZvelocity = GetVelocity();
-	nonZvelocity.Z = 0.0f;
+	FVector nonZvelocity = FVector(GetVelocity().X, GetVelocity().Y, 0.0f);
 	Speed = nonZvelocity.Size();
 	bIsMoving = Speed > 1.0f;
 	if (bIsMoving)
@@ -594,7 +601,7 @@ void ALmBaseCharacter::SetEssentialValues() {
 		LastMovementInputRotation = characterMovement->GetCurrentAcceleration().ToOrientationRotator();
 
 	//Set the Aim Yaw rate by comparing the current and previous Aim Yaw value, divided by Delta Seconds. This represents the speed the camera is rotating left to right.
-	AimYawRate = FMath::Abs((GetControlRotation().Yaw - PreviousAimYaw) / UGameplayStatics::GetWorldDeltaSeconds(this));
+	AimYawRate = FMath::Abs((GetControlRotation().Yaw - PreviousAimYaw) / GetWorld()->GetDeltaSeconds());
 }
 
 void ALmBaseCharacter::CacheValues() {
@@ -605,10 +612,12 @@ void ALmBaseCharacter::CacheValues() {
 
 FVector ALmBaseCharacter::CalculateAcceleration() {
 	//Calculate the Acceleration by comparing the current and previous velocity. The Current Acceleration returned by the movement component equals the input acceleration, and does not represent the actual physical acceleration of the character.
-	return (GetVelocity() - PreviousVelocity) / UGameplayStatics::GetWorldDeltaSeconds(this);
+	return (GetVelocity() - PreviousVelocity) / GetWorld()->GetDeltaSeconds();
 }
 
 void ALmBaseCharacter::OnCharacterMovementModeChanged(EMovementMode PrevMovementMode, EMovementMode NewMovementMode, uint8 PrevCustomMode, uint8 NewCustomMode) {
+	Super::OnMovementModeChanged(PrevMovementMode, PrevCustomMode);
+
 	if (this->GetClass()->ImplementsInterface(ULmCharacterInterface::StaticClass()))
 		if (NewMovementMode == MOVE_Walking || NewMovementMode == MOVE_NavWalking) {
 			ILmCharacterInterface::Execute_SetMovementState(this, ELmMovementState::Lm_Grounded);
@@ -618,6 +627,10 @@ void ALmBaseCharacter::OnCharacterMovementModeChanged(EMovementMode PrevMovement
 }
 
 void ALmBaseCharacter::OnMovementStateChanged(const ELmMovementState NewMovementState) {
+	if (NewMovementState == MovementState) {
+		return;
+	}
+
 	PrevMovementState = MovementState;
 	MovementState = NewMovementState;
 
@@ -634,11 +647,15 @@ void ALmBaseCharacter::OnMovementStateChanged(const ELmMovementState NewMovement
 	} else if (MovementState == ELmMovementState::Lm_Ragdoll) {
 		//Stop the Mantle Timeline if transitioning to the Ragdoll state while mantling.
 		if (PrevMovementState == ELmMovementState::Lm_Mantling)
-			mantleTimeline.Stop();
+			mantleTimeline->Stop();
 	}
 }
 
 void ALmBaseCharacter::OnMovementActionChanged(const ELmMovementAction NewMovementAction) {
+	if (NewMovementAction == MovementAction) {
+		return;
+	}
+
 	PrevMovementAction = MovementAction;
 	MovementAction = NewMovementAction;
 	//Make the character crouch if performing a roll.
@@ -648,10 +665,7 @@ void ALmBaseCharacter::OnMovementActionChanged(const ELmMovementAction NewMoveme
 
 	//Upon ending a roll, reset the stance back to its desired value.
 	if (PrevMovementAction == ELmMovementAction::Lm_Rolling) {
-		if (DesiredStance == ELmStance::Lm_Standing)
-			UnCrouch();
-		else
-			Crouch();
+		DesiredStance == ELmStance::Lm_Standing ? UnCrouch() : Crouch();
 	}
 }
 
@@ -825,38 +839,54 @@ UAnimMontage* ALmBaseCharacter::GetRollAnimation() {
 }
 
 void ALmBaseCharacter::UpdateGroundedRotation() {
-	if (MovementAction == ELmMovementAction::Lm_Rolling) {
-		if (bHasMovementInput) {
-			SmoothCharacterRotation(FRotator(0, LastMovementInputRotation.Yaw, 0), 0.0f, 2.0f);
-		}
-	} else if (MovementAction == ELmMovementAction::Lm_None) {
-		if (CanUpdateMovingRotation()) {
-			if (RotationMode == ELmRotationMode::Lm_VelocityDirection) {
-				//Velocity Direction Rotation
-				SmoothCharacterRotation(FRotator(0.0f, LastVelocityRotation.Yaw, 0.0f), 800.0f, CalculateGroundedRotationRate());
-			} else if (RotationMode == ELmRotationMode::Lm_LookingDirection) {
-				//Looking Direction Rotation
-				if (Gait == ELmGait::Lm_Sprinting) {
-					SmoothCharacterRotation(FRotator(0, LastVelocityRotation.Yaw, 0), 500.0f, CalculateGroundedRotationRate());
-				} else {
-					SmoothCharacterRotation(FRotator(0, GetControlRotation().Yaw + GetAnimCurveValue(FName(TEXT("YawOffset"))), 0), 500.0f, CalculateGroundedRotationRate());
+	switch (MovementAction) {
+		case ELmMovementAction::Lm_None:
+			if (CanUpdateMovingRotation()) {
+				switch (RotationMode) {
+					case ELmRotationMode::Lm_VelocityDirection:
+						//Velocity Direction Rotation
+						SmoothCharacterRotation(FRotator(0.0f, LastVelocityRotation.Yaw, 0.0f), 800.0f, CalculateGroundedRotationRate());
+						break;
+					case ELmRotationMode::Lm_LookingDirection:
+						//Looking Direction Rotation
+						switch (Gait) {
+							case ELmGait::Lm_Walking:
+							case ELmGait::Lm_Running:
+								SmoothCharacterRotation(FRotator(0.0f, GetControlRotation().Yaw + GetAnimCurveValue(FName(TEXT("YawOffset"))), 0.0f), 500.0f, CalculateGroundedRotationRate());
+								break;
+							case ELmGait::Lm_Sprinting:
+								SmoothCharacterRotation(FRotator(0.0f, LastVelocityRotation.Yaw, 0.0f), 500.0f, CalculateGroundedRotationRate());
+								break;
+							default:;
+						}
+						break;
+					case ELmRotationMode::Lm_Aiming:
+						//Aiming Rotation
+						SmoothCharacterRotation(FRotator(0.0f, GetControlRotation().Yaw, 0.0f), 1000.0f, 20.0f);
+						break;
+					default:;
 				}
 			} else {
-				//Aiming Rotation
-				SmoothCharacterRotation(FRotator(0, GetControlRotation().Yaw, 0), 1000.0f, 20.0f);
-			}
-		} else {
-			//Not Moving
-			if (ViewMode == ELmViewMode::Lm_FPS || RotationMode == ELmRotationMode::Lm_Aiming)
-				LimitRotation(-100.0f, 100.0f, 20.0f);
+				//Not Moving
+				if (ViewMode == ELmViewMode::Lm_FPS || RotationMode == ELmRotationMode::Lm_Aiming)
+					LimitRotation(-100.0f, 100.0f, 20.0f);
 
-			//Apply the RotationAmount curve from Turn In Place Animations. The Rotation Amount curve defines how much rotation should be applied each frame, and is calculated for animations that are animated at 30fps.
-			const float curveAmount = GetAnimCurveValue(FName(TEXT("RotationAmount")));
-			if (FMath::Abs(curveAmount) > 0.001f) {
-				AddActorWorldRotation(FRotator(0.0f, curveAmount * (UGameplayStatics::GetWorldDeltaSeconds(this) / 0.033f), 0.0f));
-				TargetRotation = GetActorRotation();
+				//Apply the RotationAmount curve from Turn In Place Animations. The Rotation Amount curve defines how much rotation should be applied each frame, and is calculated for animations that are animated at 30fps.
+				const float curveAmount = GetAnimCurveValue(FName(TEXT("RotationAmount")));
+				if (FMath::Abs(curveAmount) > 0.001f) {
+					AddActorWorldRotation(FRotator(0.0f, curveAmount * GetWorld()->GetDeltaSeconds() / 0.0334f, 0.0f));
+					TargetRotation = GetActorRotation();
+				}
 			}
-		}
+			break;
+		case ELmMovementAction::Lm_Rolling:
+			if (bHasMovementInput)
+				SmoothCharacterRotation(FRotator(0.f, LastMovementInputRotation.Yaw, 0.f), 0.0f, 2.0f);
+			break;
+		case ELmMovementAction::Lm_LowMantle:
+		case ELmMovementAction::Lm_HighMantle:
+		case ELmMovementAction::Lm_GettingUp:
+		default:;
 	}
 }
 
@@ -871,14 +901,9 @@ void ALmBaseCharacter::UpdateInAirRotation() {
 
 void ALmBaseCharacter::SmoothCharacterRotation(FRotator Target, float TargetInterpSpeedConst, float ActorInterpSpeedSmooth) {
 	//Interpolate the Target Rotation for extra smooth rotation behavior
-	TargetRotation = UKismetMathLibrary::RInterpTo_Constant(TargetRotation, Target, UGameplayStatics::GetWorldDeltaSeconds(this), TargetInterpSpeedConst);
+	TargetRotation = UKismetMathLibrary::RInterpTo_Constant(TargetRotation, Target, GetWorld()->GetDeltaSeconds(), TargetInterpSpeedConst);
 
-	SetActorRotation(UKismetMathLibrary::RInterpTo(GetActorRotation(), TargetRotation, UGameplayStatics::GetWorldDeltaSeconds(this), ActorInterpSpeedSmooth));
-}
-
-void ALmBaseCharacter::AddToCharacterRotation(FRotator DeltaRotation) {
-	TargetRotation = UKismetMathLibrary::ComposeRotators(TargetRotation, DeltaRotation);
-	AddActorWorldRotation(DeltaRotation);
+	SetActorRotation(UKismetMathLibrary::RInterpTo(GetActorRotation(), TargetRotation, GetWorld()->GetDeltaSeconds(), ActorInterpSpeedSmooth));
 }
 
 void ALmBaseCharacter::LimitRotation(float AimYawMin, float AimYawMax, float InterpSpeed) {
@@ -891,26 +916,35 @@ void ALmBaseCharacter::LimitRotation(float AimYawMin, float AimYawMax, float Int
 	SmoothCharacterRotation(FRotator(0.0f, controlYaw + deltaYaw > 0 ? AimYawMin : AimYawMax, 0.0f), 0.0f, InterpSpeed);
 }
 
-void ALmBaseCharacter::SetActorLocationRotationUpdateTarget(FVector NewLocation, FRotator NewRotation) {
+FLmHitResult ALmBaseCharacter::SetActorLocationRotationUpdateTarget(FVector NewLocation, FRotator NewRotation, bool bSweep, bool bTeleport) {
 	TargetRotation = NewRotation;
-	SetActorLocationAndRotation(NewLocation, TargetRotation, false);
+
+	//ULmLogger::LogInfo(*TargetRotation.ToString(), 0.0f);
+
+	FLmHitResult HitResult;
+
+	const bool result = SetActorLocationAndRotation(NewLocation, TargetRotation, bSweep, &HitResult.SweepHitResult);
+	HitResult.bHit = result;
+
+	return HitResult;
 }
 
 float ALmBaseCharacter::CalculateGroundedRotationRate() {
 	//Calculate the rotation rate by using the current Rotation Rate Curve in the Movement Settings. Using the curve in conjunction with the mapped speed gives you a high level of control over the rotation rates for each speed. Increase the speed if the camera is rotating quickly for more responsive rotation.
-	return CurrentMovementSettings.RotationRateCurve->GetFloatValue(GetMappedSpeed() * UKismetMathLibrary::MapRangeClamped(AimYawRate, 0.0, 300.0f, 1.0f, 3.0f));
+	return CurrentMovementSettings.RotationRateCurve->GetFloatValue(GetMappedSpeed()) * UKismetMathLibrary::MapRangeClamped(AimYawRate, 0.0, 300.0f, 1.0f, 3.0f);
 }
 
 bool ALmBaseCharacter::CanUpdateMovingRotation() {
-	return !HasAnyRootMotion() && (bIsMoving && bHasMovementInput || Speed > 15000);
+	return !HasAnyRootMotion() && (bIsMoving && bHasMovementInput || Speed > 150.0f);
 }
 
 bool ALmBaseCharacter::MantleCheck(FLmMantleTraceSettings TraceSettings, TEnumAsByte<EDrawDebugTrace::Type> DebugType) {
+
 	//Step 1: Trace forward to find a wall / object the character cannot walk on.
 
 	const auto playerMovementInput = GetPlayerMovementInput();
 
-	const FVector capsuleTraceStart = GetCapsuleBaseLocation(2.0f) - (30.0f * playerMovementInput) + (FVector(0.0f, 0.0f, TraceSettings.MaxLedgeHeight + TraceSettings.MinLedgeHeight) / 2.0f);
+	const FVector capsuleTraceStart = GetCapsuleBaseLocation(2.0f) - (30.0f * playerMovementInput) + (FVector::UpVector * (TraceSettings.MaxLedgeHeight + TraceSettings.MinLedgeHeight) / 2.0f);
 
 	const FVector capsuleTraceEnd = capsuleTraceStart + (playerMovementInput * TraceSettings.ReachDistance);
 
@@ -918,7 +952,7 @@ bool ALmBaseCharacter::MantleCheck(FLmMantleTraceSettings TraceSettings, TEnumAs
 
 	FHitResult capsuleTraceHitResult;
 
-	UKismetSystemLibrary::CapsuleTraceSingle(this, capsuleTraceStart, capsuleTraceEnd, TraceSettings.ForwardTraceRadius, halfHeight, ETT_Climbable, false, IgnoredActors, GetTraceDebugType(DebugType), capsuleTraceHitResult, true, FLinearColor::Black, FLinearColor::Black, 1.0f);
+	UKismetSystemLibrary::CapsuleTraceSingle(this, capsuleTraceStart, capsuleTraceEnd, TraceSettings.ForwardTraceRadius, halfHeight, ETT_Climbable, false, IgnoredActors, GetTraceDebugType(DebugType), capsuleTraceHitResult, true, FLinearColor::Black, FLinearColor::White, 1.0f);
 
 	if (!(capsuleTraceHitResult.bBlockingHit && !capsuleTraceHitResult.bStartPenetrating && !GetCharacterMovement()->IsWalkable(capsuleTraceHitResult)))
 		return false;
@@ -944,6 +978,11 @@ bool ALmBaseCharacter::MantleCheck(FLmMantleTraceSettings TraceSettings, TEnumAs
 
 	if (!CapsuleHasRoomCheck(GetCapsuleComponent(), tmpLocation, 0.0f, 0.0f, GetTraceDebugType(DebugType)))
 		return false;
+
+	if (OverlayState == ELmOverlayState::Lm_HandsTied) {
+		ULmLogger::LogInfo(TEXT("Can not mantle while hands are tied!"), 0.0f);
+		return false;
+	}
 
 	const FTransform TargetTransform = FTransform((impactNormal * FVector(-1.0f, -1.0f, 0.0f)).ToOrientationRotator(), tmpLocation);
 	const float mantleHeight = (TargetTransform.GetLocation() - GetActorLocation()).Z;
@@ -993,29 +1032,31 @@ void ALmBaseCharacter::MantleStart(float MantleHeight, FLmComponentAndTransform 
 	float timelineMin, timelineMax;
 	MantleParams.PositionCorrectionCurve->GetTimeRange(timelineMin, timelineMax);
 
-	mantleTimeline.SetPlayRate(MantleParams.PlayRate);
-	mantleTimeline.SetTimelineLength(timelineMax - MantleParams.StartingPosition);
-	mantleTimeline.PlayFromStart();
+	mantleTimeline->SetPlayRate(MantleParams.PlayRate);
+	mantleTimeline->SetTimelineLength(timelineMax - MantleParams.StartingPosition);
+	mantleTimeline->SetNewTime(0.0);
+	mantleTimeline->PlayFromStart();
 
 	//Step 7: Play the Anim Montage if valid.
 	if (MantleParams.AnimMontage && animInstance) {
-		if (bUseSlomoOnMantling) {
-			UGameplayStatics::SetGlobalTimeDilation(this, 0.15f);
-		}
-
 		animInstance->Montage_Play(MantleParams.AnimMontage, MantleParams.PlayRate, EMontagePlayReturnType::MontageLength, MantleParams.StartingPosition, false);
 	}
+
 }
 
 void ALmBaseCharacter::MantleUpdate(const float BlendIn) {
 	/*Step 1: Continually update the mantle target from the stored local transform to follow along with moving objects.*/
 	auto mantle_target = ULmHelpers::LocalSpaceToWorldSpace(MantleLedgeLS).Transform;
 
+	//ULmLogger::LogWarning(FString::Printf(TEXT("mantle_target: %s"), *mantle_target.ToString()), 0.0f, false);
+
 	/*Step 2: Update the Position and Correction Alphas using the Position/Correction curve set for each Mantle.*/
-	FVector alphas = MantleParams.PositionCorrectionCurve->GetVectorValue(MantleParams.StartingPosition + mantleTimeline.GetPlaybackPosition());
+	FVector alphas = MantleParams.PositionCorrectionCurve->GetVectorValue(MantleParams.StartingPosition + mantleTimeline->GetPlaybackPosition());
 	const float position_alpha = alphas.X;
 	const float xy_correction_alpha = alphas.Y;
 	const float z_correction_alpha = alphas.Z;
+
+	//ULmLogger::LogWarning(FString::Printf(TEXT("alphas: %s"), *alphas.ToString()), 0.0f, false);
 
 	/*Step 3: Lerp multiple transforms together for independent control over the horizontal and vertical blend to the animated start position, as well as the target position.*/
 	//	/*Blend into the animated horizontal and rotation offset using the Y value of the Position/Correction Curve.*/
@@ -1025,6 +1066,8 @@ void ALmBaseCharacter::MantleUpdate(const float BlendIn) {
 	horizontal_transform.SetScale3D(FVector::OneVector);
 
 	FTransform horizontal_lerp = UKismetMathLibrary::TLerp(MantleActualStartOffset, horizontal_transform, xy_correction_alpha);
+	//ULmLogger::LogWarning(FString::Printf(TEXT("hLerp: %s"), *horizontal_lerp.ToString()), 0.0f, false);
+
 
 	//	/*Blend into the animated vertical offset using the Z value of the Position/Correction Curve.*/
 	auto vertical_transform = FTransform();
@@ -1033,6 +1076,7 @@ void ALmBaseCharacter::MantleUpdate(const float BlendIn) {
 	vertical_transform.SetScale3D(FVector::OneVector);
 
 	FTransform vertical_lerp = UKismetMathLibrary::TLerp(MantleActualStartOffset, vertical_transform, z_correction_alpha);
+	//ULmLogger::LogWarning(FString::Printf(TEXT("vLerp: %s"), *vertical_lerp.ToString()), 0.0f, false);
 
 	//creating the mix transform
 	FTransform horizontal_vertical_mix = FTransform();
@@ -1042,19 +1086,17 @@ void ALmBaseCharacter::MantleUpdate(const float BlendIn) {
 
 	//	/*Blend from the currently blending transforms into the final mantle target using the X value of the Position/Correction Curve.*/
 	FTransform semi_final_lerp = UKismetMathLibrary::TLerp(ULmHelpers::AddTransform(mantle_target, horizontal_vertical_mix), mantle_target, position_alpha);
+	//ULmLogger::LogWarning(FString::Printf(TEXT("semi-final lerp: %s"), *semi_final_lerp.ToString()), 0.0f, false);
 
 	//	/*Initial Blend In (controlled in the timeline curve) to allow the actor to blend into the Position/Correction curve at the midoint. This prevents pops when mantling an object lower than the animated mantle.*/
 	FTransform lerped_target = UKismetMathLibrary::TLerp(ULmHelpers::AddTransform(mantle_target, MantleActualStartOffset), semi_final_lerp, BlendIn);
 
 	/*Step 4: Set the actors location and rotation to the Lerped Target.*/
-	SetActorLocationRotationUpdateTarget(lerped_target.GetLocation(), lerped_target.Rotator());
+	SetActorLocationRotationUpdateTarget(lerped_target.GetLocation(), lerped_target.Rotator(), false, false);
 }
 
 void ALmBaseCharacter::MantleEnd() {
 	GetCharacterMovement()->SetMovementMode(MOVE_Walking, 0);
-
-	if (bUseSlomoOnMantling)
-		UGameplayStatics::SetGlobalTimeDilation(this, 1.0f);
 }
 
 bool ALmBaseCharacter::CapsuleHasRoomCheck(UCapsuleComponent* Capsule, const FVector TargetLocation, const float HeightOffset, const float RadiusOffset, const TEnumAsByte<EDrawDebugTrace::Type> DebugType) {
@@ -1158,9 +1200,9 @@ void ALmBaseCharacter::SetActorLocationDuringRagdoll() {
 
 	if (bRagdollOnGround) {
 		float Z = targetRagdollLocation.Z + GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - FMath::Abs(HitResult.ImpactPoint.Z - HitResult.TraceStart.Z) + 2;
-		SetActorLocationRotationUpdateTarget(FVector(targetRagdollLocation.X, targetRagdollLocation.Y, Z), targetRagdollRotation);
+		SetActorLocationRotationUpdateTarget(FVector(targetRagdollLocation.X, targetRagdollLocation.Y, Z), targetRagdollRotation, false, false);
 	} else {
-		SetActorLocationRotationUpdateTarget(targetRagdollLocation, targetRagdollRotation);
+		SetActorLocationRotationUpdateTarget(targetRagdollLocation, targetRagdollRotation, false, false);
 	}
 }
 

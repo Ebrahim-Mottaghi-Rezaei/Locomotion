@@ -68,6 +68,7 @@ void ALmPlayerController::SetupInputComponent() {
 		InputComponent->BindKey(EKeys::U, IE_Pressed, this, &ALmPlayerController::ToggleShowLayerColors);
 		InputComponent->BindKey(EKeys::I, IE_Pressed, this, &ALmPlayerController::ToggleShowCharacterInfo);
 		InputComponent->BindKey(EKeys::Z, IE_Pressed, this, &ALmPlayerController::ToggleSlowMotion);
+
 		InputComponent->BindKey(EKeys::Comma, IE_Pressed, this, &ALmPlayerController::SelectPrevALSCharacter);
 		InputComponent->BindKey(EKeys::Period, IE_Pressed, this, &ALmPlayerController::SelectNextALSCharacter);
 
@@ -105,7 +106,7 @@ void ALmPlayerController::ToggleShowCharacterInfo() {
 
 void ALmPlayerController::ToggleSlowMotion() {
 	bSlowMotion = !bSlowMotion;
-	UGameplayStatics::SetGlobalTimeDilation(this, bSlowMotion ? 0.15f : 1.0f);
+	UGameplayStatics::SetGlobalTimeDilation(this, bSlowMotion ? 0.05f : 1.0f);
 }
 
 void ALmPlayerController::SelectPrevALSCharacter() {

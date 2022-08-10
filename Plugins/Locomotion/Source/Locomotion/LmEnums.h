@@ -129,3 +129,11 @@ enum class ELmAnimFeaturesExample :uint8 {
 	Lm_AdditiveLeaning		UMETA(DisplayName = "Additive Leaningn"),
 	Lm_SprintImpulse		UMETA(DisplayName = "Sprint Impulse")
 };
+
+UENUM(BlueprintType)
+enum class ELmStateTracking :uint8 {
+	Lm_WhileTrue		UMETA(DisplayName = "While True"),
+	Lm_WhileFalse		UMETA(DisplayName = "While False"),
+	Lm_ChangedToTrue	UMETA(DisplayName = "Changed To True"),
+	Lm_ChangedToFalse	UMETA(DisplayName = "Changed To False")
+};

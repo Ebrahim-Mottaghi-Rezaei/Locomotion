@@ -1,4 +1,4 @@
-#pragma once
+
 
 #include "LmStructs.h"
 #include "LmLogger.h"
@@ -34,8 +34,7 @@ FLmDynamicMontageParams::FLmDynamicMontageParams() {
 	StartTime = 0.0f;
 }
 
-FLmDynamicMontageParams::FLmDynamicMontageParams(UAnimSequenceBase* animation, float blendInTime, float blendOutTime,
-	float playRate, float startTime) {
+FLmDynamicMontageParams::FLmDynamicMontageParams(UAnimSequenceBase* animation, float blendInTime, float blendOutTime, float playRate, float startTime) {
 	Animation = animation;
 	BlendInTime = blendInTime;
 	BlendOutTime = blendOutTime;
@@ -311,6 +310,13 @@ FString FLmHitResult::ToString(bool bPrintToLog) {
 	return r;
 }
 
+//FLmFootLock::FLmFootLock() {}
+//
+//FLmFootLock::FLmFootLock(float alpha, FVector location, FRotator rotation) {
+//	Alpha = alpha;
+//	LocRot = FTransform(rotation, location, FVector(1.0f, 1.0f, 1.0f));
+//}
+
 FString FLmRotateInPlaceAsset::ToString(bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Animation: %s, SlotName: %s, TurnRate: [Slow= %s, Fast= %s], PlayRateRange: [Slow= %s, Fast= %s]"), *Animation->GetName(), *SlotName.ToString(), *FString::SanitizeFloat(SlowTurnRate), *FString::SanitizeFloat(FastTurnRate), *FString::SanitizeFloat(SlowPlayRate), *FString::SanitizeFloat(FastPlayRate));
 
@@ -384,4 +390,39 @@ FString FLmMovementSettingsState::ToString(bool bPrintToLog) {
 		ULmLogger::LogInfo(r);
 
 	return r;
+}
+
+FLmFootLock::FLmFootLock() {}
+
+FLmFootLock::FLmFootLock(FVector location, FRotator rotation, float alpha) {
+	Alpha = alpha;
+	Location = location;
+	Rotation = rotation;
+}
+
+FString FLmFootLock::ToString(bool bPrintToLog) {
+	const auto r = FString::Printf(TEXT("Alpha: %s ,Loc: %s , Rot: %s"), *FString::SanitizeFloat(Alpha), *Location.ToString(), *Rotation.ToString());
+
+	if (bPrintToLog)
+		ULmLogger::LogInfo(r);
+
+	return r;
+}
+
+FLmFootOffset::FLmFootOffset() {}
+
+FLmFootOffset::FLmFootOffset(FVector target_location, FVector offset_location, FRotator offset_rotation) {
+	LocationTarget = target_location;
+	LocationOffset = offset_location;
+	RotationOffset = offset_rotation;
+}
+
+FString FLmFootOffset::ToString(bool bPrintToLog) {
+	const auto r = FString::Printf(TEXT("OffsetLoc: %s , OffsetRot: %s, TargetLoc: %s"), *LocationOffset.ToString(), *RotationOffset.ToString(), *LocationTarget.ToString());
+
+	if (bPrintToLog)
+		ULmLogger::LogInfo(r);
+
+	return r;
+
 }

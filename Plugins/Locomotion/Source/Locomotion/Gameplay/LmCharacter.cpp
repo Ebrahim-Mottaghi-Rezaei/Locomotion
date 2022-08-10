@@ -422,9 +422,8 @@ void ALmCharacter::UpdateColoringSystem() {
 	if (IsValid(pc) && pc->GetClass()->ImplementsInterface(ULmControllerInterface::StaticClass())) {
 		const auto debugInfo = ILmControllerInterface::Execute_GetDebugInfo(pc);
 		if (debugInfo.bShowLayerColors && GetMesh()->IsVisible()) {
-			UpdateLayeringColors();
-
 			bUpdateColoringSystemDoOnceFlag = true;
+			UpdateLayeringColors();
 		} else if (bUpdateColoringSystemDoOnceFlag) {
 			bUpdateColoringSystemDoOnceFlag = false;
 			SetResetColors();
@@ -438,7 +437,6 @@ void ALmCharacter::UpdateLayeringColors() {
 	Torso->SetVectorParameterValue(FName(TEXT("BaseColor")), LerpColors2Level(OverlayLayerColor, AdditiveAmountColor, BaseLayerColor, FName("Layering_Spine_Add"), FName("Layering_Spine")));
 
 	Pelvis->SetVectorParameterValue(FName(TEXT("BaseColor")), UKismetMathLibrary::LinearColorLerp(BaseLayerColor, AdditiveAmountColor, GetAnimCurveValue(FName("Layering_Pelvis"))));
-
 	const auto lower_body_color = UKismetMathLibrary::LinearColorLerp(BaseLayerColor, AdditiveAmountColor, GetAnimCurveValue(FName("Layering_Legs")));
 	UpperLegs->SetVectorParameterValue(FName(TEXT("BaseColor")), lower_body_color);
 	LowerLegs->SetVectorParameterValue(FName(TEXT("BaseColor")), lower_body_color);
