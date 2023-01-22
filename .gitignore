@@ -77,3 +77,4 @@ DerivedDataCache/*
 *.rar
 *.zip
 /Config/HoloLens/HoloLensEngine.ini
+/.vsconfig
