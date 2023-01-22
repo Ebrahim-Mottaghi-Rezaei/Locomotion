@@ -28,14 +28,10 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
 		USceneComponent* HeldObjectRoot;
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
-		USkeletalMeshComponent* SkeletalMesh;
+		USkeletalMeshComponent* HeldSkeletalMeshObject;
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
-		UStaticMeshComponent* StaticMesh;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
-		USceneComponent* VisualMeshes;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
-		USkeletalMeshComponent* BodyMesh;
-
+		UStaticMeshComponent* HeldStaticMeshObject;
+	
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Styling")
 		ELmCharacterMeshStyle CurrentMeshType = ELmCharacterMeshStyle::Lm_Default;
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Styling")
@@ -196,4 +192,5 @@ protected:
 	virtual FLinearColor LerpColors2Level2(const FLinearColor L1A, const FLinearColor L1B, const FLinearColor L2B, const FName L1Name, const FName L2Name);
 private:
 	bool bUpdateColoringSystemDoOnceFlag;
+	TArray<UMaterialInterface*> LastSkinMaterials;
 };

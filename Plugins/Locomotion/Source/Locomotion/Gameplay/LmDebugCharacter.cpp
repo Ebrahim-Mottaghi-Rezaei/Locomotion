@@ -12,7 +12,6 @@
 #include <Components/SkeletalMeshComponent.h>
 #include <UObject/ConstructorHelpers.h>
 #include <UObject/UObjectBase.h>
-#include <ClothingSystemRuntimeNv/Public/ClothingSimulationFactoryNv.h>
 
 ALmDebugCharacter::ALmDebugCharacter() {
 	const auto mesh = GetMesh();
@@ -78,28 +77,14 @@ ALmDebugCharacter::ALmDebugCharacter() {
 	HeldObjectRoot = CreateDefaultSubobject<USceneComponent>(FName("HeldObjectRoot"));
 	HeldObjectRoot->AttachToComponent(mesh, FAttachmentTransformRules::KeepRelativeTransform);
 
-	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(FName("SkeletalMesh"));
-	SkeletalMesh->AttachToComponent(HeldObjectRoot, FAttachmentTransformRules::KeepRelativeTransform);
-	//SkeletalMesh->ClothingSimulationFactory = UClothingSimulationFactoryNv::StaticClass();
-	SkeletalMesh->SetCollisionProfileName(FName("NoCollision"));
+	HeldSkeletalMeshObject = CreateDefaultSubobject<USkeletalMeshComponent>(FName("SkeletalMesh"));
+	HeldSkeletalMeshObject->AttachToComponent(HeldObjectRoot, FAttachmentTransformRules::KeepRelativeTransform);
+	
+	HeldSkeletalMeshObject->SetCollisionProfileName(FName("NoCollision"));
 
-	/*const ConstructorHelpers::FObjectFinder<UAnimBlueprint> BowAnimBP(TEXT("AnimBlueprint'/Locomotion/Gameplay/AnimBP_LmBow.AnimBP_LmBow'"));
-	if (BowAnimBP.Succeeded())
-		SkeletalMesh->SetAnimInstanceClass(BowAnimBP.Object->GetAnimBlueprintGeneratedClass());
-	else
-		ULmLogger::LogError("BowAnimInstance not found. Please set it at BP_ALSCharacter");*/
-
-	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName("StaticMesh"));
-	StaticMesh->AttachToComponent(HeldObjectRoot, FAttachmentTransformRules::KeepRelativeTransform);
-	StaticMesh->SetCollisionProfileName(FName("Lm_Prop"));
-
-	VisualMeshes = CreateDefaultSubobject<USceneComponent>(FName("VisualMeshes"));
-	VisualMeshes->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform);
-
-	BodyMesh = CreateDefaultSubobject<USkeletalMeshComponent>(FName("BodyMesh"));
-	BodyMesh->AttachToComponent(VisualMeshes, FAttachmentTransformRules::KeepRelativeTransform);
-	//BodyMesh->ClothingSimulationFactory = UClothingSimulationFactoryNv::StaticClass();
-	BodyMesh->SetCollisionProfileName(FName("NoCollision"));
+	HeldStaticMeshObject = CreateDefaultSubobject<UStaticMeshComponent>(FName("StaticMesh"));
+	HeldStaticMeshObject->AttachToComponent(HeldObjectRoot, FAttachmentTransformRules::KeepRelativeTransform);
+	HeldStaticMeshObject->SetCollisionProfileName(FName("Lm_Prop"));
 
 	const auto capsule = GetCapsuleComponent();
 	capsule->SetCapsuleRadius(35.0f);
@@ -306,8 +291,6 @@ ALmDebugCharacter::ALmDebugCharacter() {
 void ALmDebugCharacter::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
 
-	BodyMesh->SetMasterPoseComponent(GetMesh());
-
 	SetDynamicMaterials();
 
 	SetResetColors();
@@ -476,19 +459,19 @@ void ALmDebugCharacter::UpdateHeldObject() {
 }
 
 void ALmDebugCharacter::ClearHeldObject() {
-	StaticMesh->SetStaticMesh(nullptr);
-	SkeletalMesh->SetSkeletalMesh(nullptr, false);
-	SkeletalMesh->SetAnimInstanceClass(nullptr);
+	HeldStaticMeshObject->SetStaticMesh(nullptr);
+	HeldSkeletalMeshObject->SetSkeletalMesh(nullptr, false);
+	HeldSkeletalMeshObject->SetAnimInstanceClass(nullptr);
 }
 
 void ALmDebugCharacter::AttachToHand(UStaticMesh* NewStaticMesh, USkeletalMesh* NewSkeletalMesh, UClass* NewAnimClass, bool bLeftHand, FVector Offset) {
 	ClearHeldObject();
 	if (IsValid(NewStaticMesh))
-		StaticMesh->SetStaticMesh(NewStaticMesh);
+		HeldStaticMeshObject->SetStaticMesh(NewStaticMesh);
 	if (IsValid(NewSkeletalMesh))
-		SkeletalMesh->SetSkeletalMesh(NewSkeletalMesh);
+		HeldSkeletalMeshObject->SetSkeletalMesh(NewSkeletalMesh);
 	if (IsValid(NewAnimClass))
-		SkeletalMesh->SetAnimInstanceClass(NewAnimClass);
+		HeldSkeletalMeshObject->SetAnimInstanceClass(NewAnimClass);
 
 	HeldObjectRoot->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, bLeftHand ? FName(TEXT("VB LHS_ik_hand_gun")) : FName(TEXT("VB RHS_ik_hand_gun")));
 	HeldObjectRoot->SetRelativeLocation(Offset);
@@ -496,7 +479,7 @@ void ALmDebugCharacter::AttachToHand(UStaticMesh* NewStaticMesh, USkeletalMesh* 
 
 void ALmDebugCharacter::UpdateHeldObjectAnimations() {
 	if (OverlayState == ELmOverlayState::Lm_Bow && IsValid(BowAnimInstance)) {
-		const auto ai = SkeletalMesh->GetAnimInstance();
+		const auto ai = HeldSkeletalMeshObject->GetAnimInstance();
 		if (IsValid(ai)) {
 			const auto bowAnimBp = static_cast<ULmBowAnimInstance*>(ai);
 			if (IsValid(bowAnimBp)) {
@@ -650,17 +633,32 @@ void ALmDebugCharacter::ToggleCharacterMesh() {
 }
 
 void ALmDebugCharacter::SetCharacterMesh(ELmCharacterMeshStyle MeshType) {
-	if (CurrentMeshType != MeshType) {
-		if (MeshType == ELmCharacterMeshStyle::Lm_Skin) {
-			BodyMesh->SetSkeletalMesh(SkinMesh, true);
-			GetMesh()->SetVisibility(false, false);
-		} else {
-			BodyMesh->SetSkeletalMesh(nullptr, true);
-			GetMesh()->SetVisibility(true, false);
-		}
+	if (MovementState == ELmMovementState::Lm_Ragdoll || CurrentMeshType == MeshType)
+		return;
 
-		CurrentMeshType = MeshType;
+	const auto tmpMaterials = GetMesh()->GetMaterials();
+	const auto CurMatNum = GetMesh()->GetNumMaterials();
+	for (int i = 0; i < CurMatNum; i++)
+		GetMesh()->SetMaterial(i, nullptr);
+
+	TArray<UMaterialInterface*> newMaterials;
+
+	if (LastSkinMaterials.Num() > 0) {
+		newMaterials = LastSkinMaterials;
+	} else {
+		const auto& tmp = (MeshType == ELmCharacterMeshStyle::Lm_Default ? DefaultMesh : SkinMesh)->GetMaterials();
+		for (auto& t : tmp) {
+			newMaterials.Add(t.MaterialInterface);
+		}
 	}
+
+	for (int i = 0; i < newMaterials.Num(); i++)
+		GetMesh()->SetMaterial(i, newMaterials[i]);
+
+	LastSkinMaterials = tmpMaterials;
+
+	GetMesh()->SetSkeletalMesh(MeshType == ELmCharacterMeshStyle::Lm_Default ? DefaultMesh : SkinMesh);
+	CurrentMeshType = MeshType;
 }
 
 FLinearColor ALmDebugCharacter::LerpColors2Level(const FLinearColor L1A, const FLinearColor L1B, const FLinearColor L2A, const FName L1Name, const FName L2Name) {
