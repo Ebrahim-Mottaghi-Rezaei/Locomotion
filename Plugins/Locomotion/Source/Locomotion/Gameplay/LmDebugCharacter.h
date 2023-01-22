@@ -165,6 +165,9 @@ protected:
 		void UpdateColoringSystem();
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Coloring")
 		void UpdateLayeringColors();
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Coloring")
+		virtual void SetRoleColors(const FLmRoleSkinColors SkinColors);
+
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Held Object")
 		void UpdateHeldObject();
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Held Object")
@@ -175,7 +178,7 @@ protected:
 		void UpdateHeldObjectAnimations();
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|State Changes")
 		virtual void OnOverlayStateChanged(ELmOverlayState NewOverlayState) override;
-
+	
 	virtual FTransform Get3PPivotTarget_Implementation() override;
 	virtual FLmTraceParams Get3PTraceParameters_Implementation() override;
 

@@ -99,12 +99,6 @@ ALmDebugCharacter::ALmDebugCharacter() {
 
 	mesh->bUpdateJointsFromAnimation = true;
 
-	//const ConstructorHelpers::FObjectFinder<UAnimBlueprint> ALSCharacterAnimBP(TEXT("AnimBlueprint'/Locomotion/Gameplay/AnimBP_LmCharacter.AnimBP_LmCharacter'"));
-	//if (ALSCharacterAnimBP.Succeeded()) {
-	//	mesh->SetAnimInstanceClass(ALSCharacterAnimBP.Object->GetAnimBlueprintGeneratedClass());
-	//} else
-	//	ULmLogger::LogError("BP_AnimInstance not found.");
-
 #pragma region Setting up Mantles
 	//Mantle 2m Default
 	Mantle2mDefault.StartingOffset = FVector(0.0f, 65.0f, 200.0f);
@@ -436,6 +430,21 @@ void ALmDebugCharacter::UpdateLayeringColors() {
 	UpperArm_R->SetVectorParameterValue(FName(TEXT("BaseColor")), upper_body_right_color);
 	LowerArm_R->SetVectorParameterValue(FName(TEXT("BaseColor")), upper_body_right_color);
 	Hand_R->SetVectorParameterValue(FName(TEXT("BaseColor")), LerpColors2Level2(upper_body_right_color, HandColor, HandIKColor, FName("Layering_Hand_R"), FName("Enable_HandIK_R")));
+}
+
+void ALmDebugCharacter::SetRoleColors(const FLmRoleSkinColors SkinColors) {
+	ShirtType = SkinColors.ShirtType;
+	PantsType = SkinColors.PantsType;
+	bGloves = SkinColors.UseGloves;
+	bShoes = SkinColors.UseShoes;
+
+	SkinColor = SkinColors.Skin;
+	ShirtColor = SkinColors.Shirt;
+	PantsColor = SkinColors.Pants;
+	GlovesColor = SkinColors.Gloves;
+	ShoesColor = SkinColors.Shoes;
+
+	SetResetColors();
 }
 
 void ALmDebugCharacter::UpdateHeldObject() {

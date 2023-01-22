@@ -64,7 +64,7 @@ ALmBaseCharacter::ALmBaseCharacter() {
 	cmc->PerchAdditionalHeight = 0.0f;
 	cmc->LedgeCheckThreshold = 4.0f;
 
-	static ConstructorHelpers::FObjectFinder<UDataTable> MovementDataModel(TEXT("DataTable'/Locomotion/Data/MovementModelTable.MovementModelTable'"));
+	static ConstructorHelpers::FObjectFinder<UDataTable> MovementDataModel(TEXT("DataTable'/Locomotion/Data/DT_MovementModel.DT_MovementModel'"));
 	if (MovementDataModel.Succeeded()) {
 		MovementModel.DataTable = MovementDataModel.Object;
 		MovementModel.RowName = FName("Normal");
