@@ -136,7 +136,7 @@ void ALmPlayerController::CloseOverlayMenu() {
 		UGameplayStatics::SetGlobalTimeDilation(this, 1.0f);
 
 	OverlaySwitcher->SelectOverlayState();
-	OverlaySwitcher->RemoveFromViewport();
+	OverlaySwitcher->RemoveFromParent();
 	UGameplayStatics::PlaySound2D(this, ClickSound, 1.25f, 1.0f, 0.2f);
 }
 

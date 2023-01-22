@@ -1,9 +1,9 @@
+#include "LmDebugCharacter.h"
 #include "LmCharacter.h"
 #include "../LmLogger.h"
 #include "../LmStructs.h"
 #include "../Animation/LmBowAnimInstance.h"
 #include "LmControllerInterface.h"
-
 #include <UObject/Class.h>
 #include <Components/CapsuleComponent.h>
 #include "Kismet/GameplayStatics.h"
@@ -14,7 +14,7 @@
 #include <UObject/UObjectBase.h>
 #include <ClothingSystemRuntimeNv/Public/ClothingSimulationFactoryNv.h>
 
-ALmCharacter::ALmCharacter() {
+ALmDebugCharacter::ALmDebugCharacter() {
 	const auto mesh = GetMesh();
 	const FString DefaultMeshPath = FString(TEXT("SkeletalMesh'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/Meshes/AnimMan.AnimMan'"));
 	const FString MannequinMeshPath = FString(TEXT("SkeletalMesh'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/Meshes/Mannequin.Mannequin'"));
@@ -80,7 +80,14 @@ ALmCharacter::ALmCharacter() {
 
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(FName("SkeletalMesh"));
 	SkeletalMesh->AttachToComponent(HeldObjectRoot, FAttachmentTransformRules::KeepRelativeTransform);
+	//SkeletalMesh->ClothingSimulationFactory = UClothingSimulationFactoryNv::StaticClass();
 	SkeletalMesh->SetCollisionProfileName(FName("NoCollision"));
+
+	/*const ConstructorHelpers::FObjectFinder<UAnimBlueprint> BowAnimBP(TEXT("AnimBlueprint'/Locomotion/Gameplay/AnimBP_LmBow.AnimBP_LmBow'"));
+	if (BowAnimBP.Succeeded())
+		SkeletalMesh->SetAnimInstanceClass(BowAnimBP.Object->GetAnimBlueprintGeneratedClass());
+	else
+		ULmLogger::LogError("BowAnimInstance not found. Please set it at BP_ALSCharacter");*/
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName("StaticMesh"));
 	StaticMesh->AttachToComponent(HeldObjectRoot, FAttachmentTransformRules::KeepRelativeTransform);
@@ -91,6 +98,7 @@ ALmCharacter::ALmCharacter() {
 
 	BodyMesh = CreateDefaultSubobject<USkeletalMeshComponent>(FName("BodyMesh"));
 	BodyMesh->AttachToComponent(VisualMeshes, FAttachmentTransformRules::KeepRelativeTransform);
+	//BodyMesh->ClothingSimulationFactory = UClothingSimulationFactoryNv::StaticClass();
 	BodyMesh->SetCollisionProfileName(FName("NoCollision"));
 
 	const auto capsule = GetCapsuleComponent();
@@ -105,6 +113,12 @@ ALmCharacter::ALmCharacter() {
 		ULmLogger::LogError("AnimMan not found.");
 
 	mesh->bUpdateJointsFromAnimation = true;
+
+	//const ConstructorHelpers::FObjectFinder<UAnimBlueprint> ALSCharacterAnimBP(TEXT("AnimBlueprint'/Locomotion/Gameplay/AnimBP_LmCharacter.AnimBP_LmCharacter'"));
+	//if (ALSCharacterAnimBP.Succeeded()) {
+	//	mesh->SetAnimInstanceClass(ALSCharacterAnimBP.Object->GetAnimBlueprintGeneratedClass());
+	//} else
+	//	ULmLogger::LogError("BP_AnimInstance not found.");
 
 #pragma region Setting up Mantles
 	//Mantle 2m Default
@@ -289,30 +303,30 @@ ALmCharacter::ALmCharacter() {
 
 }
 
-void ALmCharacter::OnConstruction(const FTransform& Transform) {
+void ALmDebugCharacter::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
 
-	BodyMesh->SetLeaderPoseComponent(GetMesh());
+	BodyMesh->SetMasterPoseComponent(GetMesh());
 
 	SetDynamicMaterials();
 
 	SetResetColors();
 }
 
-void ALmCharacter::Tick(float DeltaTime) {
+void ALmDebugCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	UpdateColoringSystem();
 	UpdateHeldObjectAnimations();
 }
 
-void ALmCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
+void ALmDebugCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	InputComponent->BindKey(EKeys::M, IE_Pressed, this, &ALmCharacter::ToggleCharacterMesh);
+	InputComponent->BindKey(EKeys::M, IE_Pressed, this, &ALmDebugCharacter::ToggleCharacterMesh);
 }
 
-void ALmCharacter::SetDynamicMaterials() {
+void ALmDebugCharacter::SetDynamicMaterials() {
 	const auto mesh = GetMesh();
 	Pelvis = mesh->CreateDynamicMaterialInstance(0);
 	Torso = mesh->CreateDynamicMaterialInstance(1);
@@ -330,7 +344,7 @@ void ALmCharacter::SetDynamicMaterials() {
 	Hand_R = mesh->CreateDynamicMaterialInstance(14);
 }
 
-void ALmCharacter::SetResetColors() {
+void ALmDebugCharacter::SetResetColors() {
 	if (bSolidColor) {
 		Head->SetVectorParameterValue(FName("BaseColor"), DefaultColor);
 		Torso->SetVectorParameterValue(FName("BaseColor"), DefaultColor);
@@ -403,7 +417,7 @@ void ALmCharacter::SetResetColors() {
 	}
 }
 
-void ALmCharacter::UpdateColoringSystem() {
+void ALmDebugCharacter::UpdateColoringSystem() {
 	const auto pc = UGameplayStatics::GetPlayerController(this, 0);
 	if (IsValid(pc) && pc->GetClass()->ImplementsInterface(ULmControllerInterface::StaticClass())) {
 		const auto debugInfo = ILmControllerInterface::Execute_GetDebugInfo(pc);
@@ -417,7 +431,7 @@ void ALmCharacter::UpdateColoringSystem() {
 	}
 }
 
-void ALmCharacter::UpdateLayeringColors() {
+void ALmDebugCharacter::UpdateLayeringColors() {
 
 	Head->SetVectorParameterValue(FName(TEXT("BaseColor")), LerpColors2Level(OverlayLayerColor, AdditiveAmountColor, BaseLayerColor, FName("Layering_Head_Add"), FName("Layering_Head")));
 	Torso->SetVectorParameterValue(FName(TEXT("BaseColor")), LerpColors2Level(OverlayLayerColor, AdditiveAmountColor, BaseLayerColor, FName("Layering_Spine_Add"), FName("Layering_Spine")));
@@ -441,7 +455,7 @@ void ALmCharacter::UpdateLayeringColors() {
 	Hand_R->SetVectorParameterValue(FName(TEXT("BaseColor")), LerpColors2Level2(upper_body_right_color, HandColor, HandIKColor, FName("Layering_Hand_R"), FName("Enable_HandIK_R")));
 }
 
-void ALmCharacter::UpdateHeldObject() {
+void ALmDebugCharacter::UpdateHeldObject() {
 	if (OverlayState == ELmOverlayState::Lm_Rifle) {
 		AttachToHand(nullptr, M4A1);
 	} else if (OverlayState == ELmOverlayState::Lm_Pistol1H || OverlayState == ELmOverlayState::Lm_Pistol2H) {
@@ -461,13 +475,13 @@ void ALmCharacter::UpdateHeldObject() {
 	}
 }
 
-void ALmCharacter::ClearHeldObject() {
+void ALmDebugCharacter::ClearHeldObject() {
 	StaticMesh->SetStaticMesh(nullptr);
 	SkeletalMesh->SetSkeletalMesh(nullptr, false);
 	SkeletalMesh->SetAnimInstanceClass(nullptr);
 }
 
-void ALmCharacter::AttachToHand(UStaticMesh* NewStaticMesh, USkeletalMesh* NewSkeletalMesh, UClass* NewAnimClass, bool bLeftHand, FVector Offset) {
+void ALmDebugCharacter::AttachToHand(UStaticMesh* NewStaticMesh, USkeletalMesh* NewSkeletalMesh, UClass* NewAnimClass, bool bLeftHand, FVector Offset) {
 	ClearHeldObject();
 	if (IsValid(NewStaticMesh))
 		StaticMesh->SetStaticMesh(NewStaticMesh);
@@ -480,7 +494,7 @@ void ALmCharacter::AttachToHand(UStaticMesh* NewStaticMesh, USkeletalMesh* NewSk
 	HeldObjectRoot->SetRelativeLocation(Offset);
 }
 
-void ALmCharacter::UpdateHeldObjectAnimations() {
+void ALmDebugCharacter::UpdateHeldObjectAnimations() {
 	if (OverlayState == ELmOverlayState::Lm_Bow && IsValid(BowAnimInstance)) {
 		const auto ai = SkeletalMesh->GetAnimInstance();
 		if (IsValid(ai)) {
@@ -492,7 +506,7 @@ void ALmCharacter::UpdateHeldObjectAnimations() {
 	}
 }
 
-FTransform ALmCharacter::Get3PPivotTarget_Implementation() {
+FTransform ALmDebugCharacter::Get3PPivotTarget_Implementation() {
 	TArray<FVector> vectorArray;
 	const auto mesh = GetMesh();
 	vectorArray.Add(mesh->GetSocketLocation(FName("head")));
@@ -500,142 +514,142 @@ FTransform ALmCharacter::Get3PPivotTarget_Implementation() {
 	return FTransform(GetActorRotation(), UKismetMathLibrary::GetVectorArrayAverage(vectorArray));
 }
 
-FLmTraceParams ALmCharacter::Get3PTraceParameters_Implementation() {
+FLmTraceParams ALmDebugCharacter::Get3PTraceParameters_Implementation() {
 	return FLmTraceParams(ETT_CameraCollisionChannel, GetMesh()->GetSocketLocation(FName(bRightShoulder ? "TP_CameraTrace_R" : "TP_CameraTrace_L")), 15.0f);
 }
 
-void ALmCharacter::OnOverlayStateChanged(const ELmOverlayState NewOverlayState) {
+void ALmDebugCharacter::OnOverlayStateChanged(const ELmOverlayState NewOverlayState) {
 	Super::OnOverlayStateChanged(NewOverlayState);
 
 	UpdateHeldObject();
 }
 
-UAnimMontage* ALmCharacter::GetRollAnimation() {
+UAnimMontage* ALmDebugCharacter::GetRollAnimation() {
 	switch (OverlayState) {
-		case ELmOverlayState::Lm_HandsTied:
-		case ELmOverlayState::Lm_Rifle:
-		case ELmOverlayState::Lm_Binoculars:
-		case ELmOverlayState::Lm_Box:
-			return LandRoll_2H;
-		case ELmOverlayState::Lm_Pistol1H:
-		case ELmOverlayState::Lm_Pistol2H:
-			return LandRoll_RH;
-		case ELmOverlayState::Lm_Injured:
-		case ELmOverlayState::Lm_Bow:
-		case ELmOverlayState::Lm_Torch:
-		case ELmOverlayState::Lm_Barrel:
-			return LandRoll_LH;
-		case ELmOverlayState::Lm_Default:;
-		case ELmOverlayState::Lm_Masculine:
-		case ELmOverlayState::Lm_Feminine:
-		default:
-			return LandRoll_Default;
+	case ELmOverlayState::Lm_HandsTied:
+	case ELmOverlayState::Lm_Rifle:
+	case ELmOverlayState::Lm_Binoculars:
+	case ELmOverlayState::Lm_Box:
+		return LandRoll_2H;
+	case ELmOverlayState::Lm_Pistol1H:
+	case ELmOverlayState::Lm_Pistol2H:
+		return LandRoll_RH;
+	case ELmOverlayState::Lm_Injured:
+	case ELmOverlayState::Lm_Bow:
+	case ELmOverlayState::Lm_Torch:
+	case ELmOverlayState::Lm_Barrel:
+		return LandRoll_LH;
+	case ELmOverlayState::Lm_Default:;
+	case ELmOverlayState::Lm_Masculine:
+	case ELmOverlayState::Lm_Feminine:
+	default:
+		return LandRoll_Default;
 	}
 }
 
-FLmMantleAsset ALmCharacter::GetMantleAsset(const ELmMantleType MantleType) {
+FLmMantleAsset ALmDebugCharacter::GetMantleAsset(const ELmMantleType MantleType) {
 	//Check if the mantle type is falling catch or high-mantle to return the Mantle2mDefault
 	if (MantleType != ELmMantleType::Lm_LowMantle)
 		return Mantle2mDefault;
 
 	switch (OverlayState) {
-		case ELmOverlayState::Lm_HandsTied:
-			return Mantle1m2H;
-		case ELmOverlayState::Lm_Rifle:
-		case ELmOverlayState::Lm_Pistol1H:
-		case ELmOverlayState::Lm_Pistol2H:
-		case ELmOverlayState::Lm_Binoculars:
-			return Mantle1mRH;
-		case ELmOverlayState::Lm_Barrel:
-		case ELmOverlayState::Lm_Injured:
-		case ELmOverlayState::Lm_Bow:
-		case ELmOverlayState::Lm_Torch:
-			return Mantle1mRH;
-		case ELmOverlayState::Lm_Box:
-			return Mantle1mBox;
-		case ELmOverlayState::Lm_Default:
-		case ELmOverlayState::Lm_Masculine:
-		case ELmOverlayState::Lm_Feminine:
-		default:
-			return Mantle1mDefault;
+	case ELmOverlayState::Lm_HandsTied:
+		return Mantle1m2H;
+	case ELmOverlayState::Lm_Rifle:
+	case ELmOverlayState::Lm_Pistol1H:
+	case ELmOverlayState::Lm_Pistol2H:
+	case ELmOverlayState::Lm_Binoculars:
+		return Mantle1mRH;
+	case ELmOverlayState::Lm_Barrel:
+	case ELmOverlayState::Lm_Injured:
+	case ELmOverlayState::Lm_Bow:
+	case ELmOverlayState::Lm_Torch:
+		return Mantle1mRH;
+	case ELmOverlayState::Lm_Box:
+		return Mantle1mBox;
+	case ELmOverlayState::Lm_Default:
+	case ELmOverlayState::Lm_Masculine:
+	case ELmOverlayState::Lm_Feminine:
+	default:
+		return Mantle1mDefault;
 	}
 }
 
-void ALmCharacter::MantleStart(const float MantleHeight, const FLmComponentAndTransform MantleLedgeWS, const ELmMantleType MantleType) {
+void ALmDebugCharacter::MantleStart(const float MantleHeight, const FLmComponentAndTransform MantleLedgeWS, const ELmMantleType MantleType) {
 	Super::MantleStart(MantleHeight, MantleLedgeWS, MantleType);
 
 	if (MantleType != ELmMantleType::Lm_LowMantle)
 		ClearHeldObject();
 }
 
-void ALmCharacter::MantleEnd() {
+void ALmDebugCharacter::MantleEnd() {
 	Super::MantleEnd();
 
 	UpdateHeldObject();
 }
 
-UAnimMontage* ALmCharacter::GetGetupAnimation(const bool bIsRagdollFacedUp) {
+UAnimMontage* ALmDebugCharacter::GetGetupAnimation(const bool bIsRagdollFacedUp) {
 
 	if (bIsRagdollFacedUp) {
 		switch (OverlayState) {
-			case ELmOverlayState::Lm_Default:
-			case ELmOverlayState::Lm_Masculine:
-			case ELmOverlayState::Lm_Feminine:
-			default:
-				return GetupBack_Default;
-			case ELmOverlayState::Lm_Injured:
-			case ELmOverlayState::Lm_Bow:
-			case ELmOverlayState::Lm_Torch:
-			case ELmOverlayState::Lm_Barrel:
-				return GetupBack_LH;
-			case ELmOverlayState::Lm_Rifle:
-			case ELmOverlayState::Lm_Pistol1H:
-			case ELmOverlayState::Lm_Pistol2H:
-			case ELmOverlayState::Lm_Binoculars:
-				return GetupBack_RH;
-			case ELmOverlayState::Lm_HandsTied:
-			case ELmOverlayState::Lm_Box:
-				return GetupBack_2H;
-		}
-	}
-
-	switch (OverlayState) {
 		case ELmOverlayState::Lm_Default:
 		case ELmOverlayState::Lm_Masculine:
 		case ELmOverlayState::Lm_Feminine:
 		default:
-			return GetupFront_Default;
+			return GetupBack_Default;
 		case ELmOverlayState::Lm_Injured:
 		case ELmOverlayState::Lm_Bow:
 		case ELmOverlayState::Lm_Torch:
 		case ELmOverlayState::Lm_Barrel:
-			return GetupFront_LH;
+			return GetupBack_LH;
 		case ELmOverlayState::Lm_Rifle:
 		case ELmOverlayState::Lm_Pistol1H:
 		case ELmOverlayState::Lm_Pistol2H:
 		case ELmOverlayState::Lm_Binoculars:
-			return GetupFront_RH;
+			return GetupBack_RH;
 		case ELmOverlayState::Lm_HandsTied:
 		case ELmOverlayState::Lm_Box:
-			return GetupFront_2H;
+			return GetupBack_2H;
+		}
+	}
+
+	switch (OverlayState) {
+	case ELmOverlayState::Lm_Default:
+	case ELmOverlayState::Lm_Masculine:
+	case ELmOverlayState::Lm_Feminine:
+	default:
+		return GetupFront_Default;
+	case ELmOverlayState::Lm_Injured:
+	case ELmOverlayState::Lm_Bow:
+	case ELmOverlayState::Lm_Torch:
+	case ELmOverlayState::Lm_Barrel:
+		return GetupFront_LH;
+	case ELmOverlayState::Lm_Rifle:
+	case ELmOverlayState::Lm_Pistol1H:
+	case ELmOverlayState::Lm_Pistol2H:
+	case ELmOverlayState::Lm_Binoculars:
+		return GetupFront_RH;
+	case ELmOverlayState::Lm_HandsTied:
+	case ELmOverlayState::Lm_Box:
+		return GetupFront_2H;
 	}
 }
 
-void ALmCharacter::RagdollStart() {
+void ALmDebugCharacter::RagdollStart() {
 	ClearHeldObject();
 	Super::RagdollStart();
 }
 
-void ALmCharacter::RagdollEnd() {
+void ALmDebugCharacter::RagdollEnd() {
 	Super::RagdollEnd();
 	UpdateHeldObject();
 }
 
-void ALmCharacter::ToggleCharacterMesh() {
+void ALmDebugCharacter::ToggleCharacterMesh() {
 	SetCharacterMesh(CurrentMeshType == ELmCharacterMeshStyle::Lm_Default ? ELmCharacterMeshStyle::Lm_Skin : ELmCharacterMeshStyle::Lm_Default);
 }
 
-void ALmCharacter::SetCharacterMesh(ELmCharacterMeshStyle MeshType) {
+void ALmDebugCharacter::SetCharacterMesh(ELmCharacterMeshStyle MeshType) {
 	if (CurrentMeshType != MeshType) {
 		if (MeshType == ELmCharacterMeshStyle::Lm_Skin) {
 			BodyMesh->SetSkeletalMesh(SkinMesh, true);
@@ -649,7 +663,7 @@ void ALmCharacter::SetCharacterMesh(ELmCharacterMeshStyle MeshType) {
 	}
 }
 
-FLinearColor ALmCharacter::LerpColors2Level(const FLinearColor L1A, const FLinearColor L1B, const FLinearColor L2A, const FName L1Name, const FName L2Name) {
+FLinearColor ALmDebugCharacter::LerpColors2Level(const FLinearColor L1A, const FLinearColor L1B, const FLinearColor L2A, const FName L1Name, const FName L2Name) {
 	const float alpha1 = GetAnimCurveValue(L1Name);
 	const float alpha2 = GetAnimCurveValue(L2Name);
 
@@ -657,7 +671,7 @@ FLinearColor ALmCharacter::LerpColors2Level(const FLinearColor L1A, const FLinea
 	return UKismetMathLibrary::LinearColorLerp(L2A, l2_b, alpha2);
 }
 
-FLinearColor ALmCharacter::LerpColors2Level2(const FLinearColor L1A, const FLinearColor L1B, const FLinearColor L2B, const FName L1Name, const FName L2Name) {
+FLinearColor ALmDebugCharacter::LerpColors2Level2(const FLinearColor L1A, const FLinearColor L1B, const FLinearColor L2B, const FName L1Name, const FName L2Name) {
 	const float alpha1 = GetAnimCurveValue(L1Name);
 	const float alpha2 = GetAnimCurveValue(L2Name);
 
