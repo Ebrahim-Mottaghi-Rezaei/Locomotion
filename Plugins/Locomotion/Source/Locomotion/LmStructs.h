@@ -288,39 +288,6 @@ struct FLmVelocityBlend {
 	virtual FString ToString(bool bPrintToLog = false);
 };
 
-//
-////Animation Modifiers Structures.
-//USTRUCT(BlueprintType, Category = "Advanced Locomotion System|Animation Modifiers")
-//struct FLmAnimCurveCreationData {
-//	GENERATED_BODY()
-//
-//		UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Advanced Locomotion System")
-//		int FrameNumber;
-//	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Advanced Locomotion System")
-//		float CurveValue;
-//
-//	FLmAnimCurveCreationData();
-//
-//	virtual FString ToString(bool bPrintToLog = false);
-//};
-//
-//USTRUCT(BlueprintType, Category = "Advanced Locomotion System|Animation Modifiers")
-//struct FLmAnimCurveCreationParams {
-//	GENERATED_BODY()
-//
-//		UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Advanced Locomotion System")
-//		FName CurveName;
-//	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Advanced Locomotion System")
-//		bool KeyEachFrame;
-//
-//	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Advanced Locomotion System")
-//		TArray<FLmAnimCurveCreationData> Keys;
-//
-//	FLmAnimCurveCreationParams();
-//
-//	FString ToString(bool bPrintToLog = false);
-//};
-
 USTRUCT(BlueprintType, Category = "Locomotion|DataTypes")
 struct FLmCurrentState {
 	GENERATED_BODY()
@@ -541,4 +508,22 @@ struct LOCOMOTION_API FLmRoleSkinColors : public FTableRowBase {
 		FLinearColor Pants = FColor::FromHex("4A6670FF");
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (EditCondition = "UseShoes", EditConditionHides))
 		FLinearColor Shoes = FColor::FromHex("C3B59FFF");
+};
+
+USTRUCT(BlueprintType, Category = "Locomotion|DataTypes")
+struct LOCOMOTION_API FLmHoldingInstance : public FTableRowBase {
+	GENERATED_BODY()
+public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FText Name;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FText Description;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+		ELmUseWhichHand UsingHands;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+		FVector Offset;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+		ELmOverlayState OverlayState;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+		TSubclassOf<AActor> Instance;
 };

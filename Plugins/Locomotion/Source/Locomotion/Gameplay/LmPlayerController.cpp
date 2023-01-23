@@ -52,7 +52,7 @@ void ALmPlayerController::OnPossess(APawn* InPawn) {
 	if (IsValid(cameraManager)) {
 		cameraManager->OnPossess(InPawn);
 	} else {
-		ULmLogger::LogError(FString::Printf(TEXT("Camera Manager is invalid.")));
+		ULmLogger::LogError(TEXT("Camera Manager is invalid."));
 	}
 }
 

@@ -137,3 +137,10 @@ enum class ELmStateTracking :uint8 {
 	Lm_ChangedToTrue	UMETA(DisplayName = "Changed To True"),
 	Lm_ChangedToFalse	UMETA(DisplayName = "Changed To False")
 };
+
+UENUM(BlueprintType)
+enum class ELmUseWhichHand :uint8 {
+	Lm_RightHand		UMETA(DisplayName = "Right Hand"),
+	Lm_LeftHand			UMETA(DisplayName = "Left Hand"),
+	Lm_BothHands		UMETA(DisplayName = "Both Hands")
+};
