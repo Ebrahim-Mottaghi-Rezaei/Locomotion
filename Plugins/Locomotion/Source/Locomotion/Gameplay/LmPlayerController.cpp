@@ -14,14 +14,6 @@ ALmPlayerController::ALmPlayerController() {
 	else
 		ULmLogger::LogError("ClickSound not found.");
 
-	/*static ConstructorHelpers::FObjectFinder<ULmWHuD> tmp1(TEXT("WidgetBlueprint'/Locomotion/UI/WBP_ALSHUD.WBP_ALSHUD'"));
-	if (IsValid(tmp1.Object)) {
-		HudTemplate = static_cast<UWidgetBlueprint>(tmp1.Object);
-	}*/
-
-	/*if (!IsValid(HudTemplate))
-		ULmLogger::LogError(TEXT("ALS HUD Template is null. Please set it in BP_ALSPlayerController blueprint."));*/
-
 	PlayerCameraManagerClass = ALmPlayerCameraManager::StaticClass();
 }
 
@@ -32,14 +24,14 @@ void ALmPlayerController::BeginPlay() {
 
 	if (IsValid(HudTemplate))
 		CreateWidget(this, HudTemplate)->AddToViewport();
-	//else
-	//	ULmLogger::LogError(TEXT("ALS HUD Template is null. Please set it in BP_ALSPlayerController blueprint."));
+	else
+		ULmLogger::LogError(TEXT("Locomotion HUD Template is null. Please set it in BP_LmPlayerController blueprint."));
 
-	//Search for all ALS Characters and populate array.
+	//Search for all LmCharacters and populate the array.
 	//Used to switch target character when viewing character info in the HUD
-	TArray<AActor*> alsCharacters;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALmBaseCharacter::StaticClass(), alsCharacters);
-	for (AActor* c : alsCharacters)
+	TArray<AActor*> lmCharacters;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALmBaseCharacter::StaticClass(), lmCharacters);
+	for (AActor* c : lmCharacters)
 		AvailableDebugCharacters.Add(static_cast<ALmBaseCharacter*>(c));
 
 	OverlaySwitcher = static_cast<ULmWOverlayStateSwitcher*>(CreateWidget(this, OverlayStateSwitcherTemplate));
@@ -69,8 +61,8 @@ void ALmPlayerController::SetupInputComponent() {
 		InputComponent->BindKey(EKeys::I, IE_Pressed, this, &ALmPlayerController::ToggleShowCharacterInfo);
 		InputComponent->BindKey(EKeys::Z, IE_Pressed, this, &ALmPlayerController::ToggleSlowMotion);
 
-		InputComponent->BindKey(EKeys::Comma, IE_Pressed, this, &ALmPlayerController::SelectPrevALSCharacter);
-		InputComponent->BindKey(EKeys::Period, IE_Pressed, this, &ALmPlayerController::SelectNextALSCharacter);
+		InputComponent->BindKey(EKeys::Comma, IE_Pressed, this, &ALmPlayerController::SelectPrevLmDebugCharacter);
+		InputComponent->BindKey(EKeys::Period, IE_Pressed, this, &ALmPlayerController::SelectNextLmDebugCharacter);
 
 		InputComponent->BindAction(TEXT("OpenOverlayMenu"), IE_Pressed, this, &ALmPlayerController::OpenOverlayMenu);
 		InputComponent->BindAction(TEXT("OpenOverlayMenu"), IE_Released, this, &ALmPlayerController::CloseOverlayMenu);
@@ -109,14 +101,14 @@ void ALmPlayerController::ToggleSlowMotion() {
 	UGameplayStatics::SetGlobalTimeDilation(this, bSlowMotion ? 0.05f : 1.0f);
 }
 
-void ALmPlayerController::SelectPrevALSCharacter() {
-	SelectedALSCharacterIndex = SelectedALSCharacterIndex - 1 > 0 ? SelectedALSCharacterIndex - 1 : AvailableDebugCharacters.Num() - 1;
-	DebugFocusCharacter = AvailableDebugCharacters[SelectedALSCharacterIndex];
+void ALmPlayerController::SelectPrevLmDebugCharacter() {
+	SelectedLmCharacterIndex = SelectedLmCharacterIndex - 1 > 0 ? SelectedLmCharacterIndex - 1 : AvailableDebugCharacters.Num() - 1;
+	DebugFocusCharacter = AvailableDebugCharacters[SelectedLmCharacterIndex];
 }
 
-void ALmPlayerController::SelectNextALSCharacter() {
-	SelectedALSCharacterIndex = SelectedALSCharacterIndex + 1 < AvailableDebugCharacters.Num() ? SelectedALSCharacterIndex + 1 : 0;
-	DebugFocusCharacter = AvailableDebugCharacters[SelectedALSCharacterIndex];
+void ALmPlayerController::SelectNextLmDebugCharacter() {
+	SelectedLmCharacterIndex = SelectedLmCharacterIndex + 1 < AvailableDebugCharacters.Num() ? SelectedLmCharacterIndex + 1 : 0;
+	DebugFocusCharacter = AvailableDebugCharacters[SelectedLmCharacterIndex];
 }
 
 void ALmPlayerController::OpenOverlayMenu() {

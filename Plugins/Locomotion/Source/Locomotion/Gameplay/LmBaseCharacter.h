@@ -287,7 +287,7 @@ protected:
 
 public:
 
-#pragma region IALS_Character_Interface_Overrides.
+#pragma region ILm_Character_Interface_Overrides.
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Locomotion|Character")
 		FLmCurrentState GetCurrentState();
 	virtual FLmCurrentState GetCurrentState_Implementation();
@@ -322,7 +322,7 @@ public:
 #pragma endregion
 
 
-#pragma region IALS_Camera_Interface_Overrides.
+#pragma region ILm_Camera_Interface_Overrides.
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Locomotion|Camera")
 		FLmCameraParameters GetCameraParameters();
 	virtual FLmCameraParameters GetCameraParameters_Implementation() override;

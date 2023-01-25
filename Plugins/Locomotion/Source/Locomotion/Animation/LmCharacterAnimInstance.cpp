@@ -203,8 +203,6 @@ void ULmCharacterAnimInstance::NativeUpdateAnimation(const float DeltaSeconds) {
 	UpdateLayerValues();
 	UpdateFootIK();
 
-	//ULmLogger::LogInfo(FString::Printf(TEXT("state: %s"), *UEnum::GetValueAsString(MovementState)), 0.1f);
-
 	/*Check Movement Mode*/
 	switch (MovementState) {
 		case ELmMovementState::Lm_Grounded:
@@ -361,7 +359,8 @@ void ULmCharacterAnimInstance::UpdateLayerValues() {
 
 void ULmCharacterAnimInstance::UpdateFootIK() {
 	//Update Foot Locking values.
-		//Step 1	Updating FootLockings for L/R feet and cache the results
+
+	//Step 1	Updating FootLockings for L/R feet and cache the results
 	FootLock_L = UpdateFootLock(FName(TEXT("Enable_FootIK_L")), FName(TEXT("FootLock_L")), FName(TEXT("ik_foot_l")), FootLock_L);
 	FootLock_R = UpdateFootLock(FName(TEXT("Enable_FootIK_R")), FName(TEXT("FootLock_R")), FName(TEXT("ik_foot_r")), FootLock_R);
 
@@ -407,8 +406,6 @@ void ULmCharacterAnimInstance::UpdateMovementValues() {
 	//Set the Standing and Crouching Play Rates
 	StandingPlayRate = CalculateStandingPlayRate();
 	CrouchingPlayRate = CalculateCrouchingPlayRate();
-
-	//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Cyan, FString::Printf(TEXT("VelocityBlend: %s\n  WalkRunBlend: %f, StrideBlend: %f, StandingPlayRate: %f, CrouchingPlayRate: %f"), *VelocityBlend.ToString(), WalkRunBlend, StrideBlend, StandingPlayRate, CrouchingPlayRate));
 }
 
 void ULmCharacterAnimInstance::UpdateRotationValues() {
@@ -725,36 +722,19 @@ FLmFootLock ULmCharacterAnimInstance::UpdateFootLock(FName Enable_FootIK_Curve, 
 				rotation_diff.Normalize();
 			}
 
-			/*if (FMath::Abs(rotation_diff.Yaw) > 8.f) {
-				ULmLogger::LogWarning(FString::Printf(TEXT("ar: %s, lur: %s"), *Character->GetActorRotation().ToString(), *Character->GetCharacterMovement()->GetLastUpdateRotation().ToString()), 0.1f);
-			}*/
-
 			location_diff = GetOwningComponent()->GetComponentRotation().UnrotateVector(Velocity * GetWorld()->GetDeltaSeconds());
 
-			//ULmLogger::LogWarning(FString::Printf(TEXT("YAW: %s"), *FString::SanitizeFloat(rotation_diff.Yaw)), 0.1f);
-			//if (FMath::Abs(rotation_diff.Yaw) < 8.f) {
 			lastValue.Location = UKismetMathLibrary::RotateAngleAxis(lastValue.Location - location_diff, rotation_diff.Yaw, FVector::DownVector);
 			lastValue.Rotation = lastValue.Rotation - rotation_diff;
 			lastValue.Rotation.Normalize();
-			//}
 		}
 	}
 	return lastValue;
 }
 
 ELmMovementDirection ULmCharacterAnimInstance::CalculateMovementDirection() {
-	//Calculate the Movement Direction. This value represents the direction the character is moving relative to the camera during the Looking direction / Aiming rotation modes, and is used in the Cycle Blending Anim Layers to blend to the appropriate directional states.
-
-	/*if (Gait == ELmGait::Lm_Sprinting)
-		return ELmMovementDirection::Lm_Forward;
-
-	if (RotationMode == ELmRotationMode::Lm_VelocityDirection)
-		return ELmMovementDirection::Lm_Forward;*/
-
-
-	if (Gait != ELmGait::Lm_Sprinting && RotationMode != ELmRotationMode::Lm_VelocityDirection) {
+	if (Gait != ELmGait::Lm_Sprinting && RotationMode != ELmRotationMode::Lm_VelocityDirection)
 		return CalculateQuadrant(MovementDirection, 70.0f, -70.0, 110.0f, -110.0f, 5.0f, UKismetMathLibrary::NormalizedDeltaRotator(Velocity.ToOrientationRotator(), AimingRotation).Yaw);
-	}
 
 	return ELmMovementDirection::Lm_Forward;
 }

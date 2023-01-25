@@ -1,7 +1,7 @@
 #include "LmCharacterAnimationInterface.h"
 #include "../LmLogger.h"
 
-// Add default functionality here for any IALSAnimationInterface functions that are not pure virtual.
+// Add default functionality here for any ILmCharacterAnimationInterface functions that are not pure virtual.
 void ILmCharacterAnimationInterface::Jumped_Implementation() {
 	ULmLogger::LogError(TEXT("Invalid interface method calling. ILmCharacterAnimationInterface::Jumped_Implementation"));
 }

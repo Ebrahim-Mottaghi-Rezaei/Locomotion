@@ -1,5 +1,3 @@
-
-
 #include "LmStructs.h"
 #include "LmLogger.h"
 #include "LmHelpers.h"
@@ -310,13 +308,6 @@ FString FLmHitResult::ToString(bool bPrintToLog) {
 	return r;
 }
 
-//FLmFootLock::FLmFootLock() {}
-//
-//FLmFootLock::FLmFootLock(float alpha, FVector location, FRotator rotation) {
-//	Alpha = alpha;
-//	LocRot = FTransform(rotation, location, FVector(1.0f, 1.0f, 1.0f));
-//}
-
 FString FLmRotateInPlaceAsset::ToString(bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Animation: %s, SlotName: %s, TurnRate: [Slow= %s, Fast= %s], PlayRateRange: [Slow= %s, Fast= %s]"), *Animation->GetName(), *SlotName.ToString(), *FString::SanitizeFloat(SlowTurnRate), *FString::SanitizeFloat(FastTurnRate), *FString::SanitizeFloat(SlowPlayRate), *FString::SanitizeFloat(FastPlayRate));
 
@@ -424,5 +415,4 @@ FString FLmFootOffset::ToString(bool bPrintToLog) {
 		ULmLogger::LogInfo(r);
 
 	return r;
-
 }

@@ -8,7 +8,6 @@
 #include "LmCameraInterface.h"
 #include <Camera/PlayerCameraManager.h>
 
-
 ALmPlayerCameraManager::ALmPlayerCameraManager() {
 	CameraBehaviour = CreateDefaultSubobject<USkeletalMeshComponent>(FName(TEXT("CameraBehavior")));
 	CameraBehaviour->AttachToComponent(GetTransformComponent(), FAttachmentTransformRules::KeepRelativeTransform);
@@ -21,7 +20,7 @@ ALmPlayerCameraManager::ALmPlayerCameraManager() {
 	if (IsValid(CameraMesh.Object) && CameraMesh.Succeeded())
 		CameraBehaviour->SetSkeletalMesh(CameraMesh.Object);
 	else
-		ULmLogger::LogError(FString(TEXT("AALSPlayerCameraManager | Camera mesh not found")));
+		ULmLogger::LogError(FString(TEXT("ALmPlayerCameraManager/ Camera mesh not found")));
 
 	AutoReceiveInput = EAutoReceiveInput::Player0;
 
@@ -29,7 +28,7 @@ ALmPlayerCameraManager::ALmPlayerCameraManager() {
 	if (IsValid(cameraRepositionCurve.Object) && cameraRepositionCurve.Succeeded())
 		RepositionCurve = cameraRepositionCurve.Object;
 	else
-		ULmLogger::LogError(FString(TEXT("AALSPlayerCameraManager | CameraRepositionCurve not found")));
+		ULmLogger::LogError(FString(TEXT("ALmPlayerCameraManager/ CameraRepositionCurve not found")));
 }
 
 void ALmPlayerCameraManager::OnPossess(APawn* controlledPawn) {
@@ -56,7 +55,7 @@ TEnumAsByte<EDrawDebugTrace::Type> ALmPlayerCameraManager::GetDebugTraceType(con
 //Get an Anim Curve value from the Player Camera Behavior AnimBP to use as a parameter in the custom camera behavior calculations
 float ALmPlayerCameraManager::GetCameraBehaviourParam(const FName CurveName) const {
 	if (!CameraBehaviour) {
-		ULmLogger::LogError(TEXT("ALmPlayerCameraManager | Camera Behaviour is null."));
+		ULmLogger::LogError(TEXT("ALmPlayerCameraManager::GetCameraBehaviourParam | Camera Behaviour is null."));
 		return 0.0f;
 	}
 
@@ -106,7 +105,6 @@ FLmCameraResult ALmPlayerCameraManager::CustomCameraBehaviour() {
 	SmoothedPivotTarget = FTransform(PivotTarget.GetRotation().Rotator(), axisIndependentLag);
 
 	//Step 4: Calculate Pivot Location (BlueSphere). Get the Smoothed Pivot Target and apply local offsets for further camera control.
-
 	const auto tmpRotation = SmoothedPivotTarget.GetRotation().Rotator();
 
 	PivotLocation = SmoothedPivotTarget.GetLocation() +

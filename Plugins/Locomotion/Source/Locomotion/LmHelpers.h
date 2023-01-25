@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -7,9 +5,6 @@
 #include "LmStructs.h"
 #include "LmHelpers.generated.h"
 
-/**
- *
- */
 UCLASS()
 class LOCOMOTION_API ULmHelpers : public UBlueprintFunctionLibrary {
 	GENERATED_BODY()

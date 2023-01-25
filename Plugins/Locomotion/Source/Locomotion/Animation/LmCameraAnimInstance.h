@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,9 +6,6 @@
 #include <GameFramework/PlayerController.h>
 #include "LmCameraAnimInstance.generated.h"
 
-/**
- *
- */
 UCLASS()
 class LOCOMOTION_API ULmCameraAnimInstance : public UAnimInstance {
 	GENERATED_BODY()

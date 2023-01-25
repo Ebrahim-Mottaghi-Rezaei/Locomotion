@@ -65,8 +65,8 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Debug")
 		virtual void ToggleSlowMotion();
 
-	virtual void SelectPrevALSCharacter();
-	virtual void SelectNextALSCharacter();
+	virtual void SelectPrevLmDebugCharacter();
+	virtual void SelectNextLmDebugCharacter();
 
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|HUD")
 		virtual void OpenOverlayMenu();
@@ -77,7 +77,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|HUD")
 		virtual void CycleOverlayDown();
 
-	uint8 SelectedALSCharacterIndex;
+	uint8 SelectedLmCharacterIndex;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Debug")
