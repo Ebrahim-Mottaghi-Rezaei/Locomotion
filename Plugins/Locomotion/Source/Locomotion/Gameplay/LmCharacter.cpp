@@ -219,10 +219,8 @@ void ALmCharacter::UpdateHeldObject() {
 	FName rowName = TEXT("Empty");
 	if (OverlayState == ELmOverlayState::Lm_Rifle) {
 		rowName = FName(TEXT("Rifle"));
-	} else if (OverlayState == ELmOverlayState::Lm_Pistol1H) {
-		rowName = FName(TEXT("Pistol1Hand"));
-	} else if (OverlayState == ELmOverlayState::Lm_Pistol2H) {
-		rowName = FName(TEXT("Pistol2Hands"));
+	} else if (OverlayState == ELmOverlayState::Lm_Pistol1H || OverlayState == ELmOverlayState::Lm_Pistol2H) {
+		rowName = FName(TEXT("Pistol"));
 	} else if (OverlayState == ELmOverlayState::Lm_Bow) {
 		rowName = FName(TEXT("Bow"));
 	} else if (OverlayState == ELmOverlayState::Lm_Torch) {
@@ -243,7 +241,13 @@ void ALmCharacter::SetHeldObject(const FLmHoldingInstance NewHoldingObject) {
 	if (IsValid(NewHoldingObject.Instance)) {
 		ClearHeldObject();
 
-		SetOverlayState(NewHoldingObject.OverlayState);
+		if (OverlayState == ELmOverlayState::Lm_Pistol1H || OverlayState == ELmOverlayState::Lm_Pistol2H) {
+			if (!(NewHoldingObject.OverlayState == ELmOverlayState::Lm_Pistol1H || NewHoldingObject.OverlayState == ELmOverlayState::Lm_Pistol2H)) {
+				SetOverlayState(NewHoldingObject.OverlayState);
+			}
+		} else {
+			SetOverlayState(NewHoldingObject.OverlayState);
+		}
 
 		AttachToHand(NewHoldingObject);
 	} else {
@@ -255,7 +259,7 @@ void ALmCharacter::ClearHeldObject() {
 	HoldingObject->SetChildActorClass(nullptr);
 }
 
-void ALmCharacter::AttachToHand(FLmHoldingInstance NewHoldingObject) {
+void ALmCharacter::AttachToHand(const FLmHoldingInstance NewHoldingObject) {
 	HoldingObject->SetChildActorClass(NewHoldingObject.Instance);
 	HoldingObject->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, true), NewHoldingObject.UsingHands == ELmUseWhichHand::Lm_LeftHand ? FName(TEXT("VB LHS_ik_hand_gun")) : FName(TEXT("VB RHS_ik_hand_gun")));
 	HoldingObject->SetRelativeLocation(NewHoldingObject.Offset);
@@ -284,24 +288,24 @@ void ALmCharacter::OnOverlayStateChanged(const ELmOverlayState NewOverlayState) 
 
 UAnimMontage* ALmCharacter::GetRollAnimation() {
 	switch (OverlayState) {
-	case ELmOverlayState::Lm_HandsTied:
-	case ELmOverlayState::Lm_Rifle:
-	case ELmOverlayState::Lm_Binoculars:
-	case ELmOverlayState::Lm_Box:
-		return LandRoll_2H;
-	case ELmOverlayState::Lm_Pistol1H:
-	case ELmOverlayState::Lm_Pistol2H:
-		return LandRoll_RH;
-	case ELmOverlayState::Lm_Injured:
-	case ELmOverlayState::Lm_Bow:
-	case ELmOverlayState::Lm_Torch:
-	case ELmOverlayState::Lm_Barrel:
-		return LandRoll_LH;
-	case ELmOverlayState::Lm_Default:;
-	case ELmOverlayState::Lm_Masculine:
-	case ELmOverlayState::Lm_Feminine:
-	default:
-		return LandRoll_Default;
+		case ELmOverlayState::Lm_HandsTied:
+		case ELmOverlayState::Lm_Rifle:
+		case ELmOverlayState::Lm_Binoculars:
+		case ELmOverlayState::Lm_Box:
+			return LandRoll_2H;
+		case ELmOverlayState::Lm_Pistol1H:
+		case ELmOverlayState::Lm_Pistol2H:
+			return LandRoll_RH;
+		case ELmOverlayState::Lm_Injured:
+		case ELmOverlayState::Lm_Bow:
+		case ELmOverlayState::Lm_Torch:
+		case ELmOverlayState::Lm_Barrel:
+			return LandRoll_LH;
+		case ELmOverlayState::Lm_Default:;
+		case ELmOverlayState::Lm_Masculine:
+		case ELmOverlayState::Lm_Feminine:
+		default:
+			return LandRoll_Default;
 	}
 }
 
@@ -311,25 +315,25 @@ FLmMantleAsset ALmCharacter::GetMantleAsset(const ELmMantleType MantleType) {
 		return Mantle2mDefault;
 
 	switch (OverlayState) {
-	case ELmOverlayState::Lm_HandsTied:
-		return Mantle1m2H;
-	case ELmOverlayState::Lm_Rifle:
-	case ELmOverlayState::Lm_Pistol1H:
-	case ELmOverlayState::Lm_Pistol2H:
-	case ELmOverlayState::Lm_Binoculars:
-		return Mantle1mRH;
-	case ELmOverlayState::Lm_Barrel:
-	case ELmOverlayState::Lm_Injured:
-	case ELmOverlayState::Lm_Bow:
-	case ELmOverlayState::Lm_Torch:
-		return Mantle1mRH;
-	case ELmOverlayState::Lm_Box:
-		return Mantle1mBox;
-	case ELmOverlayState::Lm_Default:
-	case ELmOverlayState::Lm_Masculine:
-	case ELmOverlayState::Lm_Feminine:
-	default:
-		return Mantle1mDefault;
+		case ELmOverlayState::Lm_HandsTied:
+			return Mantle1m2H;
+		case ELmOverlayState::Lm_Rifle:
+		case ELmOverlayState::Lm_Pistol1H:
+		case ELmOverlayState::Lm_Pistol2H:
+		case ELmOverlayState::Lm_Binoculars:
+			return Mantle1mRH;
+		case ELmOverlayState::Lm_Barrel:
+		case ELmOverlayState::Lm_Injured:
+		case ELmOverlayState::Lm_Bow:
+		case ELmOverlayState::Lm_Torch:
+			return Mantle1mRH;
+		case ELmOverlayState::Lm_Box:
+			return Mantle1mBox;
+		case ELmOverlayState::Lm_Default:
+		case ELmOverlayState::Lm_Masculine:
+		case ELmOverlayState::Lm_Feminine:
+		default:
+			return Mantle1mDefault;
 	}
 }
 
@@ -350,46 +354,46 @@ UAnimMontage* ALmCharacter::GetGetupAnimation(const bool bIsRagdollFacedUp) {
 
 	if (bIsRagdollFacedUp) {
 		switch (OverlayState) {
-		case ELmOverlayState::Lm_Default:
-		case ELmOverlayState::Lm_Masculine:
-		case ELmOverlayState::Lm_Feminine:
-		default:
-			return GetupBack_Default;
-		case ELmOverlayState::Lm_Injured:
-		case ELmOverlayState::Lm_Bow:
-		case ELmOverlayState::Lm_Torch:
-		case ELmOverlayState::Lm_Barrel:
-			return GetupBack_LH;
-		case ELmOverlayState::Lm_Rifle:
-		case ELmOverlayState::Lm_Pistol1H:
-		case ELmOverlayState::Lm_Pistol2H:
-		case ELmOverlayState::Lm_Binoculars:
-			return GetupBack_RH;
-		case ELmOverlayState::Lm_HandsTied:
-		case ELmOverlayState::Lm_Box:
-			return GetupBack_2H;
+			case ELmOverlayState::Lm_Default:
+			case ELmOverlayState::Lm_Masculine:
+			case ELmOverlayState::Lm_Feminine:
+			default:
+				return GetupBack_Default;
+			case ELmOverlayState::Lm_Injured:
+			case ELmOverlayState::Lm_Bow:
+			case ELmOverlayState::Lm_Torch:
+			case ELmOverlayState::Lm_Barrel:
+				return GetupBack_LH;
+			case ELmOverlayState::Lm_Rifle:
+			case ELmOverlayState::Lm_Pistol1H:
+			case ELmOverlayState::Lm_Pistol2H:
+			case ELmOverlayState::Lm_Binoculars:
+				return GetupBack_RH;
+			case ELmOverlayState::Lm_HandsTied:
+			case ELmOverlayState::Lm_Box:
+				return GetupBack_2H;
 		}
 	}
 
 	switch (OverlayState) {
-	case ELmOverlayState::Lm_Default:
-	case ELmOverlayState::Lm_Masculine:
-	case ELmOverlayState::Lm_Feminine:
-	default:
-		return GetupFront_Default;
-	case ELmOverlayState::Lm_Injured:
-	case ELmOverlayState::Lm_Bow:
-	case ELmOverlayState::Lm_Torch:
-	case ELmOverlayState::Lm_Barrel:
-		return GetupFront_LH;
-	case ELmOverlayState::Lm_Rifle:
-	case ELmOverlayState::Lm_Pistol1H:
-	case ELmOverlayState::Lm_Pistol2H:
-	case ELmOverlayState::Lm_Binoculars:
-		return GetupFront_RH;
-	case ELmOverlayState::Lm_HandsTied:
-	case ELmOverlayState::Lm_Box:
-		return GetupFront_2H;
+		case ELmOverlayState::Lm_Default:
+		case ELmOverlayState::Lm_Masculine:
+		case ELmOverlayState::Lm_Feminine:
+		default:
+			return GetupFront_Default;
+		case ELmOverlayState::Lm_Injured:
+		case ELmOverlayState::Lm_Bow:
+		case ELmOverlayState::Lm_Torch:
+		case ELmOverlayState::Lm_Barrel:
+			return GetupFront_LH;
+		case ELmOverlayState::Lm_Rifle:
+		case ELmOverlayState::Lm_Pistol1H:
+		case ELmOverlayState::Lm_Pistol2H:
+		case ELmOverlayState::Lm_Binoculars:
+			return GetupFront_RH;
+		case ELmOverlayState::Lm_HandsTied:
+		case ELmOverlayState::Lm_Box:
+			return GetupFront_2H;
 	}
 }
 
