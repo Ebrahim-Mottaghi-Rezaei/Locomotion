@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -22,19 +20,14 @@ public:
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
-		FName ProfileName = FName("ALS_Character");
-
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
 		UTimelineComponent* mantleTimeline;
 
 	//You should look it up in the GameTraceChannel in DefaultEngine.ini
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
-		TEnumAsByte<ECollisionChannel> ECC_Climbable = ECollisionChannel::ECC_GameTraceChannel2;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion")
-		TEnumAsByte<ECollisionChannel> CameraCollisionCheckChannel = ECollisionChannel::ECC_Camera;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion", AdvancedDisplay)
+		TEnumAsByte<ECollisionChannel> ECC_Climbable = ECC_GameTraceChannel2;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion", AdvancedDisplay)
+		TEnumAsByte<ECollisionChannel> CameraCollisionCheckChannel = ECC_Camera;
 
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Input", meta = (ClampMin = "0.1", ClampMax = "0.5", UIMin = "0.1", UIMax = "0.5"))
-		float DoubleTapTime = 0.1f;
 	///Category=Input
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Input")
 		ELmInputProcessingMode SprintProcessingMode;
@@ -48,10 +41,10 @@ protected:
 		ELmGait DesiredGait = ELmGait::Lm_Running;
 	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|Input")
 		ELmStance DesiredStance = ELmStance::Lm_Standing;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Input")
-		float LookUpDownRate = 1.25f;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Input")
-		float LookLeftRightRate = 1.25f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Input", meta = (UIMin = "0", UIMax = "5", ClampMin = "0", ClampMax = "5"))
+		float LookYawRate = 1.25f;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Input", meta = (UIMin = "0", UIMax = "5", ClampMin = "0", ClampMax = "5"))
+		float LookPitchRate = 1.25f;
 	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|Input")
 		uint8 timesPressedStance = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "Locomotion|Input")
@@ -343,6 +336,8 @@ public:
 protected:
 	TEnumAsByte<ETraceTypeQuery> ETT_CameraCollisionChannel;
 private:
+
+	float doubleTapTime = 0.10f;
 	TEnumAsByte<ETraceTypeQuery> ETT_Climbable;
 
 	TArray<AActor*> IgnoredActors;

@@ -348,11 +348,11 @@ void ALmBaseCharacter::PlayerMovementInput(const bool bIsForwardAxis) {
 }
 
 void ALmBaseCharacter::PlayerCameraYawInput(const float value) {
-	AddControllerYawInput(LookLeftRightRate * value);
+	AddControllerYawInput(LookYawRate * value);
 }
 
 void ALmBaseCharacter::PlayerCameraPitchInput(const float value) {
-	AddControllerPitchInput(LookUpDownRate * value);
+	AddControllerPitchInput(LookPitchRate * value);
 }
 
 void ALmBaseCharacter::PlayerJumpPressedInput() {
@@ -469,7 +469,7 @@ void ALmBaseCharacter::PlayerSprintBegin() {
 			}
 			});
 
-		GetWorldTimerManager().SetTimer(Sprint_Handle, del, DoubleTapTime, false);
+		GetWorldTimerManager().SetTimer(Sprint_Handle, del, doubleTapTime, false);
 	}
 }
 
@@ -488,7 +488,7 @@ void ALmBaseCharacter::PlayerSprintEnd() {
 			DesiredGait = ELmGait::Lm_Running;
 			});
 
-		GetWorldTimerManager().SetTimer(Sprint_Handle, del, DoubleTapTime, false);
+		GetWorldTimerManager().SetTimer(Sprint_Handle, del, doubleTapTime, false);
 	}
 }
 
@@ -1087,7 +1087,7 @@ bool ALmBaseCharacter::CapsuleHasRoomCheck(UCapsuleComponent* Capsule, const FVe
 	const auto zUp = FVector(0.0f, 0.0f, Capsule->GetScaledCapsuleHalfHeight_WithoutHemisphere() - RadiusOffset + HeightOffset);
 
 	FHitResult HitResult;
-	UKismetSystemLibrary::SphereTraceSingleByProfile(this, TargetLocation + zUp, TargetLocation - zUp, Capsule->GetUnscaledCapsuleRadius() + RadiusOffset, ProfileName, false, IgnoredActors, GetTraceDebugType(DebugType), HitResult, true, FLinearColor(0.130706f, 0.896269f, 0.144582f), FLinearColor(0.932733f, 0.29136f, 1.0f), 1.0f);
+	UKismetSystemLibrary::SphereTraceSingleByProfile(this, TargetLocation + zUp, TargetLocation - zUp, Capsule->GetUnscaledCapsuleRadius() + RadiusOffset, FName("ALS_Character"), false, IgnoredActors, GetTraceDebugType(DebugType), HitResult, true, FLinearColor(0.130706f, 0.896269f, 0.144582f), FLinearColor(0.932733f, 0.29136f, 1.0f), 1.0f);
 
 	return !(HitResult.bBlockingHit || HitResult.bStartPenetrating);
 }
