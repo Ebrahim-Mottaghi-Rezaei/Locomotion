@@ -494,19 +494,19 @@ struct LOCOMOTION_API FLmRoleSkinColors : public FTableRowBase {
 		bool UseGloves = true;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		bool UseShoes = true;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (ClampMin = 0, ClampMax = 2))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (ClampMin = 0, ClampMax = 3))
 		uint8 ShirtType = 3;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (ClampMin = 0, ClampMax = 2))
 		uint8 PantsType = 2;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		FLinearColor Skin = FColor::FromHex("E5B191FF");
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (EditCondition = "ShirtType > 0", EditConditionHides))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (EditCondition = "ShirtType > 0"))
 		FLinearColor Shirt = FColor::FromHex("668F80FF");
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (EditCondition = "UseGloves", EditConditionHides))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (EditCondition = "UseGloves"))
 		FLinearColor Gloves = FColor::FromHex("A0AF84FF");
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		FLinearColor Pants = FColor::FromHex("4A6670FF");
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (EditCondition = "UseShoes", EditConditionHides))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (EditCondition = "UseShoes"))
 		FLinearColor Shoes = FColor::FromHex("C3B59FFF");
 };
 
