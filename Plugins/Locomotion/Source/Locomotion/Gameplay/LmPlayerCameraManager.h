@@ -14,8 +14,9 @@ class LOCOMOTION_API ALmPlayerCameraManager : public APlayerCameraManager {
 public:
 	ALmPlayerCameraManager();
 	virtual void OnPossess(APawn* ControlledPawn);
-
 protected:
+	UPROPERTY(BlueprintReadOnly, EditInstanceOnly, Category = "Locomotion")
+		bool bDoCollisionTest = true;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Locomotion")
 		USkeletalMeshComponent* CameraBehaviour;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Locomotion")
@@ -47,4 +48,8 @@ protected:
 	APawn* ControlledPawn;
 
 	float repositionAlpha;
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Locomotion")
+		void SetDoCollisionTest(const bool bNewDoCollisionTest);
 };

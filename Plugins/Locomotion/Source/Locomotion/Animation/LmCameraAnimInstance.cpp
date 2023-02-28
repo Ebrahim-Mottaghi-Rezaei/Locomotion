@@ -9,7 +9,6 @@ void ULmCameraAnimInstance::NativeUpdateAnimation(const float DeltaSeconds) {
 
 	//Updating Character Info
 	if (IsValid(controlledPawn)) {
-		//TODO optimizing these variable checking by implementing proper events in the possessed pawn. in this case Controlled Pawn
 
 		if (controlledPawn->GetClass()->ImplementsInterface(ULmCharacterInterface::StaticClass())) {
 			const auto currentState = ILmCharacterInterface::Execute_GetCurrentState(controlledPawn);

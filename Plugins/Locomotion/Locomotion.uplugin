@@ -3,7 +3,7 @@
 	"Version": 1,
 	"VersionName": "1.0",
 	"FriendlyName": "Locomotion",
-	"Description": "C++ Driven Humanoid Locomotion system based on Advanced Locomotion System",
+	"Description": "C++ Driven Humanoid Locomotion system based on Advanced Locomotion System v4",
 	"Category": "Animation",
 	"CreatedBy": "Ebrahim Mottaghi Rezaei",
 	"CreatedByURL": "https://www.linkedin.com/in/ebrahim-mr",
@@ -19,7 +19,9 @@
 			"Name": "Locomotion",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
-			"WhitelistPlatforms": [ "Win64"]
+			"PlatformAllowList": [
+				"Win64"
+			]
 		}
 	]
 }

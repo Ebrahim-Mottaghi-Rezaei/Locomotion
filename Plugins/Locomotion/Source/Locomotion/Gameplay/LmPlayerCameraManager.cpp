@@ -20,15 +20,14 @@ ALmPlayerCameraManager::ALmPlayerCameraManager() {
 	if (IsValid(CameraMesh.Object) && CameraMesh.Succeeded())
 		CameraBehaviour->SetSkeletalMesh(CameraMesh.Object);
 	else
-		ULmLogger::LogError(FString(TEXT("ALmPlayerCameraManager/ Camera mesh not found")));
+		ULmLogger::LogError(FString(TEXT("ALmPlayerCameraManager::ALmPlayerCameraManager Camera mesh not found")));
 
 	AutoReceiveInput = EAutoReceiveInput::Player0;
-
-	static ConstructorHelpers::FObjectFinder<UCurveFloat> cameraRepositionCurve(TEXT("CurveFloat'/Locomotion/Data/Curves/CameraRepositionCurve.CameraRepositionCurve'"));
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> cameraRepositionCurve(TEXT("CurveFloat'/Locomotion/Curves/CV_CameraReposition.CV_CameraReposition'"));
 	if (IsValid(cameraRepositionCurve.Object) && cameraRepositionCurve.Succeeded())
 		RepositionCurve = cameraRepositionCurve.Object;
 	else
-		ULmLogger::LogError(FString(TEXT("ALmPlayerCameraManager/ CameraRepositionCurve not found")));
+		ULmLogger::LogError(FString(TEXT("ALmPlayerCameraManager::ALmPlayerCameraManager CameraRepositionCurve not found")));
 }
 
 void ALmPlayerCameraManager::OnPossess(APawn* controlledPawn) {
@@ -40,6 +39,11 @@ void ALmPlayerCameraManager::OnPossess(APawn* controlledPawn) {
 
 	cameraAnimInstance->playerController = GetOwningPlayerController();
 	cameraAnimInstance->controlledPawn = ControlledPawn;
+}
+
+void ALmPlayerCameraManager::SetDoCollisionTest(const bool bNewDoCollisionTest) {
+	//TODO Do some security checkups to make sure that the calling is from valid sources. [Cheat check from clipping]
+	bDoCollisionTest = bNewDoCollisionTest;
 }
 
 TEnumAsByte<EDrawDebugTrace::Type> ALmPlayerCameraManager::GetDebugTraceType(const EDrawDebugTrace::Type ShowTraceType) const {
@@ -123,7 +127,7 @@ FLmCameraResult ALmPlayerCameraManager::CustomCameraBehaviour() {
 	);
 
 	//Step 6: Trace for an object between the camera and character to apply a corrective offset. Trace origins are set within the Character BP via the Camera Interface. Functions like the normal spring arm, but can allow for different trace origins regardless of the pivot.
-	if (IsValid(ControlledPawn)) {
+	if (bDoCollisionTest && IsValid(ControlledPawn)) {
 		if (ControlledPawn->GetClass()->ImplementsInterface(ULmCameraInterface::StaticClass())) {
 
 			auto traceParams = ILmCameraInterface::Execute_Get3PTraceParameters(ControlledPawn);

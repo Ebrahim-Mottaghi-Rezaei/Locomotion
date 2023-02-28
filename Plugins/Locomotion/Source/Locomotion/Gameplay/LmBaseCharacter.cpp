@@ -14,6 +14,7 @@
 #include "LmControllerInterface.h"
 #include <GameFramework/Pawn.h>
 #include <GameFramework/Actor.h>
+#include "LmPlayerCameraManager.h"
 
 ALmBaseCharacter::ALmBaseCharacter() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -119,7 +120,7 @@ ALmBaseCharacter::ALmBaseCharacter() {
 	else
 		ULmLogger::LogError("Mantle_2m not found.");
 
-	static ConstructorHelpers::FObjectFinder<UCurveFloat> mantleTimelineCurve(TEXT("CurveFloat'/Locomotion/Data/Curves/MantleTimelineCurve.MantleTimelineCurve'"));
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> mantleTimelineCurve(TEXT("CurveFloat'/Locomotion/Curves/CV_MantleTimeline.CV_MantleTimeline'"));
 	if (mantleTimelineCurve.Succeeded())
 		MantleTimelineCurve = mantleTimelineCurve.Object;
 	else
@@ -178,27 +179,28 @@ void ALmBaseCharacter::Tick(const float DeltaTime) {
 
 	SetEssentialValues();
 	switch (MovementState) {
-	case ELmMovementState::Lm_Grounded:
-		//Do While On Ground
-		UpdateCharacterMovement();
-		UpdateGroundedRotation();
-		break;
-	case ELmMovementState::Lm_Mantling:
-		break;
-	case ELmMovementState::Lm_InAir:
-		//Do while In Air
-		UpdateInAirRotation();
-		//Perform a mantle check if falling while movement input is pressed.
-		if (bHasMovementInput)
-			MantleCheck(FallingTraceSettings, EDrawDebugTrace::ForOneFrame);
-		break;
-	case ELmMovementState::Lm_Ragdoll:
-		//Do while in Rag-doll
-		RagdollUpdate();
-		break;
-	case ELmMovementState::Lm_None:
-	default:;
-		break;
+		case ELmMovementState::Lm_Grounded:
+			//Do While On Ground
+			UpdateCharacterMovement();
+			UpdateGroundedRotation();
+			break;
+		case ELmMovementState::Lm_Mantling:
+			break;
+		case ELmMovementState::Lm_InAir:
+			//Do while In Air
+			UpdateInAirRotation();
+			
+			//Perform a mantle check if falling while movement input is pressed.
+			if (bHasMovementInput)
+				MantleCheck(FallingTraceSettings, EDrawDebugTrace::ForOneFrame);
+			break;
+		case ELmMovementState::Lm_Ragdoll:
+			//Do while in Rag-doll
+			RagdollUpdate();
+			break;
+		case ELmMovementState::Lm_None:
+		default:;
+			break;
 	}
 
 	CacheValues();
@@ -283,7 +285,7 @@ void ALmBaseCharacter::Landed(const FHitResult& Hit) {
 
 		timerDel.BindLambda([this] {
 			GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
-			});
+		});
 
 		GetWorldTimerManager().SetTimer(timerHandle_Landing, timerDel, 0.5f, false);
 	}
@@ -418,7 +420,7 @@ void ALmBaseCharacter::PlayerStanceActionInput(FKey key) {
 						GetWorldTimerManager().ClearTimer(ResetBreakFall_th);
 
 					bBreakFall = false;
-					});
+				});
 
 				if (GetWorldTimerManager().IsTimerActive(ResetBreakFall_th))
 					GetWorldTimerManager().ClearTimer(ResetBreakFall_th);
@@ -428,11 +430,11 @@ void ALmBaseCharacter::PlayerStanceActionInput(FKey key) {
 		} else {
 			//multi-pressed
 			Roll();
-			DesiredStance = Stance == ELmStance::Lm_Standing ? ELmStance::Lm_Crouching : ELmStance::Lm_Standing;
+			DesiredStance = Stance;
 		}
 
 		this->StanceActionInputCounter = 0;
-		});
+	});
 
 	GetWorldTimerManager().SetTimer(StanceAction_th, timerDel, 0.3f, false);
 }
@@ -467,7 +469,7 @@ void ALmBaseCharacter::PlayerSprintBegin() {
 
 				DesiredGait = ELmGait::Lm_Walking;
 			}
-			});
+		});
 
 		GetWorldTimerManager().SetTimer(Sprint_Handle, del, doubleTapTime, false);
 	}
@@ -486,7 +488,7 @@ void ALmBaseCharacter::PlayerSprintEnd() {
 
 			SprintTapCounter = 0;
 			DesiredGait = ELmGait::Lm_Running;
-			});
+		});
 
 		GetWorldTimerManager().SetTimer(Sprint_Handle, del, doubleTapTime, false);
 	}
@@ -534,7 +536,7 @@ void ALmBaseCharacter::CameraActionBegin() {
 				ILmCharacterInterface::Execute_SetViewMode(this, ViewMode == ELmViewMode::Lm_TPS ? ELmViewMode::Lm_FPS : ELmViewMode::Lm_TPS);
 			}
 		}
-		});
+	});
 
 	GetWorldTimerManager().SetTimer(cameraAction_th, holdAction, 0.2f, false);
 }
@@ -834,53 +836,53 @@ UAnimMontage* ALmBaseCharacter::GetRollAnimation() {
 
 void ALmBaseCharacter::UpdateGroundedRotation() {
 	switch (MovementAction) {
-	case ELmMovementAction::Lm_None:
-		if (CanUpdateMovingRotation()) {
-			switch (RotationMode) {
-			case ELmRotationMode::Lm_VelocityDirection:
-				//Velocity Direction Rotation
-				SmoothCharacterRotation(FRotator(0.0f, LastVelocityRotation.Yaw, 0.0f), 800.0f, CalculateGroundedRotationRate());
-				break;
-			case ELmRotationMode::Lm_LookingDirection:
-				//Looking Direction Rotation
-				switch (Gait) {
-				case ELmGait::Lm_Walking:
-				case ELmGait::Lm_Running:
-					SmoothCharacterRotation(FRotator(0.0f, GetControlRotation().Yaw + GetAnimCurveValue(FName(TEXT("YawOffset"))), 0.0f), 500.0f, CalculateGroundedRotationRate());
-					break;
-				case ELmGait::Lm_Sprinting:
-					SmoothCharacterRotation(FRotator(0.0f, LastVelocityRotation.Yaw, 0.0f), 500.0f, CalculateGroundedRotationRate());
-					break;
-				default:;
+		case ELmMovementAction::Lm_None:
+			if (CanUpdateMovingRotation()) {
+				switch (RotationMode) {
+					case ELmRotationMode::Lm_VelocityDirection:
+						//Velocity Direction Rotation
+						SmoothCharacterRotation(FRotator(0.0f, LastVelocityRotation.Yaw, 0.0f), 800.0f, CalculateGroundedRotationRate());
+						break;
+					case ELmRotationMode::Lm_LookingDirection:
+						//Looking Direction Rotation
+						switch (Gait) {
+							case ELmGait::Lm_Walking:
+							case ELmGait::Lm_Running:
+								SmoothCharacterRotation(FRotator(0.0f, GetControlRotation().Yaw + GetAnimCurveValue(FName(TEXT("YawOffset"))), 0.0f), 500.0f, CalculateGroundedRotationRate());
+								break;
+							case ELmGait::Lm_Sprinting:
+								SmoothCharacterRotation(FRotator(0.0f, LastVelocityRotation.Yaw, 0.0f), 500.0f, CalculateGroundedRotationRate());
+								break;
+							default:;
+						}
+						break;
+					case ELmRotationMode::Lm_Aiming:
+						//Aiming Rotation
+						SmoothCharacterRotation(FRotator(0.0f, GetControlRotation().Yaw, 0.0f), 1000.0f, 20.0f);
+						break;
+					default:;
 				}
-				break;
-			case ELmRotationMode::Lm_Aiming:
-				//Aiming Rotation
-				SmoothCharacterRotation(FRotator(0.0f, GetControlRotation().Yaw, 0.0f), 1000.0f, 20.0f);
-				break;
-			default:;
-			}
-		} else {
-			//Not Moving
-			if (ViewMode == ELmViewMode::Lm_FPS || RotationMode == ELmRotationMode::Lm_Aiming)
-				LimitRotation(-100.0f, 100.0f, 20.0f);
+			} else {
+				//Not Moving
+				if (ViewMode == ELmViewMode::Lm_FPS || RotationMode == ELmRotationMode::Lm_Aiming)
+					LimitRotation(-100.0f, 100.0f, 20.0f);
 
-			//Apply the RotationAmount curve from Turn In Place Animations. The Rotation Amount curve defines how much rotation should be applied each frame, and is calculated for animations that are animated at 30fps.
-			const float curveAmount = GetAnimCurveValue(FName(TEXT("RotationAmount")));
-			if (FMath::Abs(curveAmount) > 0.001f) {
-				AddActorWorldRotation(FRotator(0.0f, curveAmount * GetWorld()->GetDeltaSeconds() / 0.0334f, 0.0f));
-				TargetRotation = GetActorRotation();
+				//Apply the RotationAmount curve from Turn In Place Animations. The Rotation Amount curve defines how much rotation should be applied each frame, and is calculated for animations that are animated at 30fps.
+				const float curveAmount = GetAnimCurveValue(FName(TEXT("RotationAmount")));
+				if (FMath::Abs(curveAmount) > 0.001f) {
+					AddActorWorldRotation(FRotator(0.0f, curveAmount * GetWorld()->GetDeltaSeconds() / 0.0334f, 0.0f));
+					TargetRotation = GetActorRotation();
+				}
 			}
-		}
-		break;
-	case ELmMovementAction::Lm_Rolling:
-		if (bHasMovementInput)
-			SmoothCharacterRotation(FRotator(0.f, LastMovementInputRotation.Yaw, 0.f), 0.0f, 2.0f);
-		break;
-	case ELmMovementAction::Lm_LowMantle:
-	case ELmMovementAction::Lm_HighMantle:
-	case ELmMovementAction::Lm_GettingUp:
-	default:;
+			break;
+		case ELmMovementAction::Lm_Rolling:
+			if (bHasMovementInput)
+				SmoothCharacterRotation(FRotator(0.f, LastMovementInputRotation.Yaw, 0.f), 0.0f, 2.0f);
+			break;
+		case ELmMovementAction::Lm_LowMantle:
+		case ELmMovementAction::Lm_HighMantle:
+		case ELmMovementAction::Lm_GettingUp:
+		default:;
 	}
 }
 
@@ -1107,6 +1109,10 @@ FLmMantleAsset ALmBaseCharacter::GetMantleAsset(ELmMantleType MantleType) {
 
 void ALmBaseCharacter::RagdollStart() {
 
+	//TODO Use Interface
+	const auto cameraManager = UGameplayStatics::GetPlayerController(this, 0)->PlayerCameraManager;
+	static_cast<ALmPlayerCameraManager*>(cameraManager)->SetDoCollisionTest(false);
+
 	//Step 1: Clear the Character Movement Mode and set the Movement State to Ragdoll
 	GetCharacterMovement()->SetMovementMode(MOVE_None);
 	if (this->GetClass()->ImplementsInterface(ULmCharacterInterface::StaticClass()))
@@ -1123,11 +1129,16 @@ void ALmBaseCharacter::RagdollStart() {
 }
 
 void ALmBaseCharacter::RagdollEnd() {
+
+	//TODO Use Interface
+	const auto cameraManager = UGameplayStatics::GetPlayerController(this, 0)->PlayerCameraManager;
+	static_cast<ALmPlayerCameraManager*>(cameraManager)->SetDoCollisionTest(true);
+
 	//Step 1: Save a snapshot of the current Ragdoll Pose for use in AnimGraph to blend out of the Ragdoll
 	if (IsValid(animInstance))
 		animInstance->SavePoseSnapshot(FName(TEXT("RagdollPose")));
 
-	//Step 2: If the ragdoll is on the ground, set the movement mode to walking and play a Get Up animation. If not, set the movement mode to falling and update teh character movement velocity to match the last ragdoll velocity.
+	//Step 2: If the ragdoll is on the ground, set the movement mode to walking and play a Get Up animation. If not, set the movement mode to falling and update the character movement velocity to match the last ragdoll velocity.
 	if (bRagdollOnGround) {
 		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 		animInstance->Montage_Play(GetGetupAnimation(bRagdollFaceUp));

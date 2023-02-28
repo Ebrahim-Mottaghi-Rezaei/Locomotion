@@ -261,11 +261,11 @@ void ALmCharacter::ClearHeldObject() {
 
 void ALmCharacter::AttachToHand(const FLmHoldingInstance NewHoldingObject) {
 	HoldingObject->SetChildActorClass(NewHoldingObject.Instance);
-	HoldingObject->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, true), NewHoldingObject.UsingHands == ELmUseWhichHand::Lm_LeftHand ? FName(TEXT("VB LHS_ik_hand_gun")) : FName(TEXT("VB RHS_ik_hand_gun")));
+	HoldingObject->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, true), NewHoldingObject.UsingHands == ELmUsingHand::Lm_LeftHand ? FName(TEXT("VB LHS_ik_hand_gun")) : FName(TEXT("VB RHS_ik_hand_gun")));
 	HoldingObject->SetRelativeLocation(NewHoldingObject.Offset);
 
 	if (HoldingObject->GetChildActor()->GetClass()->ImplementsInterface(ULmHoldingObjectInterface::StaticClass()))
-		ILmHoldingObjectInterface::Execute_SetParent(HoldingObject->GetChildActor(), this);
+		ILmHoldingObjectInterface::Execute_SetHoldingActor(HoldingObject->GetChildActor(), this);
 }
 
 FTransform ALmCharacter::Get3PPivotTarget_Implementation() {

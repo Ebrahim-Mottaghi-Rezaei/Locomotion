@@ -26,9 +26,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|HuD")
 		TSubclassOf<UUserWidget> HudTemplate;
 
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Debug")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Locomotion|Debug")
 		ACharacter* DebugFocusCharacter;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Debug")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Locomotion|Debug")
 		TArray<ACharacter*> AvailableDebugCharacters;
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Debug")
 		bool bShowHud;

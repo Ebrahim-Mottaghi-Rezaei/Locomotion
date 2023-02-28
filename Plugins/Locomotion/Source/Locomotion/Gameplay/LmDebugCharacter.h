@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "LmCharacter.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "LmDebugCharacter.generated.h"
 
 

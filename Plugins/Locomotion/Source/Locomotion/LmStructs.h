@@ -486,27 +486,27 @@ USTRUCT(BlueprintType, Category = "Locomotion|DataTypes")
 struct LOCOMOTION_API FLmRoleSkinColors : public FTableRowBase {
 	GENERATED_BODY()
 
-		UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Information")
 		ELmOverlayState Role;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Information")
 		FText Description;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Styling")
 		bool UseGloves = true;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Styling")
 		bool UseShoes = true;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (ClampMin = 0, ClampMax = 3))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (ClampMin = 0, ClampMax = 3), Category = "Styling")
 		uint8 ShirtType = 3;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (ClampMin = 0, ClampMax = 2))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (ClampMin = 0, ClampMax = 2), Category = "Styling")
 		uint8 PantsType = 2;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Styling")
 		FLinearColor Skin = FColor::FromHex("E5B191FF");
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (EditCondition = "ShirtType > 0"))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (EditCondition = "ShirtType > 0"), Category = "Styling")
 		FLinearColor Shirt = FColor::FromHex("668F80FF");
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (EditCondition = "UseGloves"))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (EditCondition = "UseGloves"), Category = "Styling")
 		FLinearColor Gloves = FColor::FromHex("A0AF84FF");
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Styling")
 		FLinearColor Pants = FColor::FromHex("4A6670FF");
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (EditCondition = "UseShoes"))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (EditCondition = "UseShoes"), Category = "Styling")
 		FLinearColor Shoes = FColor::FromHex("C3B59FFF");
 };
 
@@ -514,16 +514,16 @@ USTRUCT(BlueprintType, Category = "Locomotion|DataTypes")
 struct LOCOMOTION_API FLmHoldingInstance : public FTableRowBase {
 	GENERATED_BODY()
 public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Information")
 		FText Name;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Information")
 		FText Description;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-		ELmUseWhichHand UsingHands;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Information")
+		ELmUsingHand UsingHands;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Information")
 		FVector Offset;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Information")
 		ELmOverlayState OverlayState;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Information")
 		TSubclassOf<AActor> Instance;
 };

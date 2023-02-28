@@ -15,7 +15,7 @@ class LOCOMOTION_API ILmHoldingObjectInterface {
 
 		// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Locomotion|Interfaces|Hold Objects")
-		void SetParent(APawn* owner);
-	virtual void SetParent_Implementation(APawn* owner);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Locomotion|Interfaces|Hold Objects")
+		void SetHoldingActor(AActor* owner);
+	virtual void SetHoldingActor_Implementation(AActor* owner);
 };
