@@ -12,7 +12,7 @@ enum class  ELmGait :uint8 {
 
 UENUM(BlueprintType)
 enum class ELmMovementAction :uint8 {
-	Lm_None			UMETA(DisplayName = "None"),
+	Lm_None				UMETA(DisplayName = "None"),
 	Lm_LowMantle		UMETA(DisplayName = "Low Mantle"),
 	Lm_HighMantle		UMETA(DisplayName = "High Mantle"),
 	Lm_Rolling			UMETA(DisplayName = "Rolling"),
@@ -21,10 +21,10 @@ enum class ELmMovementAction :uint8 {
 
 UENUM(BlueprintType)
 enum class ELmMovementState :uint8 {
-	Lm_None			UMETA(DisplayName = "None"),
-	Lm_Grounded		UMETA(DisplayName = "Grounded"),
+	Lm_None				UMETA(DisplayName = "None"),
+	Lm_Grounded			UMETA(DisplayName = "Grounded"),
 	Lm_InAir			UMETA(DisplayName = "In Air"),
-	Lm_Mantling		UMETA(DisplayName = "Mantling"),
+	Lm_Mantling			UMETA(DisplayName = "Mantling"),
 	Lm_Ragdoll			UMETA(DisplayName = "Ragdoll")
 };
 
@@ -32,23 +32,23 @@ UENUM(BlueprintType)
 enum class ELmOverlayState :uint8 {
 	Lm_Default			UMETA(DisplayName = "Default"),
 	Lm_Masculine		UMETA(DisplayName = "Masculine"),
-	Lm_Feminine		UMETA(DisplayName = "Feminine"),
+	Lm_Feminine			UMETA(DisplayName = "Feminine"),
 	Lm_Injured			UMETA(DisplayName = "Injured"),
 	Lm_HandsTied		UMETA(DisplayName = "HandsTied"),
 	Lm_Rifle			UMETA(DisplayName = "Rifle"),
-	Lm_Pistol1H		UMETA(DisplayName = "Pistol 1 Hand"),
-	Lm_Pistol2H		UMETA(DisplayName = "Pistol 2 Hands"),
+	Lm_Pistol1H			UMETA(DisplayName = "Pistol 1 Hand"),
+	Lm_Pistol2H			UMETA(DisplayName = "Pistol 2 Hands"),
 	Lm_Bow				UMETA(DisplayName = "Bow"),
 	Lm_Torch			UMETA(DisplayName = "Torch"),
 	Lm_Binoculars		UMETA(DisplayName = "Binoculars"),
 	Lm_Box				UMETA(DisplayName = "Box"),
 	Lm_Barrel			UMETA(DisplayName = "Barrel"),
-	Lm_Count				UMETA(Hidden)
+	Lm_Count			UMETA(Hidden)
 };
 
 UENUM(BlueprintType)
 enum class ELmStance :uint8 {
-	Lm_Standing		UMETA(DisplayName = "Standing"),
+	Lm_Standing			UMETA(DisplayName = "Standing"),
 	Lm_Crouching		UMETA(DisplayName = "Crouching")
 };
 

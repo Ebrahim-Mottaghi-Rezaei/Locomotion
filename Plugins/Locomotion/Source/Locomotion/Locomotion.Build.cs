@@ -10,7 +10,7 @@ public class Locomotion : ModuleRules {
 
         PrivateIncludePaths.AddRange(new string[] { });
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "InputCore", "Engine", "UMG", "Slate", "SlateCore", "AnimGraphRuntime", "AIModule", "ClothingSystemRuntimeNv", "AnimGraphRuntime" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "InputCore", "Engine", "EnhancedInput", "UMG", "Slate", "SlateCore", "AnimGraphRuntime", "AIModule", "ClothingSystemRuntimeNv", "AnimGraphRuntime" });
 
         PrivateDependencyModuleNames.AddRange(new string[] { "CoreUObject", "Engine", "Slate", "SlateCore" });
 

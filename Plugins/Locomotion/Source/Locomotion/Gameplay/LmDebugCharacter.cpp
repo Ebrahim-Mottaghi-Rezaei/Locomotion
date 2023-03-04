@@ -12,6 +12,7 @@
 #include <Components/SkeletalMeshComponent.h>
 #include <UObject/ConstructorHelpers.h>
 #include <UObject/UObjectBase.h>
+#include "Locomotion/EnhancedInput/LmControllerInputConfiguration.h"
 
 ALmDebugCharacter::ALmDebugCharacter() {
 	const auto mesh = GetMesh();
@@ -51,7 +52,18 @@ void ALmDebugCharacter::Tick(float DeltaTime) {
 void ALmDebugCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	InputComponent->BindKey(EKeys::M, IE_Pressed, this, &ALmDebugCharacter::ToggleCharacterMesh);
+	// Get the player controller
+	const auto playerController = Cast<APlayerController>(GetController());
+	// Get the local player subsystem
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer());
+	// Clear out existing mapping, and add our mapping
+	Subsystem->ClearAllMappings();
+	Subsystem->AddMappingContext(InputMappings, 0);
+
+	// Get the EnhancedInputComponent
+	UEnhancedInputComponent* PEI = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+
+	PEI->BindAction(InputActions->ChangeCharacterMesh, ETriggerEvent::Started, this, &ALmDebugCharacter::ToggleCharacterMesh);
 }
 
 void ALmDebugCharacter::SetDynamicMaterials() {

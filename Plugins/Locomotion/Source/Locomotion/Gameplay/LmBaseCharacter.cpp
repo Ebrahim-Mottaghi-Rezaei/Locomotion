@@ -15,6 +15,9 @@
 #include <GameFramework/Pawn.h>
 #include <GameFramework/Actor.h>
 #include "LmPlayerCameraManager.h"
+#include <EnhancedInputSubsystems.h>
+#include <EnhancedInputComponent.h>
+#include "InputMappingContext.h"
 
 ALmBaseCharacter::ALmBaseCharacter() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -125,6 +128,18 @@ ALmBaseCharacter::ALmBaseCharacter() {
 		MantleTimelineCurve = mantleTimelineCurve.Object;
 	else
 		ULmLogger::LogError("MantleTimelineCurve not found.");
+
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> inputMappings(TEXT("/Script/EnhancedInput.InputMappingContext'/Locomotion/Blueprints/Input/IMC_Locomotion.IMC_Locomotion'"));
+	if (inputMappings.Succeeded())
+		InputMappings = inputMappings.Object;
+	else
+		ULmLogger::LogError("InputMappings not found.");
+
+	static ConstructorHelpers::FObjectFinder<ULmCharacterInputConfiguration> characterInputConfigs(TEXT("/Script/Locomotion.LmCharacterInputConfiguration'/Locomotion/Blueprints/Input/Actions/CharacterActions/DA_LmCharacterInputActions.DA_LmCharacterInputActions'"));
+	if (characterInputConfigs.Succeeded())
+		InputActions = characterInputConfigs.Object;
+	else
+		ULmLogger::LogError("LmCharacterInputActions Data Asset not found.");
 }
 
 void ALmBaseCharacter::BeginPlay() {
@@ -189,7 +204,7 @@ void ALmBaseCharacter::Tick(const float DeltaTime) {
 		case ELmMovementState::Lm_InAir:
 			//Do while In Air
 			UpdateInAirRotation();
-			
+
 			//Perform a mantle check if falling while movement input is pressed.
 			if (bHasMovementInput)
 				MantleCheck(FallingTraceSettings, EDrawDebugTrace::ForOneFrame);
@@ -214,42 +229,58 @@ void ALmBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	if (!IsValid(PlayerInputComponent))
 		return;
 
+	// Get the player controller
+	const auto playerController = Cast<APlayerController>(GetController());
+
+	// Get the local player subsystem
+	const auto Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer());
+	if (bClearExistingKeyBindings) {
+		// Clear out existing mapping, and add our mapping
+		Subsystem->ClearAllMappings();
+	}
+
+	Subsystem->AddMappingContext(InputMappings, 0);
+
+	// Get the EnhancedInputComponent
+	UEnhancedInputComponent* PEI = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+
 	//Movement Input
-	PlayerInputComponent->BindAxis(FName(TEXT("MoveForward/Backwards")), this, &ALmBaseCharacter::ReceiveMoveForwardBackwards);
-	PlayerInputComponent->BindAxis(FName(TEXT("MoveRight/Left")), this, &ALmBaseCharacter::ReceiveMoveRightLeft);
+	PEI->BindAction(InputActions->InputMove, ETriggerEvent::Triggered, this, &ALmBaseCharacter::Move);
 
 	//Camera Input
-	PlayerInputComponent->BindAxis(FName(TEXT("LookUp/Down")), this, &ALmBaseCharacter::PlayerCameraPitchInput);
-	PlayerInputComponent->BindAxis(FName(TEXT("LookLeft/Right")), this, &ALmBaseCharacter::PlayerCameraYawInput);
+	PEI->BindAction(InputActions->InputLook, ETriggerEvent::Triggered, this, &ALmBaseCharacter::Look);
 
 	//Jump Action: Press "Jump Action" to capsuleTraceEnd the rag-doll if rag-dolling, check for a mantle if grounded or in air, stand up if crouching, or jump if standing.
-	PlayerInputComponent->BindAction(FName(TEXT("JumpAction")), IE_Pressed, this, &ALmBaseCharacter::PlayerJumpPressedInput);
-	PlayerInputComponent->BindAction(FName(TEXT("JumpAction")), IE_Released, this, &ALmBaseCharacter::StopJumping);
+	PEI->BindAction(InputActions->Jump, ETriggerEvent::Started, this, &ALmBaseCharacter::StartJumping);
+	PEI->BindAction(InputActions->Jump, ETriggerEvent::Completed, this, &ALmBaseCharacter::StopJumping);
 
 	//Stance Action: Press "Stance Action" to toggle Standing / Crouching, double tap to Roll.
-	PlayerInputComponent->BindAction(FName(TEXT("StanceAction")), IE_Pressed, this, &ALmBaseCharacter::PlayerStanceActionInput);
+	PEI->BindAction(InputActions->Stance, ETriggerEvent::Triggered, this, &ALmBaseCharacter::StanceAction);
 
 	//Gait Actions Type 1: Press "Walk Action" to toggle walking/running, hold "Sprint Action" to sprint.
-	PlayerInputComponent->BindAction(FName(TEXT("WalkAction")), IE_Pressed, this, &ALmBaseCharacter::PlayerWalkBegin);
-	PlayerInputComponent->BindAction(FName(TEXT("WalkAction")), IE_Released, this, &ALmBaseCharacter::PlayerWalkEnd);
+	PEI->BindAction(InputActions->Walk, ETriggerEvent::Started, this, &ALmBaseCharacter::PlayerWalkBegin);
+	PEI->BindAction(InputActions->Walk, ETriggerEvent::Completed, this, &ALmBaseCharacter::PlayerWalkEnd);
 
 	//Gait Action Type 2 (Unused): Hold "Sprint Action" to run, double tap and hold to sprint.
-	PlayerInputComponent->BindAction(FName(TEXT("SprintAction")), IE_Pressed, this, &ALmBaseCharacter::PlayerSprintBegin);
-	PlayerInputComponent->BindAction(FName(TEXT("SprintAction")), IE_Released, this, &ALmBaseCharacter::PlayerSprintEnd);
+	PEI->BindAction(InputActions->Sprint, ETriggerEvent::Started, this, &ALmBaseCharacter::PlayerSprintBegin);
+	PEI->BindAction(InputActions->Sprint, ETriggerEvent::Completed, this, &ALmBaseCharacter::PlayerSprintEnd);
 
-	//Select Rotation Mode: Switch the desired (default) rotation mode to Velocity or Looking Direction. This will be the mode the character reverts back to when unaiming
-	PlayerInputComponent->BindAction(FName(TEXT("ToggleRotationMode")), IE_Pressed, this, &ALmBaseCharacter::ToggleRotationMode);
+	//Select Rotation Mode: Switch the desired (default) rotation mode to Velocity or Looking Direction. This will be the mode the character reverts back to when not aiming
+	PEI->BindAction(InputActions->RotationMode, ETriggerEvent::Triggered, this, &ALmBaseCharacter::ToggleRotationMode);
 
 	//AimAction: Hold "AimAction" to enter the aiming mode, release to revert back the desired rotation mode.
-	PlayerInputComponent->BindAction(FName(TEXT("AimAction")), IE_Pressed, this, &ALmBaseCharacter::AimActionBegin);
-	PlayerInputComponent->BindAction(FName(TEXT("AimAction")), IE_Released, this, &ALmBaseCharacter::AimActionEnd);
+	PEI->BindAction(InputActions->Aim, ETriggerEvent::Started, this, &ALmBaseCharacter::AimActionBegin);
+	PEI->BindAction(InputActions->Aim, ETriggerEvent::Completed, this, &ALmBaseCharacter::AimActionEnd);
 
 	//Camera Action: Hold "Camera Action" to toggle Third / First Person, tap to swap shoulders.
-	PlayerInputComponent->BindAction(FName(TEXT("CameraAction")), IE_Pressed, this, &ALmBaseCharacter::CameraActionBegin);
-	PlayerInputComponent->BindAction(FName(TEXT("CameraAction")), IE_Released, this, &ALmBaseCharacter::CameraActionEnd);
+	PEI->BindAction(InputActions->CameraSide, ETriggerEvent::Triggered, this, &ALmBaseCharacter::ToggleCameraSide);
+	PEI->BindAction(InputActions->CameraMode, ETriggerEvent::Triggered, this, &ALmBaseCharacter::ToggleCameraMode);
 
 	//Ragdoll Action: Press "Ragdoll Action" to toggle the ragdoll state on or off.
-	PlayerInputComponent->BindAction(FName(TEXT("RagdollAction")), IE_Pressed, this, &ALmBaseCharacter::ToggleRagdollMode);
+	PEI->BindAction(InputActions->Ragdoll, ETriggerEvent::Triggered, this, &ALmBaseCharacter::ToggleRagdollMode);
+
+	//Roll Action: Press Roll Action to do an instant roll
+	PEI->BindAction(InputActions->Roll, ETriggerEvent::Triggered, this, &ALmBaseCharacter::Roll);
 }
 
 void ALmBaseCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode) {
@@ -325,14 +356,38 @@ float ALmBaseCharacter::GetAnimCurveValue(const FName curveName) {
 	return IsValid(animInstance) ? animInstance->GetCurveValue(curveName == NAME_None ? TEXT("") : curveName) : 0.0f;
 }
 
-void ALmBaseCharacter::ReceiveMoveForwardBackwards(const float value) {
-	forwardInputValue = value;
-	PlayerMovementInput(true);
+void ALmBaseCharacter::Move(const FInputActionValue& value) {
+	if (!IsValid(Controller))
+		return;
+
+	const FVector2D MoveValue = value.Get<FVector2D>();
+
+	// Forward/Backward direction
+	if (MoveValue.Y != 0.f) {
+		// Get forward vector
+		forwardInputValue = MoveValue.Y;
+		PlayerMovementInput(true);
+	}
+
+	// Right/Left direction
+	if (MoveValue.X != 0.f) {
+		rightInputValue = MoveValue.X;
+		PlayerMovementInput(false);
+	}
 }
 
-void ALmBaseCharacter::ReceiveMoveRightLeft(const float value) {
-	rightInputValue = value;
-	PlayerMovementInput(false);
+void ALmBaseCharacter::Look(const FInputActionValue& value) {
+	if (Controller != nullptr) {
+		const FVector2D LookValue = value.Get<FVector2D>();
+
+		if (LookValue.X != 0.f) {
+			AddControllerYawInput(LookValue.X);
+		}
+
+		if (LookValue.Y != 0.f) {
+			AddControllerPitchInput(LookValue.Y);
+		}
+	}
 }
 
 void ALmBaseCharacter::PlayerMovementInput(const bool bIsForwardAxis) {
@@ -357,86 +412,45 @@ void ALmBaseCharacter::PlayerCameraPitchInput(const float value) {
 	AddControllerPitchInput(LookPitchRate * value);
 }
 
-void ALmBaseCharacter::PlayerJumpPressedInput() {
-	if (MovementAction != ELmMovementAction::Lm_None)
-		return;
+void ALmBaseCharacter::StartJumping() {
+	if (MovementState == ELmMovementState::Lm_Grounded) {
 
-	if (MovementState == ELmMovementState::Lm_Ragdoll) {
-
-		RagdollEnd();
-
-	} else if (MovementState != ELmMovementState::Lm_Mantling) {
-
-		if (MovementState == ELmMovementState::Lm_Grounded) {
-
-			if (bHasMovementInput) {
-				const bool MantleCheckResult = MantleCheck(GroundedTraceSettings, EDrawDebugTrace::ForDuration);
-				if (!MantleCheckResult) {
-					if (Stance == ELmStance::Lm_Standing)
-						Jump();
-					else
-						UnCrouch();
-				}
-			} else {
+		if (bHasMovementInput) {
+			const bool MantleCheckResult = MantleCheck(GroundedTraceSettings, EDrawDebugTrace::ForDuration);
+			if (!MantleCheckResult) {
 				if (Stance == ELmStance::Lm_Standing)
 					Jump();
 				else
 					UnCrouch();
 			}
-
-		} else if (MovementState == ELmMovementState::Lm_InAir) {
-			MantleCheck(FallingTraceSettings, EDrawDebugTrace::ForDuration);
+		} else {
+			if (Stance == ELmStance::Lm_Standing)
+				Jump();
+			else
+				UnCrouch();
 		}
+
+	} else if (MovementState == ELmMovementState::Lm_InAir) {
+		MantleCheck(FallingTraceSettings, EDrawDebugTrace::ForDuration);
 	}
 }
 
-void ALmBaseCharacter::PlayerStanceActionInput(FKey key) {
+void ALmBaseCharacter::StanceAction() {
 	if (MovementAction != ELmMovementAction::Lm_None)
 		return;
 
-	StanceActionInputCounter++;
-
-	GetWorldTimerManager().ClearTimer(StanceAction_th);
-
-	FTimerDelegate timerDel;
-	timerDel.BindLambda([this] {
-		GetWorldTimerManager().ClearTimer(StanceAction_th);
-
-		if (StanceActionInputCounter == 1) {
-			if (MovementState == ELmMovementState::Lm_Grounded) {
-				if (Stance == ELmStance::Lm_Standing) {
-					DesiredStance = ELmStance::Lm_Crouching;
-					Crouch();
-				} else {
-					DesiredStance = ELmStance::Lm_Standing;
-					UnCrouch();
-				}
-			} else if (MovementState == ELmMovementState::Lm_InAir) {
-				bBreakFall = true;
-
-				FTimerDelegate resetBreakFallDel;
-				resetBreakFallDel.BindLambda([this] {
-					if (GetWorldTimerManager().IsTimerActive(ResetBreakFall_th))
-						GetWorldTimerManager().ClearTimer(ResetBreakFall_th);
-
-					bBreakFall = false;
-				});
-
-				if (GetWorldTimerManager().IsTimerActive(ResetBreakFall_th))
-					GetWorldTimerManager().ClearTimer(ResetBreakFall_th);
-
-				GetWorldTimerManager().SetTimer(ResetBreakFall_th, resetBreakFallDel, 0.4f, true);
-			}
+	if (MovementState == ELmMovementState::Lm_Grounded) {
+		if (Stance == ELmStance::Lm_Standing) {
+			DesiredStance = ELmStance::Lm_Crouching;
+			Crouch();
 		} else {
-			//multi-pressed
-			Roll();
-			DesiredStance = Stance;
+			DesiredStance = ELmStance::Lm_Standing;
+			UnCrouch();
 		}
+	} else if (MovementState == ELmMovementState::Lm_InAir) {
+		bBreakFall = true;
 
-		this->StanceActionInputCounter = 0;
-	});
-
-	GetWorldTimerManager().SetTimer(StanceAction_th, timerDel, 0.3f, false);
+	}
 }
 
 void ALmBaseCharacter::PlayerWalkBegin() {
@@ -448,50 +462,11 @@ void ALmBaseCharacter::PlayerWalkEnd() {
 }
 
 void ALmBaseCharacter::PlayerSprintBegin() {
-	//Implementing the dual mode functionality on "Sprint Action" input event, 'double tap' or 'hold to sprint'
-
-	if (SprintProcessingMode == ELmInputProcessingMode::Lm_PressAndHold) {
-		DesiredGait = ELmGait::Lm_Sprinting;
-	} else {
-		bSprintHeld = true;
-		SprintTapCounter++;
-
-		DesiredGait = ELmGait::Lm_Running;
-
-		FTimerDelegate del;
-		del.BindLambda([this]() {
-			if (SprintTapCounter > 1) {
-				GetWorldTimerManager().ClearTimer(Sprint_Handle);
-
-				DesiredGait = ELmGait::Lm_Sprinting;
-			} else if (SprintTapCounter == 1) {
-				GetWorldTimerManager().ClearTimer(Sprint_Handle);
-
-				DesiredGait = ELmGait::Lm_Walking;
-			}
-		});
-
-		GetWorldTimerManager().SetTimer(Sprint_Handle, del, doubleTapTime, false);
-	}
+	DesiredGait = ELmGait::Lm_Sprinting;
 }
 
 void ALmBaseCharacter::PlayerSprintEnd() {
-	if (SprintProcessingMode == ELmInputProcessingMode::Lm_PressAndHold) {
-		DesiredGait = ELmGait::Lm_Running;
-	} else {
-
-		bSprintHeld = true;
-
-		FTimerDelegate del;
-		del.BindLambda([this]() {
-			GetWorldTimerManager().ClearTimer(Sprint_Handle);
-
-			SprintTapCounter = 0;
-			DesiredGait = ELmGait::Lm_Running;
-		});
-
-		GetWorldTimerManager().SetTimer(Sprint_Handle, del, doubleTapTime, false);
-	}
+	DesiredGait = ELmGait::Lm_Running;
 }
 
 void ALmBaseCharacter::ToggleRotationMode() {
@@ -522,33 +497,15 @@ void ALmBaseCharacter::AimActionEnd() {
 	}
 }
 
-void ALmBaseCharacter::CameraActionBegin() {
-	//Camera Action: Hold "Camera Action" to toggle Third / First Person, tap to swap shoulders.
-	GetWorldTimerManager().ClearTimer(cameraAction_th);
-
-	CameraActionPressType = ELmButtonPressType::Lm_Tapping;
-
-	FTimerDelegate holdAction;
-	holdAction.BindLambda([this] {
-		if (CameraActionPressType == ELmButtonPressType::Lm_Tapping) {
-			CameraActionPressType = ELmButtonPressType::Lm_Holding;
-			if (this->GetClass()->ImplementsInterface(ULmCharacterInterface::StaticClass())) {
-				ILmCharacterInterface::Execute_SetViewMode(this, ViewMode == ELmViewMode::Lm_TPS ? ELmViewMode::Lm_FPS : ELmViewMode::Lm_TPS);
-			}
-		}
-	});
-
-	GetWorldTimerManager().SetTimer(cameraAction_th, holdAction, 0.2f, false);
+void ALmBaseCharacter::ToggleCameraSide() {
+	if (ViewMode == ELmViewMode::Lm_TPS)
+		bRightShoulder = !bRightShoulder;
 }
 
-void ALmBaseCharacter::CameraActionEnd() {
-	if (CameraActionPressType == ELmButtonPressType::Lm_Tapping) {
-		bRightShoulder = !bRightShoulder;
-	} else {
-		GetWorldTimerManager().ClearTimer(cameraAction_th);
-	}
-
-	CameraActionPressType = ELmButtonPressType::Lm_Released;
+void ALmBaseCharacter::ToggleCameraMode() {
+	//Camera Action: Hold "Camera Action" to toggle Third / First Person, tap to swap shoulders.
+	if (this->GetClass()->ImplementsInterface(ULmCharacterInterface::StaticClass()))
+		ILmCharacterInterface::Execute_SetViewMode(this, ViewMode == ELmViewMode::Lm_TPS ? ELmViewMode::Lm_FPS : ELmViewMode::Lm_TPS);
 }
 
 void ALmBaseCharacter::RagdollActionBegin() {
@@ -1202,7 +1159,6 @@ void ALmBaseCharacter::SetActorLocationDuringRagdoll() {
 
 UAnimMontage* ALmBaseCharacter::GetGetupAnimation(const bool bIsRagdollFacedUp) {
 	//This gets overriden in the AnimMan Child character to select the appropriate animation based on the overlay state.
-
 	return nullptr;
 }
 
@@ -1257,7 +1213,10 @@ void ALmBaseCharacter::BreakFall() {
 }
 
 void ALmBaseCharacter::Roll() {
-	if (IsValid(animInstance)) {
+	if (!IsValid(animInstance) || animInstance->Montage_IsPlaying(GetRollAnimation()))
+		return;
+
+	if (MovementState == ELmMovementState::Lm_Grounded || MovementState == ELmMovementState::Lm_None) {
 		animInstance->Montage_Play(GetRollAnimation(), 1.15f);
 	}
 }

@@ -7,12 +7,28 @@
 #include "../UI/LmWHuD.h"
 #include <Sound/SoundWave.h>
 
+#include "Locomotion/EnhancedInput/LmControllerInputConfiguration.h"
+
 ALmPlayerController::ALmPlayerController() {
 	static ConstructorHelpers::FObjectFinder<USoundWave> clickSound(TEXT("SoundWave'/Game/AdvancedLocomotionV4/Audio/UI/Click.Click'"));
 	if (clickSound.Succeeded())
 		ClickSound = clickSound.Object;
 	else
 		ULmLogger::LogError("ClickSound not found.");
+
+	PlayerCameraManagerClass = ALmPlayerCameraManager::StaticClass();
+
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> inputMappings(TEXT("/Script/EnhancedInput.InputMappingContext'/Locomotion/Blueprints/Input/IMC_Locomotion.IMC_Locomotion'"));
+	if (inputMappings.Succeeded())
+		InputMappings = inputMappings.Object;
+	else
+		ULmLogger::LogError("InputMappings not found.");
+
+	static ConstructorHelpers::FObjectFinder<ULmControllerInputConfiguration> inputActions(TEXT("/Script/Locomotion.LmControllerInputConfiguration'/Locomotion/Blueprints/Input/Actions/ControllerActions/DA_LmControllerInputActions.DA_LmControllerInputActions'"));
+	if (inputActions.Succeeded())
+		InputActions = inputActions.Object;
+	else
+		ULmLogger::LogError("LmControllerInputConfiguration Data Asset not found.");
 
 	PlayerCameraManagerClass = ALmPlayerCameraManager::StaticClass();
 }
@@ -52,23 +68,35 @@ void ALmPlayerController::SetupInputComponent() {
 	Super::SetupInputComponent();
 
 	// Attaching Debug Keys to the game.
-	if (bBindDefaultInputEvents) {
-		InputComponent->BindKey(EKeys::Tab, IE_Pressed, this, &ALmPlayerController::ToggleShowHud);
-		InputComponent->BindKey(EKeys::V, IE_Pressed, this, &ALmPlayerController::ToggleDebugView);
-		InputComponent->BindKey(EKeys::T, IE_Pressed, this, &ALmPlayerController::ToggleShowTraces);
-		InputComponent->BindKey(EKeys::Y, IE_Pressed, this, &ALmPlayerController::ToggleShowDebugShapes);
-		InputComponent->BindKey(EKeys::U, IE_Pressed, this, &ALmPlayerController::ToggleShowLayerColors);
-		InputComponent->BindKey(EKeys::I, IE_Pressed, this, &ALmPlayerController::ToggleShowCharacterInfo);
-		InputComponent->BindKey(EKeys::Z, IE_Pressed, this, &ALmPlayerController::ToggleSlowMotion);
+	if (bBindDefaultInputKeys) {
 
-		InputComponent->BindKey(EKeys::Comma, IE_Pressed, this, &ALmPlayerController::SelectPrevLmDebugCharacter);
-		InputComponent->BindKey(EKeys::Period, IE_Pressed, this, &ALmPlayerController::SelectNextLmDebugCharacter);
+		//Checking the player input validity
+		if (!IsValid(InputComponent))
+			return;
 
-		InputComponent->BindAction(TEXT("OpenOverlayMenu"), IE_Pressed, this, &ALmPlayerController::OpenOverlayMenu);
-		InputComponent->BindAction(TEXT("OpenOverlayMenu"), IE_Released, this, &ALmPlayerController::CloseOverlayMenu);
+		// Get the local player subsystem
+		const auto Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+		if (bClearExistingKeyBindings) {
+			// Clear out existing mapping, and add our mapping
+			Subsystem->ClearAllMappings();
+		}
 
-		InputComponent->BindAction(TEXT("CycleOverlayUp"), IE_Pressed, this, &ALmPlayerController::CycleOverlayDown);
-		InputComponent->BindAction(TEXT("CycleOverlayDown"), IE_Released, this, &ALmPlayerController::CycleOverlayUp);
+		Subsystem->AddMappingContext(InputMappings, 0);
+
+		// Get the EnhancedInputComponent
+		const auto PEI = Cast<UEnhancedInputComponent>(InputComponent);
+
+		//Movement Input
+		PEI->BindAction(InputActions->ToggleHUD, ETriggerEvent::Triggered, this, &ALmPlayerController::ToggleShowHud);
+		PEI->BindAction(InputActions->ToggleDebugView, ETriggerEvent::Triggered, this, &ALmPlayerController::ToggleDebugView);
+		PEI->BindAction(InputActions->ToggleShowTraces, ETriggerEvent::Triggered, this, &ALmPlayerController::ToggleShowTraces);
+		PEI->BindAction(InputActions->ToggleDebugShapes, ETriggerEvent::Triggered, this, &ALmPlayerController::ToggleShowDebugShapes);
+		PEI->BindAction(InputActions->ToggleLayerColors, ETriggerEvent::Triggered, this, &ALmPlayerController::ToggleShowLayerColors);
+		PEI->BindAction(InputActions->ToggleCharacterInfo, ETriggerEvent::Triggered, this, &ALmPlayerController::ToggleShowCharacterInfo);
+		PEI->BindAction(InputActions->ToggleSlowMotion, ETriggerEvent::Triggered, this, &ALmPlayerController::ToggleSlowMotion);
+		PEI->BindAction(InputActions->ToggleOverlayMenu, ETriggerEvent::Triggered, this, &ALmPlayerController::ToggleOverlayMenu);
+		PEI->BindAction(InputActions->CycleDebugCharacters, ETriggerEvent::Triggered, this, &ALmPlayerController::SelectLmDebugCharacter);
+		PEI->BindAction(InputActions->CycleOverlayMenuItems, ETriggerEvent::Triggered, this, &ALmPlayerController::CycleOverlayItems);
 	}
 }
 
@@ -101,14 +129,26 @@ void ALmPlayerController::ToggleSlowMotion() {
 	UGameplayStatics::SetGlobalTimeDilation(this, bSlowMotion ? 0.05f : 1.0f);
 }
 
-void ALmPlayerController::SelectPrevLmDebugCharacter() {
-	SelectedLmCharacterIndex = SelectedLmCharacterIndex - 1 > 0 ? SelectedLmCharacterIndex - 1 : AvailableDebugCharacters.Num() - 1;
-	DebugFocusCharacter = AvailableDebugCharacters[SelectedLmCharacterIndex];
+void ALmPlayerController::CycleDebugCharacter(const bool bNext) {
+	if (bNext) {
+		SelectedLmCharacterIndex = SelectedLmCharacterIndex + 1 < AvailableDebugCharacters.Num() ? SelectedLmCharacterIndex + 1 : 0;
+		DebugFocusCharacter = AvailableDebugCharacters[SelectedLmCharacterIndex];
+	} else {
+		SelectedLmCharacterIndex = SelectedLmCharacterIndex - 1 > 0 ? SelectedLmCharacterIndex - 1 : AvailableDebugCharacters.Num() - 1;
+		DebugFocusCharacter = AvailableDebugCharacters[SelectedLmCharacterIndex];
+	}
 }
 
-void ALmPlayerController::SelectNextLmDebugCharacter() {
-	SelectedLmCharacterIndex = SelectedLmCharacterIndex + 1 < AvailableDebugCharacters.Num() ? SelectedLmCharacterIndex + 1 : 0;
-	DebugFocusCharacter = AvailableDebugCharacters[SelectedLmCharacterIndex];
+void ALmPlayerController::SelectLmDebugCharacter(const FInputActionValue& Value) {
+	CycleDebugCharacter(Value.Get<float>() > 0);
+}
+
+void ALmPlayerController::ToggleOverlayMenu(const FInputActionValue& Value) {
+	Value.Get<bool>() ? OpenOverlayMenu() : CloseOverlayMenu();
+}
+
+void ALmPlayerController::CycleOverlayItems(const FInputActionValue& Value) {
+	Value.Get<float>() < 0 ? CycleOverlayUp() : CycleOverlayDown();
 }
 
 void ALmPlayerController::OpenOverlayMenu() {

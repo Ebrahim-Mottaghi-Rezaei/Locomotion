@@ -9,6 +9,10 @@
 #include <Components/TimelineComponent.h>
 #include "LmCharacterInterface.h"
 #include "LmCameraInterface.h"
+#include "../EnhancedInput/LmCharacterInputConfiguration.h"
+#include <EnhancedInputSubsystems.h>
+#include <EnhancedInputComponent.h>
+#include "InputMappingContext.h"
 #include "LmBaseCharacter.generated.h"
 
 UCLASS(Category = "Locomotion")
@@ -29,6 +33,14 @@ protected:
 		TEnumAsByte<ECollisionChannel> CameraCollisionCheckChannel = ECC_Camera;
 
 	///Category=Input
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Enhanced Input")
+		bool bClearExistingKeyBindings = false;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Enhanced Input")
+		UInputMappingContext* InputMappings;
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Enhanced Input")
+		ULmCharacterInputConfiguration* InputActions;
+
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Input")
 		ELmInputProcessingMode SprintProcessingMode;
 
@@ -172,13 +184,17 @@ protected:
 	UFUNCTION(BlueprintGetter, Category = "Locomotion|Utility")
 		virtual float GetAnimCurveValue(FName curveName);
 	///Category=Input
-	void ReceiveMoveForwardBackwards(float value);
-	void ReceiveMoveRightLeft(float value);
+
+	// Handle move input
+	virtual void Move(const FInputActionValue& value);
+	// Handle look input
+	virtual void Look(const FInputActionValue& value);
+
 	virtual void PlayerMovementInput(const bool bIsForwardAxis);
 	virtual void PlayerCameraYawInput(float value);
 	virtual void PlayerCameraPitchInput(float value);
-	virtual void PlayerJumpPressedInput();
-	virtual void PlayerStanceActionInput(FKey key);
+	virtual void StartJumping();
+	virtual void StanceAction();
 	virtual void PlayerWalkBegin();
 	virtual void PlayerWalkEnd();
 	virtual void PlayerSprintBegin();
@@ -192,9 +208,9 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Input")
 		virtual void AimActionEnd();
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Input")
-		virtual void CameraActionBegin();
+		virtual void ToggleCameraSide();
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Input")
-		virtual void CameraActionEnd();
+		virtual void ToggleCameraMode();
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Input")
 		virtual void RagdollActionBegin();
 	UFUNCTION(BlueprintGetter, Category = "Locomotion|Input")
@@ -276,7 +292,8 @@ protected:
 	///BreakFall CustomEvent
 	virtual void BreakFall();
 	///Roll CustomEvent
-	virtual void Roll();
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|Roll")
+		virtual void Roll();
 
 public:
 

@@ -4,6 +4,7 @@
 #include "GameFramework/PlayerController.h"
 #include "LmControllerInterface.h"
 #include "../UI/LmWOverlayStateSwitcher.h"
+#include "../EnhancedInput/LmControllerInputConfiguration.h"
 #include "LmPlayerController.generated.h"
 
 UCLASS()
@@ -12,10 +13,15 @@ class LOCOMOTION_API ALmPlayerController : public APlayerController, public ILmC
 public:
 	ALmPlayerController();
 protected:
-	//Changing this value requires UE to restart.
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Input")
-		bool bBindDefaultInputEvents = true;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Input")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Enhanced Input")
+		bool bBindDefaultInputKeys = true;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Enhanced Input", meta = (EditCondition = "bBindDefaultInputKeys"))
+		bool bClearExistingKeyBindings = false;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Enhanced Input", meta = (EditCondition = "bBindDefaultInputKeys"))
+		UInputMappingContext* InputMappings;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Enhanced Input", meta = (EditCondition = "bBindDefaultInputKeys"))
+		ULmControllerInputConfiguration* InputActions;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Enhanced Input", meta = (EditCondition = "bBindDefaultInputKeys"))
 		USoundWave* ClickSound;
 	UPROPERTY(BlueprintReadWrite, Category = "Locomotion|HuD")
 		bool bOverlayMenuOpen;
@@ -26,9 +32,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|HuD")
 		TSubclassOf<UUserWidget> HudTemplate;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Locomotion|Debug")
+	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly, Category = "Locomotion|Debug")
 		ACharacter* DebugFocusCharacter;
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Locomotion|Debug")
+	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly, Category = "Locomotion|Debug")
 		TArray<ACharacter*> AvailableDebugCharacters;
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Debug")
 		bool bShowHud;
@@ -65,11 +71,17 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Debug")
 		virtual void ToggleSlowMotion();
 
-	virtual void SelectPrevLmDebugCharacter();
-	virtual void SelectNextLmDebugCharacter();
-
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|HUD")
-		virtual void OpenOverlayMenu();
+		virtual void CycleDebugCharacter(bool bNext);
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|HUD")
+		virtual void SelectLmDebugCharacter(const FInputActionValue& Value);
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|HUD")
+		virtual void ToggleOverlayMenu(const FInputActionValue& Value);
+	UFUNCTION(BlueprintCallable, Category = "Locomotion|HUD")
+		virtual void CycleOverlayItems(const FInputActionValue& Value);
+
+
+	virtual void OpenOverlayMenu();
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|HUD")
 		virtual void CloseOverlayMenu();
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|HUD")

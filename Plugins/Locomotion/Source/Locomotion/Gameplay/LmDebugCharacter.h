@@ -17,7 +17,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 protected:
-	
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Styling")
 		ELmCharacterMeshStyle CurrentMeshType = ELmCharacterMeshStyle::Lm_Default;
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Locomotion|Styling")
