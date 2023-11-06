@@ -21,7 +21,7 @@ struct FLmOverlayStateParams {
 		Widget = nullptr;
 		State = ELmOverlayState::Lm_Default;
 	}
-	FLmOverlayStateParams(ULmWOverlayStateButton* widget, ELmOverlayState state) {
+	FLmOverlayStateParams(ULmWOverlayStateButton* widget, const ELmOverlayState state) {
 		Widget = widget;
 		State = state;
 	}

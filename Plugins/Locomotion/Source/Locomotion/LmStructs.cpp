@@ -15,7 +15,7 @@ FLmComponentAndTransform::FLmComponentAndTransform(FTransform transform, UPrimit
 	Component = component;
 }
 
-FString FLmComponentAndTransform::ToString(bool bPrintToLog) {
+FString FLmComponentAndTransform::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Component Name: %s, Transform: %s"), *Component->GetName(), *Transform.ToString());
 
 	if (bPrintToLog)
@@ -32,7 +32,7 @@ FLmDynamicMontageParams::FLmDynamicMontageParams() {
 	StartTime = 0.0f;
 }
 
-FLmDynamicMontageParams::FLmDynamicMontageParams(UAnimSequenceBase* animation, float blendInTime, float blendOutTime, float playRate, float startTime) {
+FLmDynamicMontageParams::FLmDynamicMontageParams(UAnimSequenceBase* animation, const float blendInTime, const float blendOutTime, const float playRate, const float startTime) {
 	Animation = animation;
 	BlendInTime = blendInTime;
 	BlendOutTime = blendOutTime;
@@ -40,7 +40,7 @@ FLmDynamicMontageParams::FLmDynamicMontageParams(UAnimSequenceBase* animation, f
 	StartTime = startTime;
 }
 
-FString FLmDynamicMontageParams::ToString(bool bPrintToLog) {
+FString FLmDynamicMontageParams::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Animation: %s, PlayRate: %s, StartTime: %s, Blend=[In: %s, Out: %s]"),
 		*Animation->GetName(), *FString::SanitizeFloat(PlayRate), *FString::SanitizeFloat(StartTime), *FString::SanitizeFloat(BlendInTime), *FString::SanitizeFloat(BlendOutTime));
 
@@ -55,12 +55,12 @@ FLmLeanAmount::FLmLeanAmount() {
 	LeftRight = 0.0f;
 }
 
-FLmLeanAmount::FLmLeanAmount(float FB, float LR) {
+FLmLeanAmount::FLmLeanAmount(const float FB, const float LR) {
 	FrontBack = FB;
 	LeftRight = LR;
 }
 
-FString FLmLeanAmount::ToString(bool bPrintToLog) {
+FString FLmLeanAmount::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Lean | FrontBack: %s, RightLeft: %s"), *FString::SanitizeFloat(FrontBack), *FString::SanitizeFloat(LeftRight));
 
 	if (bPrintToLog)
@@ -85,7 +85,7 @@ FLmMantleAsset::FLmMantleAsset(UAnimMontage* AnimMontage, UCurveVector* Position
 	this->HighStartPosition = HighStartPosition;
 }
 
-FString FLmMantleAsset::ToString(bool bPrintToLog) {
+FString FLmMantleAsset::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("AnimMontage: %s, PositionCorrectionCurve: %s,\nStartingOffset: %s,Height: [Low: %s, High: %s], PlayRate: [Low: %s, High: %s], StaringPosition: [Low: %s , High: %s]"), *AnimMontage->GetName(), *PositionCorrectionCurve->GetName(), *StartingOffset.ToString(), *FString::SanitizeFloat(LowHeight), *FString::SanitizeFloat(HighHeight), *FString::SanitizeFloat(LowPlayRate), *FString::SanitizeFloat(HighPlayRate), *FString::SanitizeFloat(LowStartPosition), *FString::SanitizeFloat(HighStartPosition));
 
 	if (bPrintToLog)
@@ -98,7 +98,7 @@ FLmMantleParams::FLmMantleParams() {
 	PlayRate = 1.0f;
 }
 
-FLmMantleParams::FLmMantleParams(UAnimMontage* animMontage, UCurveVector* positionCorrectionCurve, float startingPosition, FVector startingOffset, float playRate) {
+FLmMantleParams::FLmMantleParams(UAnimMontage* animMontage, UCurveVector* positionCorrectionCurve, const float startingPosition, FVector startingOffset, const float playRate) {
 	AnimMontage = animMontage;
 	PositionCorrectionCurve = positionCorrectionCurve;
 	StartingOffset = startingOffset;
@@ -106,7 +106,7 @@ FLmMantleParams::FLmMantleParams(UAnimMontage* animMontage, UCurveVector* positi
 	PlayRate = playRate;
 }
 
-FString FLmMantleParams::ToString(bool bPrintToLog) {
+FString FLmMantleParams::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("AnimMontage: %s, PositionCorrectionCurve: %s, StatingOffset: %s, StatingPosition: %s, PlayRate: %s"), *AnimMontage->GetName(), *PositionCorrectionCurve->GetName(), *StartingOffset.ToString(), *FString::SanitizeFloat(StartingPosition), *FString::SanitizeFloat(PlayRate));
 
 	if (bPrintToLog)
@@ -119,7 +119,7 @@ FLmTurnInPlaceAsset::FLmTurnInPlaceAsset() : AnimatedAngle(0), PlayRate(0), Scal
 	Animation = nullptr;
 }
 
-FString FLmTurnInPlaceAsset::ToString(bool bPrintToLog) {
+FString FLmTurnInPlaceAsset::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Animation: %s, Slot Name: %s, AnimatedAngle: %s, PlayRate: %s, ScaleTurnAngle: %s"), *Animation->GetName(), *SlotName.ToString(), *FString::SanitizeFloat(AnimatedAngle), *FString::SanitizeFloat(PlayRate), *ULmHelpers::Bool2String(ScaleTurnAngle));
 
 	if (bPrintToLog)
@@ -132,7 +132,7 @@ FLmVelocityBlend::FLmVelocityBlend() : F(0.0f), B(0.0f), L(0.0f), R(0.0f) {}
 
 FLmVelocityBlend::FLmVelocityBlend(const float f, const float b, const float l, const float r) : F(f), B(b), L(l), R(r) {}
 
-FString FLmVelocityBlend::ToString(bool bPrintToLog) {
+FString FLmVelocityBlend::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Front: %s, Back: %s, Right: %s, Left: %s"), *FString::SanitizeFloat(F), *FString::SanitizeFloat(B), *FString::SanitizeFloat(R), *FString::SanitizeFloat(L));
 
 	if (bPrintToLog)
@@ -145,7 +145,7 @@ FLmCurrentState::FLmCurrentState() {
 	PawnMovementMode = MOVE_None;
 }
 
-FString FLmCurrentState::ToString(bool bPrintToLog) {
+FString FLmCurrentState::ToString(const bool bPrintToLog) {
 
 	const auto r = FString::Printf(TEXT("MovementMode: %s, MovementState: %s, PrevMovementState: %s, MovementAction: %s, RotationMode: %s, ActualGait: %s, ActualStance: %s, ViewMode: %s, OverlayState: %s"),
 		*UEnum::GetValueAsString(PawnMovementMode),
@@ -180,7 +180,7 @@ FLmEssentialValues::FLmEssentialValues(const FVector velocity, const FVector acc
 	bHasMovementInput = hasMovementInput;
 }
 
-FString FLmEssentialValues::ToString(bool bPrintToLog) {
+FString FLmEssentialValues::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Velocity: %ls \nAcceleration: %ls,\nAimingRotation: %ls\nMovementInput: %ls\nSpeed: %f\nMovementInputAmount: %f\nAimYawRate: %f\nIsMoving: %ls\nHasMovementInput: %ls\n"), *Velocity.ToString(), *Acceleration.ToString(), *AimingRotation.ToString(), *MovementInput.ToString(), Speed, MovementInputAmount, AimYawRate, *ULmHelpers::Bool2String(bIsMoving), *ULmHelpers::Bool2String(bHasMovementInput));
 
 	if (bPrintToLog)
@@ -205,7 +205,7 @@ FLmDebugInfo::FLmDebugInfo(ACharacter* FocusedDebugCharacter, const bool DebugVi
 	bShowCharacterInfo = ShowCharacterInfo;
 }
 
-FString FLmDebugInfo::ToString(bool bPrintToLog) {
+FString FLmDebugInfo::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Debugging Character: %s, DebugView: %s, HUD: %s, Traces: %s, Debug Shapes: %s, Layer Colors: %s, Slow Motion: %s, Character Info: %s"),
 		*DebugFocusCharacter->GetName(),
 		*ULmHelpers::Bool2String(bDebugView, TEXT("Enabled"), TEXT("Disabled")),
@@ -229,13 +229,13 @@ FLmCameraParameters::FLmCameraParameters() {
 	bRightShoulder = true;
 }
 
-FLmCameraParameters::FLmCameraParameters(float tP_FOV, float fp_FOV, bool rightShoulder) {
+FLmCameraParameters::FLmCameraParameters(const float tP_FOV, const float fp_FOV, const bool rightShoulder) {
 	TP_FOV = tP_FOV;
 	FP_FOV = fp_FOV;
 	bRightShoulder = rightShoulder;
 }
 
-FString FLmCameraParameters::ToString(bool bPrintToLog) {
+FString FLmCameraParameters::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("TP FOV: %s, FP FOV: %s, Cam Shoulder? %s"), *FString::SanitizeFloat(TP_FOV), *FString::SanitizeFloat(FP_FOV), *ULmHelpers::Bool2String(bRightShoulder, TEXT("Right"), TEXT("Left")));
 
 	if (bPrintToLog)
@@ -250,13 +250,13 @@ FLmTraceParams::FLmTraceParams() {
 	TraceRadius = 10.0f;
 }
 
-FLmTraceParams::FLmTraceParams(TEnumAsByte<ETraceTypeQuery> traceChannel, FVector traceOrigin, float traceRadius) {
+FLmTraceParams::FLmTraceParams(const TEnumAsByte<ETraceTypeQuery> traceChannel, FVector traceOrigin, const float traceRadius) {
 	TraceChannel = traceChannel;
 	TraceOrigin = traceOrigin;
 	TraceRadius = traceRadius;
 }
 
-FString FLmTraceParams::ToString(bool bPrintToLog) {
+FString FLmTraceParams::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Trace Channel: %s, Trace Origin: %s, Trace Radius: %s"), *UEnum::GetValueAsString(TraceChannel), *TraceOrigin.ToString(), *FString::SanitizeFloat(TraceRadius));
 
 	if (bPrintToLog)
@@ -277,7 +277,7 @@ FLmCameraResult::FLmCameraResult(const FVector location, const  FRotator rotatio
 	FOV = fov;
 }
 
-FString FLmCameraResult::ToString(bool bPrintToLog) {
+FString FLmCameraResult::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Location: %s, Rotation: %s , FOV: %s"), *Location.ToString(), *Rotation.ToString(), *FString::SanitizeFloat(FOV));
 
 	if (bPrintToLog)
@@ -290,7 +290,7 @@ FLmControlVectors::FLmControlVectors() {}
 
 FLmControlVectors::FLmControlVectors(const FVector forward, const FVector right) : Forward(forward), Right(right) {}
 
-FString FLmControlVectors::ToString(bool bPrintToLog) {
+FString FLmControlVectors::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("[Forward= %s, Right= %s]"), *Forward.ToString(), *Right.ToString());
 
 	if (bPrintToLog)
@@ -299,7 +299,7 @@ FString FLmControlVectors::ToString(bool bPrintToLog) {
 	return r;
 }
 
-FString FLmHitResult::ToString(bool bPrintToLog) {
+FString FLmHitResult::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("bHit: %s, bBlockingHit: %s, bStartPenetrating: %s, Hit Component Name: %s, Distance: %s"), *ULmHelpers::Bool2String(bHit), *ULmHelpers::Bool2String(SweepHitResult.bBlockingHit), *ULmHelpers::Bool2String(SweepHitResult.bStartPenetrating), *SweepHitResult.Component->GetName(), *FString::SanitizeFloat(SweepHitResult.Distance));
 
 	if (bPrintToLog)
@@ -308,7 +308,7 @@ FString FLmHitResult::ToString(bool bPrintToLog) {
 	return r;
 }
 
-FString FLmRotateInPlaceAsset::ToString(bool bPrintToLog) {
+FString FLmRotateInPlaceAsset::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Animation: %s, SlotName: %s, TurnRate: [Slow= %s, Fast= %s], PlayRateRange: [Slow= %s, Fast= %s]"), *Animation->GetName(), *SlotName.ToString(), *FString::SanitizeFloat(SlowTurnRate), *FString::SanitizeFloat(FastTurnRate), *FString::SanitizeFloat(SlowPlayRate), *FString::SanitizeFloat(FastPlayRate));
 
 	if (bPrintToLog)
@@ -317,7 +317,7 @@ FString FLmRotateInPlaceAsset::ToString(bool bPrintToLog) {
 	return r;
 }
 
-FString FLmCameraSettings::ToString(bool bPrintToLog) {
+FString FLmCameraSettings::ToString(const bool bPrintToLog) {
 
 	const auto r = FString::Printf(TEXT("TargetArmLength: %s, SocketOffset: %s, LagSpeed: %s, RotationLagSpeed: %s, DoCollitionTest: %s"),
 		*FString::SanitizeFloat(TargetArmLength), *SocketOffset.ToString(), *FString::SanitizeFloat(LagSpeed), *FString::SanitizeFloat(RotationLagSpeed), *ULmHelpers::Bool2String(DoCollisionTest));
@@ -328,7 +328,7 @@ FString FLmCameraSettings::ToString(bool bPrintToLog) {
 	return r;
 }
 
-FString FLmCameraSettingsGait::ToString(bool bPrintToLog) {
+FString FLmCameraSettingsGait::ToString(const bool bPrintToLog) {
 
 	const auto r = FString::Printf(TEXT("Walking: %s\nRunning: %s\nSprinting: %s\nCrouching: %s"), *Walking.ToString(), *Running.ToString(), *Sprinting.ToString(), *Crouching.ToString());
 
@@ -338,7 +338,7 @@ FString FLmCameraSettingsGait::ToString(bool bPrintToLog) {
 	return r;
 }
 
-FString FLmCameraSettingsState::ToString(bool bPrintToLog) {
+FString FLmCameraSettingsState::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Velocity Direction: %s\nLooking Direction: %s\nAiming: %s"), *VelocityDirection.ToString(), *LookingDirection.ToString(), *Aiming.ToString());
 
 	if (bPrintToLog)
@@ -347,7 +347,7 @@ FString FLmCameraSettingsState::ToString(bool bPrintToLog) {
 	return r;
 }
 
-FString FLmMantleTraceSettings::ToString(bool bPrintToLog) {
+FString FLmMantleTraceSettings::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Ledge Height= [Min: %s ,Max: %s], TraceRadius= [Forward: %s, Downward: %s], Reach Distance: %s"), *FString::SanitizeFloat(MinLedgeHeight), *FString::SanitizeFloat(MaxLedgeHeight), *FString::SanitizeFloat(ForwardTraceRadius), *FString::SanitizeFloat(DownwardTraceRadius), *FString::SanitizeFloat(ReachDistance));
 
 	if (bPrintToLog)
@@ -356,7 +356,7 @@ FString FLmMantleTraceSettings::ToString(bool bPrintToLog) {
 	return r;
 }
 
-FString FLmMovementSettings::ToString(bool bPrintToLog) {
+FString FLmMovementSettings::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Speeds= [Walk: %s, Run: %s, Sprint: %s], MovementCurve: %s, Rotation RateCurve: %s"), *FString::SanitizeFloat(WalkSpeed), *FString::SanitizeFloat(RunSpeed), *FString::SanitizeFloat(SprintSpeed), *MovementCurve->GetName(), *RotationRateCurve->GetName());
 
 	if (bPrintToLog)
@@ -365,7 +365,7 @@ FString FLmMovementSettings::ToString(bool bPrintToLog) {
 	return r;
 }
 
-FString FLmMovementSettingsStance::ToString(bool bPrintToLog) {
+FString FLmMovementSettingsStance::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Standing: %s, Crouching: %s"), *Standing.ToString(), *Crouching.ToString());
 
 	if (bPrintToLog)
@@ -374,7 +374,7 @@ FString FLmMovementSettingsStance::ToString(bool bPrintToLog) {
 	return r;
 }
 
-FString FLmMovementSettingsState::ToString(bool bPrintToLog) {
+FString FLmMovementSettingsState::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Velocity Direction: %s, Looking Direction: %s, AimingDirection: %s"), *VelocityDirection.ToString(), *LookingDirection.ToString(), *Aiming.ToString());
 
 	if (bPrintToLog)
@@ -385,13 +385,13 @@ FString FLmMovementSettingsState::ToString(bool bPrintToLog) {
 
 FLmFootLock::FLmFootLock() {}
 
-FLmFootLock::FLmFootLock(FVector location, FRotator rotation, float alpha) {
+FLmFootLock::FLmFootLock(FVector location, FRotator rotation, const float alpha) {
 	Alpha = alpha;
 	Location = location;
 	Rotation = rotation;
 }
 
-FString FLmFootLock::ToString(bool bPrintToLog) {
+FString FLmFootLock::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("Alpha: %s ,Loc: %s , Rot: %s"), *FString::SanitizeFloat(Alpha), *Location.ToString(), *Rotation.ToString());
 
 	if (bPrintToLog)
@@ -408,7 +408,7 @@ FLmFootOffset::FLmFootOffset(FVector target_location, FVector offset_location, F
 	RotationOffset = offset_rotation;
 }
 
-FString FLmFootOffset::ToString(bool bPrintToLog) {
+FString FLmFootOffset::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf(TEXT("OffsetLoc: %s , OffsetRot: %s, TargetLoc: %s"), *LocationOffset.ToString(), *RotationOffset.ToString(), *LocationTarget.ToString());
 
 	if (bPrintToLog)

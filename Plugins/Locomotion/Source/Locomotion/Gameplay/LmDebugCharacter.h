@@ -89,7 +89,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Coloring")
 		void SetDynamicMaterials();
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Coloring")
-		void SetResetColors();
+		void SetResetColors() const;
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Coloring")
 		void UpdateColoringSystem();
 	UFUNCTION(BlueprintCallable, Category = "Locomotion|Coloring")

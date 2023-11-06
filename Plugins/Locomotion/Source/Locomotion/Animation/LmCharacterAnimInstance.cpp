@@ -682,7 +682,7 @@ FLmFootOffset ULmCharacterAnimInstance::SetFootOffsets(FName EnableFootIKCurve, 
 	return params;
 }
 
-void ULmCharacterAnimInstance::UpdatePelvisIKOffset(FVector FootOffset_L_Target, FVector FootOffset_R_Target) {
+void ULmCharacterAnimInstance::UpdatePelvisIKOffset(const FVector FootOffset_L_Target, const FVector FootOffset_R_Target) {
 	//Calculate the Pelvis Alpha by finding the average Foot IK weight. If the alpha is 0, clear the offset.
 	PelvisAlpha = (GetCurveValue(FName(TEXT("Enable_FootIK_L"))) + GetCurveValue(FName(TEXT("Enable_FootIK_R")))) / 2.0f;
 
@@ -699,15 +699,15 @@ void ULmCharacterAnimInstance::UpdatePelvisIKOffset(FVector FootOffset_L_Target,
 	}
 }
 
-FLmFootLock ULmCharacterAnimInstance::UpdateFootLock(FName Enable_FootIK_Curve, FName FootLockCurve, FName IKFootBone, FLmFootLock lastValue) {
+FLmFootLock ULmCharacterAnimInstance::UpdateFootLock(const FName Enable_FootIK_Curve, const FName FootLockCurve, const FName IKFootBone, FLmFootLock lastValue) {
 	if (GetCurveValue(Enable_FootIK_Curve) > 0.f) {
-		float FootLockCurveValue = GetCurveValue(FootLockCurve);
+		const float FootLockCurveValue = GetCurveValue(FootLockCurve);
 
 		if (FootLockCurveValue < lastValue.Alpha || FootLockCurveValue >= 0.99f)
 			lastValue.Alpha = FootLockCurveValue;
 
 		if (lastValue.Alpha >= 0.99f) {
-			FTransform tmp = GetOwningComponent()->GetSocketTransform(IKFootBone, RTS_Component);
+			const FTransform tmp = GetOwningComponent()->GetSocketTransform(IKFootBone, RTS_Component);
 			lastValue.Location = tmp.GetLocation();
 			lastValue.Rotation = tmp.Rotator();
 		}
@@ -739,7 +739,7 @@ ELmMovementDirection ULmCharacterAnimInstance::CalculateMovementDirection() {
 	return ELmMovementDirection::Lm_Forward;
 }
 
-ELmMovementDirection ULmCharacterAnimInstance::CalculateQuadrant(ELmMovementDirection Current, float FR_Threshold, float FL_Threshold, float BR_Threshold, float BL_Threshold, float buffer, float angle) {
+ELmMovementDirection ULmCharacterAnimInstance::CalculateQuadrant(const ELmMovementDirection Current, const float FR_Threshold, const float FL_Threshold, const float BR_Threshold, const float BL_Threshold, const float buffer, const float angle) {
 	//Take the input angle and determine its quadrant (direction). Use the current Movement Direction to increase or decrease the buffers on the angle ranges for each quadrant.
 	if (AngleInRange(angle, FL_Threshold, FR_Threshold, buffer, Current != ELmMovementDirection::Lm_Forward || Current != ELmMovementDirection::Lm_Backward))
 		return ELmMovementDirection::Lm_Forward;
@@ -753,7 +753,7 @@ ELmMovementDirection ULmCharacterAnimInstance::CalculateQuadrant(ELmMovementDire
 	return ELmMovementDirection::Lm_Backward;
 }
 
-bool ULmCharacterAnimInstance::AngleInRange(float angle, float minAngle, float maxAngle, float buffer, bool IncreaseBuffer) {
+bool ULmCharacterAnimInstance::AngleInRange(const float angle, const float minAngle, const float maxAngle, const float buffer, const bool IncreaseBuffer) {
 	if (IncreaseBuffer)
 		return UKismetMathLibrary::InRange_FloatFloat(angle, minAngle - buffer, maxAngle + buffer, true, true);
 
@@ -800,7 +800,7 @@ TEnumAsByte<EDrawDebugTrace::Type> ULmCharacterAnimInstance::GetDebugTraceType(T
 	return EDrawDebugTrace::None;
 }
 
-void ULmCharacterAnimInstance::PlayTransition(FLmDynamicMontageParams params) {
+void ULmCharacterAnimInstance::PlayTransition(const FLmDynamicMontageParams params) {
 	PlaySlotAnimationAsDynamicMontage(params.Animation, FName(TEXT("Grounded Slot")), params.BlendInTime, params.BlendOutTime, params.PlayRate, 1, 0.0f, params.StartTime);
 }
 

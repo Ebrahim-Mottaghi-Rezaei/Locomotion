@@ -283,18 +283,18 @@ void ALmBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PEI->BindAction(InputActions->Roll, ETriggerEvent::Triggered, this, &ALmBaseCharacter::Roll);
 }
 
-void ALmBaseCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode) {
+void ALmBaseCharacter::OnMovementModeChanged(const EMovementMode PrevMovementMode, const uint8 PreviousCustomMode) {
 	Super::OnMovementModeChanged(PrevMovementMode, PreviousCustomMode);
 	OnCharacterMovementModeChanged(PrevMovementMode, GetCharacterMovement()->MovementMode, PreviousCustomMode, GetCharacterMovement()->CustomMovementMode);
 }
 
-void ALmBaseCharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) {
+void ALmBaseCharacter::OnStartCrouch(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust) {
 	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
 
 	OnStanceChanged(ELmStance::Lm_Crouching);
 }
 
-void ALmBaseCharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) {
+void ALmBaseCharacter::OnEndCrouch(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust) {
 	Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
 
 	OnStanceChanged(ELmStance::Lm_Standing);
@@ -343,12 +343,12 @@ FLmControlVectors ALmBaseCharacter::GetControlVectors() {
 	return ControlVectors;
 }
 
-FVector ALmBaseCharacter::GetCapsuleBaseLocation(float ZOffset) {
+FVector ALmBaseCharacter::GetCapsuleBaseLocation(const float ZOffset) {
 	const auto cc = GetCapsuleComponent();
 	return cc->GetComponentLocation() - (cc->GetUpVector() * (ZOffset + cc->GetScaledCapsuleHalfHeight()));
 }
 
-FVector ALmBaseCharacter::GetCapsuleLocationFromBase(FVector baseLocation, float zOffset) {
+FVector ALmBaseCharacter::GetCapsuleLocationFromBase(const FVector baseLocation, const float zOffset) {
 	return baseLocation + FVector(0.0f, 0.0f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + zOffset);
 }
 
@@ -477,7 +477,7 @@ void ALmBaseCharacter::ToggleRotationMode() {
 	}
 }
 
-void ALmBaseCharacter::ChangeRotationMode(ELmRotationMode newMode) {
+void ALmBaseCharacter::ChangeRotationMode(const ELmRotationMode newMode) {
 	DesiredRotationMode = newMode;
 	if (this->GetClass()->ImplementsInterface(ULmCharacterInterface::StaticClass())) {
 		ILmCharacterInterface::Execute_SetRotationMode(this, newMode);
@@ -539,7 +539,7 @@ void ALmBaseCharacter::SetEssentialValues() {
 	Acceleration = CalculateAcceleration();
 
 	//Determine if the character is moving by getting it's speed. The Speed equals the length of the horizontal (x y) velocity, so it does not take vertical movement into account. If the character is moving, update the last velocity rotation. This value is saved because it might be useful to know the last orientation of movement even after the character has stopped.
-	FVector nonZvelocity = FVector(GetVelocity().X, GetVelocity().Y, 0.0f);
+	const FVector nonZvelocity = FVector(GetVelocity().X, GetVelocity().Y, 0.0f);
 	Speed = nonZvelocity.Size();
 	bIsMoving = Speed > 1.0f;
 	if (bIsMoving)
@@ -568,7 +568,7 @@ FVector ALmBaseCharacter::CalculateAcceleration() {
 	return (GetVelocity() - PreviousVelocity) / GetWorld()->GetDeltaSeconds();
 }
 
-void ALmBaseCharacter::OnCharacterMovementModeChanged(EMovementMode PrevMovementMode, EMovementMode NewMovementMode, uint8 PrevCustomMode, uint8 NewCustomMode) {
+void ALmBaseCharacter::OnCharacterMovementModeChanged(const EMovementMode PrevMovementMode, const EMovementMode NewMovementMode, const uint8 PrevCustomMode, uint8 NewCustomMode) {
 	Super::OnMovementModeChanged(PrevMovementMode, PrevCustomMode);
 
 	if (this->GetClass()->ImplementsInterface(ULmCharacterInterface::StaticClass()))
@@ -691,7 +691,7 @@ void ALmBaseCharacter::UpdateCharacterMovement() {
 	UpdateDynamicMovementSettings(allowedGait);
 }
 
-void ALmBaseCharacter::UpdateDynamicMovementSettings(ELmGait AllowedGait) {
+void ALmBaseCharacter::UpdateDynamicMovementSettings(const ELmGait AllowedGait) {
 	CurrentMovementSettings = GetTargetMovementSettings();
 	const auto cm = GetCharacterMovement();
 
@@ -747,7 +747,7 @@ ELmGait ALmBaseCharacter::GetAllowedGait() {
 
 }
 
-ELmGait ALmBaseCharacter::GetActualGait(ELmGait AllowedGait) {
+ELmGait ALmBaseCharacter::GetActualGait(const ELmGait AllowedGait) {
 	if (Speed >= CurrentMovementSettings.RunSpeed + 10)
 		return AllowedGait == ELmGait::Lm_Sprinting ? ELmGait::Lm_Sprinting : ELmGait::Lm_Running;
 
@@ -852,14 +852,14 @@ void ALmBaseCharacter::UpdateInAirRotation() {
 	}
 }
 
-void ALmBaseCharacter::SmoothCharacterRotation(FRotator Target, float TargetInterpSpeedConst, float ActorInterpSpeedSmooth) {
+void ALmBaseCharacter::SmoothCharacterRotation(const FRotator Target, const float TargetInterpSpeedConst, const float ActorInterpSpeedSmooth) {
 	//Interpolate the Target Rotation for extra smooth rotation behavior
 	TargetRotation = UKismetMathLibrary::RInterpTo_Constant(TargetRotation, Target, GetWorld()->GetDeltaSeconds(), TargetInterpSpeedConst);
 
 	SetActorRotation(UKismetMathLibrary::RInterpTo(GetActorRotation(), TargetRotation, GetWorld()->GetDeltaSeconds(), ActorInterpSpeedSmooth));
 }
 
-void ALmBaseCharacter::LimitRotation(float AimYawMin, float AimYawMax, float InterpSpeed) {
+void ALmBaseCharacter::LimitRotation(const float AimYawMin, const float AimYawMax, const float InterpSpeed) {
 	const float deltaYaw = UKismetMathLibrary::NormalizedDeltaRotator(GetControlRotation(), GetActorRotation()).Yaw;
 
 	const float controlYaw = GetControlRotation().Yaw;
@@ -869,7 +869,7 @@ void ALmBaseCharacter::LimitRotation(float AimYawMin, float AimYawMax, float Int
 	SmoothCharacterRotation(FRotator(0.0f, controlYaw + deltaYaw > 0 ? AimYawMin : AimYawMax, 0.0f), 0.0f, InterpSpeed);
 }
 
-FLmHitResult ALmBaseCharacter::SetActorLocationRotationUpdateTarget(FVector NewLocation, FRotator NewRotation, bool bSweep, bool bTeleport) {
+FLmHitResult ALmBaseCharacter::SetActorLocationRotationUpdateTarget(const FVector NewLocation, const FRotator NewRotation, const bool bSweep, bool bTeleport) {
 	TargetRotation = NewRotation;
 
 	FLmHitResult HitResult;
@@ -952,7 +952,7 @@ bool ALmBaseCharacter::MantleCheck(FLmMantleTraceSettings TraceSettings, TEnumAs
 	return true;
 }
 
-void ALmBaseCharacter::MantleStart(float MantleHeight, FLmComponentAndTransform MantleLedgeWS, ELmMantleType MantleType) {
+void ALmBaseCharacter::MantleStart(const float MantleHeight, const FLmComponentAndTransform MantleLedgeWS, const ELmMantleType MantleType) {
 	//Step 2: Convert the world space target to the mantle component's local space for use in moving objects.
 	MantleLedgeLS = ULmHelpers::WorldSpaceToLocalSpace(MantleLedgeWS);
 
@@ -968,10 +968,10 @@ void ALmBaseCharacter::MantleStart(float MantleHeight, FLmComponentAndTransform 
 	MantleActualStartOffset = ULmHelpers::SubtractTransform(GetActorTransform(), MantleTarget);
 
 	//Step 4: Calculate the Animated Start Offset from the Target Location. This would be the location the actual animation starts at relative to the Target Transform.
-	const FVector t1 = MantleTarget.GetRotation().Vector() * MantleParams.StartingOffset.Y;
-	FVector LocationA = MantleTarget.GetLocation() - FVector(t1.X, t1.Y, MantleParams.StartingOffset.Z);
-	FTransform TransformA = FTransform(MantleTarget.GetRotation(), LocationA);
-	MantleAnimatedStartOffset = ULmHelpers::SubtractTransform(TransformA, MantleTarget);
+	const FVector    t1         = MantleTarget.GetRotation().Vector() * MantleParams.StartingOffset.Y;
+	const FVector    LocationA  = MantleTarget.GetLocation() - FVector(t1.X, t1.Y, MantleParams.StartingOffset.Z);
+	const FTransform TransformA = FTransform(MantleTarget.GetRotation(), LocationA);
+	MantleAnimatedStartOffset   = ULmHelpers::SubtractTransform(TransformA, MantleTarget);
 
 	//Step 5: Clear the Character Movement Mode and set the Movement State to Mantling
 	GetCharacterMovement()->SetMovementMode(MOVE_None, 0);
@@ -1051,7 +1051,7 @@ bool ALmBaseCharacter::CapsuleHasRoomCheck(UCapsuleComponent* Capsule, const FVe
 	return !(HitResult.bBlockingHit || HitResult.bStartPenetrating);
 }
 
-FLmMantleAsset ALmBaseCharacter::GetMantleAsset(ELmMantleType MantleType) {
+FLmMantleAsset ALmBaseCharacter::GetMantleAsset(const ELmMantleType MantleType) {
 	//Get the Default Mantle Asset values.These will be overridden in the AnimMan Child Character
 	if (MantleType == ELmMantleType::Lm_HighMantle) {
 		return FLmMantleAsset(nullptr, HighMantle, FVector(0.0f, 65.0f, 200.0f), 50.0f, 1.0f, 0.5f, 100.0f, 1.0f, 0.0f);
@@ -1221,37 +1221,37 @@ void ALmBaseCharacter::Roll() {
 	}
 }
 
-void ALmBaseCharacter::SetMovementState_Implementation(ELmMovementState NewMovementState) {
+void ALmBaseCharacter::SetMovementState_Implementation(const ELmMovementState NewMovementState) {
 	if (NewMovementState != MovementState) {
 		OnMovementStateChanged(NewMovementState);
 	}
 }
 
-void ALmBaseCharacter::SetMovementAction_Implementation(ELmMovementAction NewMovementAction) {
+void ALmBaseCharacter::SetMovementAction_Implementation(const ELmMovementAction NewMovementAction) {
 	if (NewMovementAction != MovementAction) {
 		OnMovementActionChanged(NewMovementAction);
 	}
 }
 
-void ALmBaseCharacter::SetRotationMode_Implementation(ELmRotationMode NewRotationMode) {
+void ALmBaseCharacter::SetRotationMode_Implementation(const ELmRotationMode NewRotationMode) {
 	if (NewRotationMode != RotationMode) {
 		OnRotationModeChanged(NewRotationMode);
 	}
 }
 
-void ALmBaseCharacter::SetGait_Implementation(ELmGait NewGait) {
+void ALmBaseCharacter::SetGait_Implementation(const ELmGait NewGait) {
 	if (NewGait != Gait) {
 		OnGaitChanged(NewGait);
 	}
 }
 
-void ALmBaseCharacter::SetViewMode_Implementation(ELmViewMode NewViewMode) {
+void ALmBaseCharacter::SetViewMode_Implementation(const ELmViewMode NewViewMode) {
 	if (NewViewMode != ViewMode) {
 		OnViewModeChanged(NewViewMode);
 	}
 }
 
-void ALmBaseCharacter::SetOverlayState_Implementation(ELmOverlayState NewOverlayState) {
+void ALmBaseCharacter::SetOverlayState_Implementation(const ELmOverlayState NewOverlayState) {
 	if (NewOverlayState != OverlayState) {
 		OnOverlayStateChanged(NewOverlayState);
 	}

@@ -11,7 +11,7 @@
 #include <Layout/Geometry.h>
 #include "Components/CanvasPanelSlot.h"
 
-void ULmWHuD::NativeTick(const FGeometry& MovieSceneBlends, float InDeltaTime) {
+void ULmWHuD::NativeTick(const FGeometry& MovieSceneBlends, const float InDeltaTime) {
 	Super::NativeTick(MovieSceneBlends, InDeltaTime);
 
 	dt = InDeltaTime;

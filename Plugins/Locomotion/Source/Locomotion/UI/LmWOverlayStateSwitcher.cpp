@@ -31,7 +31,7 @@ void ULmWOverlayStateSwitcher::NativeConstruct() {
 	}
 }
 
-void ULmWOverlayStateSwitcher::NativeTick(const FGeometry& MovieSceneBlends, float InDeltaTime) {
+void ULmWOverlayStateSwitcher::NativeTick(const FGeometry& MovieSceneBlends, const float InDeltaTime) {
 	Super::NativeTick(MovieSceneBlends, InDeltaTime);
 
 	//local player controller
@@ -55,8 +55,8 @@ void ULmWOverlayStateSwitcher::SelectOverlayState() const {
 
 void ULmWOverlayStateSwitcher::CreateButtons() {
 	//Lm_Barrel is the last element in the ELmOverlayState enum. if any other states added
-	for (ELmOverlayState value : TEnumRange<ELmOverlayState>()) {
-		auto button = static_cast<ULmWOverlayStateButton*>(CreateWidget(GetOwningPlayer(), OverlayStateButtonTemplate));
+	for ( const ELmOverlayState value : TEnumRange<ELmOverlayState>()) {
+		const auto button = static_cast<ULmWOverlayStateButton*>(CreateWidget(GetOwningPlayer(), OverlayStateButtonTemplate));
 		button->GetText()->SetText(FText::FromString(UEnum::GetDisplayValueAsText(value).ToString()));
 		VerticalBox->AddChildToVerticalBox(button);
 		OverlayStateButtons.Add(FLmOverlayStateParams(button, value));
@@ -76,7 +76,7 @@ void ULmWOverlayStateSwitcher::SetUIElements(UCanvasPanel* movablePanel, UVertic
 	VerticalBox = verticalBox;
 }
 
-void ULmWOverlayStateSwitcher::CycleState(bool bUp) {
+void ULmWOverlayStateSwitcher::CycleState(const bool bUp) {
 	if (bUp)
 		selectedIndex = selectedIndex + 1 < OverlayStates.Num() ? selectedIndex + 1 : 0;
 	else

@@ -12,6 +12,8 @@
 #include <Components/SkeletalMeshComponent.h>
 #include <UObject/ConstructorHelpers.h>
 #include <UObject/UObjectBase.h>
+
+#include "Engine/SkinnedAssetCommon.h"
 #include "Locomotion/EnhancedInput/LmControllerInputConfiguration.h"
 
 ALmDebugCharacter::ALmDebugCharacter() {
@@ -43,7 +45,7 @@ void ALmDebugCharacter::OnConstruction(const FTransform& Transform) {
 	SetResetColors();
 }
 
-void ALmDebugCharacter::Tick(float DeltaTime) {
+void ALmDebugCharacter::Tick(const float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	UpdateColoringSystem();
@@ -84,7 +86,7 @@ void ALmDebugCharacter::SetDynamicMaterials() {
 	Hand_R = mesh->CreateDynamicMaterialInstance(14);
 }
 
-void ALmDebugCharacter::SetResetColors() {
+void ALmDebugCharacter::SetResetColors() const {
 	if (bSolidColor) {
 		Head->SetVectorParameterValue(FName("BaseColor"), DefaultColor);
 		Torso->SetVectorParameterValue(FName("BaseColor"), DefaultColor);
@@ -214,7 +216,7 @@ void ALmDebugCharacter::ToggleCharacterMesh() {
 	SetCharacterMesh(CurrentMeshType == ELmCharacterMeshStyle::Lm_Default ? ELmCharacterMeshStyle::Lm_Skin : ELmCharacterMeshStyle::Lm_Default);
 }
 
-void ALmDebugCharacter::SetCharacterMesh(ELmCharacterMeshStyle MeshType) {
+void ALmDebugCharacter::SetCharacterMesh(const ELmCharacterMeshStyle MeshType) {
 	if (MovementState == ELmMovementState::Lm_Ragdoll || CurrentMeshType == MeshType)
 		return;
 
