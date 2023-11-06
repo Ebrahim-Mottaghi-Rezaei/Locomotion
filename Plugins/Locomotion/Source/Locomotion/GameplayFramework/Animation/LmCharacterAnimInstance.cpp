@@ -23,7 +23,7 @@ ULmCharacterAnimInstance::ULmCharacterAnimInstance() {
 	N_TurnIP_L90.ScaleTurnAngle = true;
 
 	const ConstructorHelpers::FObjectFinder<UAnimSequence>
-	ALS_N_TurnIP_L90( TEXT( "AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/TurnInPlace/ALS_N_TurnIP_L90.ALS_N_TurnIP_L90'" ) );
+	ALS_N_TurnIP_L90( TEXT( "/Script/Engine.AnimSequence'/Locomotion/Character/AnimationExamples/Base/TurnInPlace/ALS_N_TurnIP_L90.ALS_N_TurnIP_L90'" ) );
 	if ( IsValid( ALS_N_TurnIP_L90.Object ) && ALS_N_TurnIP_L90.Succeeded() )
 		N_TurnIP_L90.Animation = ALS_N_TurnIP_L90.Object;
 	else
@@ -35,7 +35,7 @@ ULmCharacterAnimInstance::ULmCharacterAnimInstance() {
 	N_TurnIP_R90.PlayRate       = 1.2f;
 	N_TurnIP_R90.ScaleTurnAngle = true;
 	const ConstructorHelpers::FObjectFinder<UAnimSequence>
-	ALS_N_TurnIP_R90( TEXT( "AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/TurnInPlace/ALS_N_TurnIP_R90.ALS_N_TurnIP_R90'" ) );
+	ALS_N_TurnIP_R90( TEXT( "/Script/Engine.AnimSequence'/Locomotion/Character/AnimationExamples/Base/TurnInPlace/ALS_N_TurnIP_R90.ALS_N_TurnIP_R90'" ) );
 	if ( IsValid( ALS_N_TurnIP_R90.Object ) && ALS_N_TurnIP_R90.Succeeded() )
 		N_TurnIP_R90.Animation = ALS_N_TurnIP_R90.Object;
 	else
@@ -47,7 +47,7 @@ ULmCharacterAnimInstance::ULmCharacterAnimInstance() {
 	N_TurnIP_L180.PlayRate       = 1.2f;
 	N_TurnIP_L180.ScaleTurnAngle = true;
 	const ConstructorHelpers::FObjectFinder<UAnimSequence>
-	ALS_N_TurnIP_L180( TEXT( "AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/TurnInPlace/ALS_N_TurnIP_L180.ALS_N_TurnIP_L180'" ) );
+	ALS_N_TurnIP_L180( TEXT( "/Script/Engine.AnimSequence'/Locomotion/Character/AnimationExamples/Base/TurnInPlace/ALS_N_TurnIP_L180.ALS_N_TurnIP_L180'" ) );
 	if ( IsValid( ALS_N_TurnIP_L180.Object ) && ALS_N_TurnIP_L180.Succeeded() )
 		N_TurnIP_L180.Animation = ALS_N_TurnIP_L180.Object;
 	else
@@ -59,7 +59,7 @@ ULmCharacterAnimInstance::ULmCharacterAnimInstance() {
 	N_TurnIP_R180.PlayRate       = 1.2f;
 	N_TurnIP_R180.ScaleTurnAngle = true;
 	const ConstructorHelpers::FObjectFinder<UAnimSequence>
-	ALS_N_TurnIP_R180( TEXT( "AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/TurnInPlace/ALS_N_TurnIP_R180.ALS_N_TurnIP_R180'" ) );
+	ALS_N_TurnIP_R180( TEXT( "/Script/Engine.AnimSequence'/Locomotion/Character/AnimationExamples/Base/TurnInPlace/ALS_N_TurnIP_R180.ALS_N_TurnIP_R180'" ) );
 	if ( IsValid( ALS_N_TurnIP_R180.Object ) && ALS_N_TurnIP_R180.Succeeded() )
 		N_TurnIP_R180.Animation = ALS_N_TurnIP_R180.Object;
 	else
@@ -71,7 +71,7 @@ ULmCharacterAnimInstance::ULmCharacterAnimInstance() {
 	CLF_TurnIP_L90.PlayRate       = 1.2f;
 	CLF_TurnIP_L90.ScaleTurnAngle = false;
 	const ConstructorHelpers::FObjectFinder<UAnimSequence>
-	ALS_CLF_TurnIP_L90( TEXT( "AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/TurnInPlace/ALS_CLF_TurnIP_L90.ALS_CLF_TurnIP_L90'" ) );
+	ALS_CLF_TurnIP_L90( TEXT( "/Script/Engine.AnimSequence'/Locomotion/Character/AnimationExamples/Base/TurnInPlace/ALS_CLF_TurnIP_L90.ALS_CLF_TurnIP_L90'" ) );
 	if ( IsValid( ALS_CLF_TurnIP_L90.Object ) && ALS_CLF_TurnIP_L90.Succeeded() )
 		CLF_TurnIP_L90.Animation = ALS_CLF_TurnIP_L90.Object;
 	else
@@ -83,7 +83,7 @@ ULmCharacterAnimInstance::ULmCharacterAnimInstance() {
 	CLF_TurnIP_R90.PlayRate       = 1.2f;
 	CLF_TurnIP_R90.ScaleTurnAngle = false;
 	const ConstructorHelpers::FObjectFinder<UAnimSequence>
-	ALS_CLF_TurnIP_R90( TEXT( "AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/TurnInPlace/ALS_CLF_TurnIP_R90.ALS_CLF_TurnIP_R90'" ) );
+	ALS_CLF_TurnIP_R90( TEXT( "/Script/Engine.AnimSequence'/Locomotion/Character/AnimationExamples/Base/TurnInPlace/ALS_CLF_TurnIP_R90.ALS_CLF_TurnIP_R90'" ) );
 	if ( IsValid( ALS_CLF_TurnIP_R90.Object ) && ALS_CLF_TurnIP_R90.Succeeded() )
 		CLF_TurnIP_R90.Animation = ALS_CLF_TurnIP_R90.Object;
 	else
@@ -95,7 +95,7 @@ ULmCharacterAnimInstance::ULmCharacterAnimInstance() {
 	CLF_TurnIP_L180.PlayRate       = 1.2f;
 	CLF_TurnIP_L180.ScaleTurnAngle = false;
 	const ConstructorHelpers::FObjectFinder<UAnimSequence>
-	ALS_CLF_TurnIP_L180( TEXT( "AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/TurnInPlace/ALS_CLF_TurnIP_L180.ALS_CLF_TurnIP_L180'" ) );
+	ALS_CLF_TurnIP_L180( TEXT( "/Script/Engine.AnimSequence'/Locomotion/Character/AnimationExamples/Base/TurnInPlace/ALS_CLF_TurnIP_L180.ALS_CLF_TurnIP_L180'" ) );
 	if ( IsValid( ALS_CLF_TurnIP_L180.Object ) && ALS_CLF_TurnIP_L180.Succeeded() )
 		CLF_TurnIP_L180.Animation = ALS_CLF_TurnIP_L180.Object;
 	else
@@ -107,7 +107,7 @@ ULmCharacterAnimInstance::ULmCharacterAnimInstance() {
 	CLF_TurnIP_R180.PlayRate       = 1.2f;
 	CLF_TurnIP_R180.ScaleTurnAngle = false;
 	const ConstructorHelpers::FObjectFinder<UAnimSequence>
-	ALS_CLF_TurnIP_R180( TEXT( "AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/TurnInPlace/ALS_CLF_TurnIP_R180.ALS_CLF_TurnIP_R180'" ) );
+	ALS_CLF_TurnIP_R180( TEXT( "/Script/Engine.AnimSequence'/Locomotion/Character/AnimationExamples/Base/TurnInPlace/ALS_CLF_TurnIP_R180.ALS_CLF_TurnIP_R180'" ) );
 	if ( IsValid( ALS_CLF_TurnIP_R180.Object ) && ALS_CLF_TurnIP_R180.Succeeded() )
 		CLF_TurnIP_R180.Animation = ALS_CLF_TurnIP_R180.Object;
 	else
@@ -115,68 +115,68 @@ ULmCharacterAnimInstance::ULmCharacterAnimInstance() {
 #pragma endregion
 
 #pragma region Setting Up Blend Curves
-	const ConstructorHelpers::FObjectFinder<UCurveFloat> _DiagonalScaleAmountCurve( TEXT( "CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/DiagonalScaleAmount.DiagonalScaleAmount'" ) );
-	if ( IsValid( _DiagonalScaleAmountCurve.Object ) && _DiagonalScaleAmountCurve.Succeeded() )
-		DiagonalScaleAmountCurve = _DiagonalScaleAmountCurve.Object;
+	const ConstructorHelpers::FObjectFinder<UCurveFloat> DiagonalScaleAmountCurveAsset( TEXT( "/Script/Engine.CurveFloat'/Locomotion/Data/Curves/AnimationBlendCurves/DiagonalScaleAmount.DiagonalScaleAmount'" ) );
+	if ( IsValid( DiagonalScaleAmountCurveAsset.Object ) && DiagonalScaleAmountCurveAsset.Succeeded() )
+		DiagonalScaleAmountCurve = DiagonalScaleAmountCurveAsset.Object;
 	else
 		ULmLogger::LogError( TEXT( "Curve not found: DiagonalScaleAmount" ) );
 
-	const ConstructorHelpers::FObjectFinder<UCurveFloat> _StrideBlend_N_Walk( TEXT( "CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/StrideBlend_N_Walk.StrideBlend_N_Walk'" ) );
+	const ConstructorHelpers::FObjectFinder<UCurveFloat> _StrideBlend_N_Walk( TEXT( "/Script/Engine.CurveFloat'/Locomotion/Data/Curves/AnimationBlendCurves/StrideBlend_N_Walk.StrideBlend_N_Walk'" ) );
 	if ( IsValid( _StrideBlend_N_Walk.Object ) && _StrideBlend_N_Walk.Succeeded() )
 		StrideBlend_N_Walk = _StrideBlend_N_Walk.Object;
 	else
 		ULmLogger::LogError( TEXT( "Curve not found: StrideBlend_N_Walk" ) );
 
-	const ConstructorHelpers::FObjectFinder<UCurveFloat> _StrideBlend_N_Run( TEXT( "CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/StrideBlend_N_Run.StrideBlend_N_Run'" ) );
-	if ( IsValid( _StrideBlend_N_Run.Object ) && _StrideBlend_N_Run.Succeeded() )
-		StrideBlend_N_Run = _StrideBlend_N_Run.Object;
+	const ConstructorHelpers::FObjectFinder<UCurveFloat> StrideBlend_N_RunAsset( TEXT( "/Script/Engine.CurveFloat'/Locomotion/Data/Curves/AnimationBlendCurves/StrideBlend_N_Run.StrideBlend_N_Run'" ) );
+	if ( IsValid( StrideBlend_N_RunAsset.Object ) && StrideBlend_N_RunAsset.Succeeded() )
+		StrideBlend_N_Run = StrideBlend_N_RunAsset.Object;
 	else
 		ULmLogger::LogError( TEXT( "Curve not found: StrideBlend_N_Run" ) );
 
-	const ConstructorHelpers::FObjectFinder<UCurveFloat> _StrideBlend_C_Walk( TEXT( "CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/StrideBlend_N_Walk.StrideBlend_N_Walk'" ) );
-	if ( IsValid( _StrideBlend_C_Walk.Object ) && _StrideBlend_C_Walk.Succeeded() )
-		StrideBlend_C_Walk = _StrideBlend_C_Walk.Object;
+	const ConstructorHelpers::FObjectFinder<UCurveFloat> StrideBlend_C_WalkAsset( TEXT( "/Script/Engine.CurveFloat'/Locomotion/Data/Curves/AnimationBlendCurves/StrideBlend_N_Walk.StrideBlend_N_Walk'" ) );
+	if ( IsValid( StrideBlend_C_WalkAsset.Object ) && StrideBlend_C_WalkAsset.Succeeded() )
+		StrideBlend_C_Walk = StrideBlend_C_WalkAsset.Object;
 	else
 		ULmLogger::LogError( TEXT( "Curve not found: StrideBlend_C_Walk" ) );
 
-	const ConstructorHelpers::FObjectFinder<UCurveFloat> _LandPredictionCurve( TEXT( "CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/LandPredictionBlend.LandPredictionBlend'" ) );
-	if ( IsValid( _LandPredictionCurve.Object ) && _LandPredictionCurve.Succeeded() )
-		LandPredictionCurve = _LandPredictionCurve.Object;
+	const ConstructorHelpers::FObjectFinder<UCurveFloat> LandPredictionCurveAsset( TEXT( "/Script/Engine.CurveFloat'/Locomotion/Data/Curves/AnimationBlendCurves/LandPredictionBlend.LandPredictionBlend'" ) );
+	if ( IsValid( LandPredictionCurveAsset.Object ) && LandPredictionCurveAsset.Succeeded() )
+		LandPredictionCurve = LandPredictionCurveAsset.Object;
 	else
 		ULmLogger::LogError( TEXT( "Curve not found: LandPredictionCurve" ) );
 
-	const ConstructorHelpers::FObjectFinder<UCurveFloat> _LeanInAirAmount( TEXT( "CurveFloat'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/LeanInAirAmount.LeanInAirAmount'" ) );
-	if ( IsValid( _LeanInAirAmount.Object ) && _LeanInAirAmount.Succeeded() )
-		LeanInAirCurve = _LeanInAirAmount.Object;
+	const ConstructorHelpers::FObjectFinder<UCurveFloat> LeanInAirAmountAsset( TEXT( "/Script/Engine.CurveFloat'/Locomotion/Data/Curves/AnimationBlendCurves/LeanInAirAmount.LeanInAirAmount'" ) );
+	if ( IsValid( LeanInAirAmountAsset.Object ) && LeanInAirAmountAsset.Succeeded() )
+		LeanInAirCurve = LeanInAirAmountAsset.Object;
 	else
 		ULmLogger::LogError( TEXT( "Curve not found: LeanInAirCurve" ) );
 
-	const ConstructorHelpers::FObjectFinder<UCurveVector> _YawOffset_FB( TEXT( "CurveVector'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/YawOffset_FB.YawOffset_FB'" ) );
-	if ( IsValid( _YawOffset_FB.Object ) && _YawOffset_FB.Succeeded() )
-		YawOffset_FB = _YawOffset_FB.Object;
+	const ConstructorHelpers::FObjectFinder<UCurveVector> YawOffset_FBAsset( TEXT( "/Script/Engine.CurveVector'/Locomotion/Data/Curves/AnimationBlendCurves/YawOffset_FB.YawOffset_FB'" ) );
+	if ( IsValid( YawOffset_FBAsset.Object ) && YawOffset_FBAsset.Succeeded() )
+		YawOffset_FB = YawOffset_FBAsset.Object;
 	else
 		ULmLogger::LogError( TEXT( "Curve not found: YawOffset_FB" ) );
 
-	const ConstructorHelpers::FObjectFinder<UCurveVector> _YawOffset_LR( TEXT( "CurveVector'/Game/AdvancedLocomotionV4/Data/Curves/AnimationBlendCurves/YawOffset_LR.YawOffset_LR'" ) );
-	if ( IsValid( _YawOffset_LR.Object ) && _YawOffset_LR.Succeeded() )
-		YawOffset_LR = _YawOffset_LR.Object;
+	const ConstructorHelpers::FObjectFinder<UCurveVector> YawOffset_LRAsset( TEXT( "/Script/Engine.CurveVector'/Locomotion/Data/Curves/AnimationBlendCurves/YawOffset_LR.YawOffset_LR'" ) );
+	if ( IsValid( YawOffset_LRAsset.Object ) && YawOffset_LRAsset.Succeeded() )
+		YawOffset_LR = YawOffset_LRAsset.Object;
 	else
 		ULmLogger::LogError( TEXT( "Curve not found: YawOffset_LR" ) );
 #pragma endregion
 
 #pragma region Setting Up Transitions
 	static ConstructorHelpers::FObjectFinder<UAnimSequence>
-	ALS_N_Transition_R_Finder( TEXT( "AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/Transitions/ALS_N_Transition_R.ALS_N_Transition_R'" ) );
-	if ( IsValid( ALS_N_Transition_R_Finder.Object ) && ALS_N_Transition_R_Finder.Succeeded() ) {
-		ALS_N_Transition_R = ALS_N_Transition_R_Finder.Object;
+	ALS_N_Transition_RAsset( TEXT( "/Script/Engine.AnimSequence'/Locomotion/Character/AnimationExamples/Base/Transitions/ALS_N_Transition_R.ALS_N_Transition_R'" ) );
+	if ( IsValid( ALS_N_Transition_RAsset.Object ) && ALS_N_Transition_RAsset.Succeeded() ) {
+		ALS_N_Transition_R = ALS_N_Transition_RAsset.Object;
 	} else {
 		ULmLogger::LogError( TEXT( "Animation not found: ALS_N_Transition_R" ) );
 	}
 
 	static ConstructorHelpers::FObjectFinder<UAnimSequence>
-	ALS_N_Transition_L_Finder( TEXT( "AnimSequence'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Base/Transitions/ALS_N_Transition_L.ALS_N_Transition_L'" ) );
-	if ( IsValid( ALS_N_Transition_L_Finder.Object ) && ALS_N_Transition_L_Finder.Succeeded() ) {
-		ALS_N_Transition_L = ALS_N_Transition_L_Finder.Object;
+	ALS_N_Transition_LAsset( TEXT( "/Script/Engine.AnimSequence'/Locomotion/Character/AnimationExamples/Base/Transitions/ALS_N_Transition_L.ALS_N_Transition_L'" ) );
+	if ( IsValid( ALS_N_Transition_LAsset.Object ) && ALS_N_Transition_LAsset.Succeeded() ) {
+		ALS_N_Transition_L = ALS_N_Transition_LAsset.Object;
 	} else {
 		ULmLogger::LogError( TEXT( "Animation not found: ALS_N_Transition_R" ) );
 	}
@@ -430,7 +430,7 @@ void ULmCharacterAnimInstance::UpdateRotationValues() {
 	//Set the Movement Direction
 	MovementDirection = CalculateMovementDirection();
 
-	/*Set the Yaw Offsets. These values influence the "YawOffset" curve in the animgraph and are used to offset the characters rotation for more natural movement.
+	/*Set the Yaw Offsets. These values influence the "YawOffset" curve in the anim-graph and are used to offset the characters rotation for more natural movement.
 	The curves allow for fine control over how the offset behaves for each movement direction.*/
 	const auto DeltaRotator = UKismetMathLibrary::NormalizedDeltaRotator( Velocity.ToOrientationRotator() , Character->GetControlRotation() );
 

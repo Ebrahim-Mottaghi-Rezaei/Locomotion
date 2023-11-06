@@ -16,7 +16,7 @@ ALmPlayerCameraManager::ALmPlayerCameraManager() {
 	CameraBehaviour->SetAnimationMode( EAnimationMode::AnimationBlueprint );
 	CameraBehaviour->SetAnimInstanceClass( ULmCameraAnimInstance::StaticClass() );
 
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CameraMesh( TEXT( "SkeletalMesh'/Game/AdvancedLocomotionV4/Blueprints/CameraSystem/Camera.Camera'" ) );
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CameraMesh( TEXT( "/Script/Engine.SkeletalMesh'/Locomotion/Blueprints/Camera/Camera.Camera'" ) );
 
 	if ( IsValid( CameraMesh.Object ) && CameraMesh.Succeeded() )
 		CameraBehaviour->SetSkeletalMesh( CameraMesh.Object );
@@ -24,7 +24,7 @@ ALmPlayerCameraManager::ALmPlayerCameraManager() {
 		ULmLogger::LogError( FString( TEXT( "ALmPlayerCameraManager::ALmPlayerCameraManager Camera mesh not found" ) ) );
 
 	AutoReceiveInput = EAutoReceiveInput::Player0;
-	static ConstructorHelpers::FObjectFinder<UCurveFloat> CameraRepositionCurve( TEXT( "CurveFloat'/Locomotion/Curves/CV_CameraReposition.CV_CameraReposition'" ) );
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> CameraRepositionCurve( TEXT( "/Script/Engine.CurveFloat'/Locomotion/Data/Curves/CameraBlendCurves/CV_CameraReposition.CV_CameraReposition'" ) );
 	if ( IsValid( CameraRepositionCurve.Object ) && CameraRepositionCurve.Succeeded() )
 		RepositionCurve = CameraRepositionCurve.Object;
 	else

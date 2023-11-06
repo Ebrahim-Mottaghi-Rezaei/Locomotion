@@ -1,9 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
-#include "Components/SceneComponent.h"
 #include "LmHoldingObjectInterface.h"
+#include "Components/SceneComponent.h"
+#include "GameFramework/Actor.h"
 #include "LmHoldingObject.generated.h"
 
 UCLASS()
@@ -13,12 +13,12 @@ class LOCOMOTION_API ALmHoldingObject : public AActor, public ILmHoldingObjectIn
 public:
 	ALmHoldingObject();
 
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Locomotion")
-		USceneComponent* Root;
+	UPROPERTY( BlueprintReadOnly , EditDefaultsOnly , Category = "Locomotion" )
+	USceneComponent* Root;
 
 	void SetHoldingActor_Implementation(AActor* holdingActor) override;
 
 protected:
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere,Category="Locomotion|HoldingObjects")
-		AActor* HoldingActor;
+	UPROPERTY( BlueprintReadOnly , VisibleAnywhere , Category="Locomotion|HoldingObjects" )
+	AActor* HoldingActor;
 };

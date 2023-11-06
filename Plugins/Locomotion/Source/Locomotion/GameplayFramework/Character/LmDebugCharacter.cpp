@@ -15,8 +15,8 @@
 
 ALmDebugCharacter::ALmDebugCharacter() {
 	const auto    MeshComponent     = GetMesh();
-	const FString DefaultMeshPath   = FString( TEXT( "SkeletalMesh'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/Meshes/AnimMan.AnimMan'" ) );
-	const FString MannequinMeshPath = FString( TEXT( "SkeletalMesh'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/Meshes/Mannequin.Mannequin'" ) );
+	const FString DefaultMeshPath   = FString( TEXT( "/Script/Engine.SkeletalMesh'/Locomotion/Character/Meshes/AnimMan.AnimMan'" ) );
+	const FString MannequinMeshPath = FString( TEXT( "/Script/Engine.SkeletalMesh'/Locomotion/Character/Meshes/Mannequin.Mannequin'" ) );
 
 	const ConstructorHelpers::FObjectFinder<USkeletalMesh> DefaultMeshAsset( *DefaultMeshPath );
 	if ( DefaultMeshAsset.Succeeded() )

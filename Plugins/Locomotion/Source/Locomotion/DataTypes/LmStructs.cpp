@@ -7,6 +7,11 @@
 #include "Locomotion/Logging/LMLogger.h"
 
 
+FString FLmStruct::ToString(bool bPrintToLog) {
+	return {};
+}
+
+
 FLmComponentAndTransform::FLmComponentAndTransform() {
 	Component = nullptr;
 	Transform = FTransform();

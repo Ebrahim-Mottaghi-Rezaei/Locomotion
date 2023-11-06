@@ -23,7 +23,7 @@ ALmPlayerController::ALmPlayerController() {
 	bSlowMotion         = false;
 
 	SelectedLmCharacterIndex = 0;
-	static ConstructorHelpers::FObjectFinder<USoundWave> ClickSoundAsset( TEXT( "SoundWave'/Game/AdvancedLocomotionV4/Audio/UI/Click.Click'" ) );
+	static ConstructorHelpers::FObjectFinder<USoundWave> ClickSoundAsset( TEXT( "/Script/Engine.SoundWave'/Locomotion/Audio/UI/Click.Click'" ) );
 	if ( ClickSoundAsset.Succeeded() )
 		ClickSound = ClickSoundAsset.Object;
 	else

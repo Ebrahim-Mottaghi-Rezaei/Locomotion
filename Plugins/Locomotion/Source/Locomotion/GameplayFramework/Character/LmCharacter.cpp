@@ -9,7 +9,7 @@
 
 ALmCharacter::ALmCharacter() {
 	const auto MeshComponent = GetMesh();
-	if ( const ConstructorHelpers::FObjectFinder<USkeletalMesh> MannequinAsset( TEXT( "SkeletalMesh'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/Meshes/Mannequin.Mannequin'" ) ); MannequinAsset.
+	if ( const ConstructorHelpers::FObjectFinder<USkeletalMesh> MannequinAsset( TEXT( "/Script/Engine.SkeletalMesh'/Locomotion/Character/Meshes/Mannequin.Mannequin'" ) ); MannequinAsset.
 		Succeeded() )
 		MeshComponent->SetSkeletalMeshAsset( MannequinAsset.Object );
 	else
@@ -20,9 +20,9 @@ ALmCharacter::ALmCharacter() {
 
 	MeshComponent->bUpdateJointsFromAnimation = true;
 
-	const ConstructorHelpers::FObjectFinder<UDataTable> holdingObjects_dt( TEXT( "DataTable'/Locomotion/Data/DT_HoldingActorInstances.DT_HoldingActorInstances'" ) );
-	if ( holdingObjects_dt.Succeeded() ) {
-		DT_HoldingActors.DataTable = holdingObjects_dt.Object;
+	const ConstructorHelpers::FObjectFinder<UDataTable> HoldingObjectsDataTableAsset( TEXT( "DataTable'/Locomotion/Data/DT_HoldingActorInstances.DT_HoldingActorInstances'" ) );
+	if ( HoldingObjectsDataTableAsset.Succeeded() ) {
+		DT_HoldingActors.DataTable = HoldingObjectsDataTableAsset.Object;
 		DT_HoldingActors.RowName   = FName( "Empty" );
 	} else
 		ULmLogger::LogError( "Holding Objects DataTable not found." );
@@ -36,12 +36,12 @@ ALmCharacter::ALmCharacter() {
 	Mantle2mDefault.HighPlayRate      = 1.2f;
 	Mantle2mDefault.HighStartPosition = 0.0f;
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	Montage2MAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_N_Mantle_2m_Montage_Default.ALS_N_Mantle_2m_Montage_Default'" ) );
+	Montage2MAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_N_Mantle_2m_Montage_Default.ALS_N_Mantle_2m_Montage_Default'" ) );
 	if ( Montage2MAsset.Succeeded() )
 		Mantle2mDefault.AnimMontage = Montage2MAsset.Object;
 	else
 		ULmLogger::LogError( "Lm_N_Mantle_2m_Montage_Default not found." );
-	const ConstructorHelpers::FObjectFinder<UCurveVector> Curve2m( TEXT( "CurveVector'/Game/AdvancedLocomotionV4/Data/Curves/MantleCurves/Mantle_2m.Mantle_2m'" ) );
+	const ConstructorHelpers::FObjectFinder<UCurveVector> Curve2m( TEXT( "/Script/Engine.CurveVector'/Locomotion/Data/Curves/MantleCurves/Mantle_2m.Mantle_2m'" ) );
 	if ( Curve2m.Succeeded() )
 		Mantle2mDefault.PositionCorrectionCurve = Curve2m.Object;
 	else
@@ -56,7 +56,7 @@ ALmCharacter::ALmCharacter() {
 	Mantle1mDefault.HighPlayRate      = 1.0f;
 	Mantle1mDefault.HighStartPosition = 0.0f;
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	Montage1mAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_N_Mantle_1m_Montage_Default.ALS_N_Mantle_1m_Montage_Default'" ) );
+	Montage1mAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_N_Mantle_1m_Montage_Default.ALS_N_Mantle_1m_Montage_Default'" ) );
 	if ( Montage1mAsset.Succeeded() )
 		Mantle1mDefault.AnimMontage = Montage1mAsset.Object;
 	else
@@ -71,7 +71,7 @@ ALmCharacter::ALmCharacter() {
 	Mantle1mRH.HighPlayRate      = 1.0f;
 	Mantle1mRH.HighStartPosition = 0.0f;
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	Montage1mRHAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_N_Mantle_1m_Montage_RH.ALS_N_Mantle_1m_Montage_RH'" ) );
+	Montage1mRHAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_N_Mantle_1m_Montage_RH.ALS_N_Mantle_1m_Montage_RH'" ) );
 	if ( Montage1mRHAsset.Succeeded() )
 		Mantle1mRH.AnimMontage = Montage1mRHAsset.Object;
 	else
@@ -86,7 +86,7 @@ ALmCharacter::ALmCharacter() {
 	Mantle1mLH.HighPlayRate      = 1.0f;
 	Mantle1mLH.HighStartPosition = 0.0f;
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	Montage1mLHAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_N_Mantle_1m_Montage_LH.ALS_N_Mantle_1m_Montage_LH'" ) );
+	Montage1mLHAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_N_Mantle_1m_Montage_LH.ALS_N_Mantle_1m_Montage_LH'" ) );
 	if ( Montage1mLHAsset.Succeeded() )
 		Mantle1mLH.AnimMontage = Montage1mLHAsset.Object;
 	else
@@ -101,7 +101,7 @@ ALmCharacter::ALmCharacter() {
 	Mantle1m2H.HighPlayRate      = 1.0f;
 	Mantle1m2H.HighStartPosition = 0.0f;
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	Montage2HAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_N_Mantle_1m_Montage_2H.ALS_N_Mantle_1m_Montage_2H'" ) );
+	Montage2HAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_N_Mantle_1m_Montage_2H.ALS_N_Mantle_1m_Montage_2H'" ) );
 	if ( Montage2HAsset.Succeeded() )
 		Mantle1m2H.AnimMontage = Montage2HAsset.Object;
 	else
@@ -116,14 +116,14 @@ ALmCharacter::ALmCharacter() {
 	Mantle1mBox.HighPlayRate      = 1.0f;
 	Mantle1mBox.HighStartPosition = 0.0f;
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	Montage1mBoxAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_N_Mantle_1m_Montage_Box.ALS_N_Mantle_1m_Montage_Box'" ) );
+	Montage1mBoxAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_N_Mantle_1m_Montage_Box.ALS_N_Mantle_1m_Montage_Box'" ) );
 	if ( Montage1mBoxAsset.Succeeded() )
 		Mantle1mBox.AnimMontage = Montage1mBoxAsset.Object;
 	else
 		ULmLogger::LogError( "Lm_N_Mantle_1m_Montage_Box not found." );
 
 	//Setting up 1m Mantle Curve
-	const ConstructorHelpers::FObjectFinder<UCurveVector> Curve1m( TEXT( "CurveVector'/Game/AdvancedLocomotionV4/Data/Curves/MantleCurves/Mantle_1m.Mantle_1m'" ) );
+	const ConstructorHelpers::FObjectFinder<UCurveVector> Curve1m( TEXT( "/Script/Engine.CurveVector'/Locomotion/Data/Curves/MantleCurves/Mantle_1m.Mantle_1m'" ) );
 	if ( Curve1m.Succeeded() ) {
 		Mantle1mDefault.PositionCorrectionCurve = Curve1m.Object;
 		Mantle1mRH.PositionCorrectionCurve      = Curve1m.Object;
@@ -136,28 +136,28 @@ ALmCharacter::ALmCharacter() {
 
 #pragma region Setting Up Land Roll
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	LandRollDefaultAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_N_LandRoll_F_Montage_Default.ALS_N_LandRoll_F_Montage_Default'" ) );
+	LandRollDefaultAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_N_LandRoll_F_Montage_Default.ALS_N_LandRoll_F_Montage_Default'" ) );
 	if ( LandRollDefaultAsset.Succeeded() )
 		LandRoll_Default = LandRollDefaultAsset.Object;
 	else
 		ULmLogger::LogError( "Lm_N_LandRoll_F_Montage_Default not found." );
 
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	LandRollRHAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_N_LandRoll_F_Montage_RH.ALS_N_LandRoll_F_Montage_RH'" ) );
+	LandRollRHAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_N_LandRoll_F_Montage_RH.ALS_N_LandRoll_F_Montage_RH'" ) );
 	if ( LandRollRHAsset.Succeeded() )
 		LandRoll_RH = LandRollRHAsset.Object;
 	else
 		ULmLogger::LogError( "Lm_N_LandRoll_F_Montage_RH not found." );
 
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	LandRollLHAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_N_LandRoll_F_Montage_LH.ALS_N_LandRoll_F_Montage_LH'" ) );
+	LandRollLHAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_N_LandRoll_F_Montage_LH.ALS_N_LandRoll_F_Montage_LH'" ) );
 	if ( LandRollLHAsset.Succeeded() )
 		LandRoll_LH = LandRollLHAsset.Object;
 	else
 		ULmLogger::LogError( "Lm_N_LandRoll_F_Montage_LH not found." );
 
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	LandRoll2HAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_N_LandRoll_F_Montage_2H.ALS_N_LandRoll_F_Montage_2H'" ) );
+	LandRoll2HAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_N_LandRoll_F_Montage_2H.ALS_N_LandRoll_F_Montage_2H'" ) );
 	if ( LandRoll2HAsset.Succeeded() )
 		LandRoll_2H = LandRoll2HAsset.Object;
 	else
@@ -167,28 +167,28 @@ ALmCharacter::ALmCharacter() {
 #pragma region Getup Montages
 	//Front
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	GetupFrontDefaultAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_CLF_GetUp_Front_Montage_Default.ALS_CLF_GetUp_Front_Montage_Default'" ) );
+	GetupFrontDefaultAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_CLF_GetUp_Front_Montage_Default.ALS_CLF_GetUp_Front_Montage_Default'" ) );
 	if ( GetupFrontDefaultAsset.Succeeded() )
 		GetupFront_Default = GetupFrontDefaultAsset.Object;
 	else
 		ULmLogger::LogError( "Lm_CLF_GetUp_Front_Montage_Default not found." );
 
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	GetupFrontRHAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_CLF_GetUp_Front_Montage_RH.ALS_CLF_GetUp_Front_Montage_RH'" ) );
+	GetupFrontRHAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_CLF_GetUp_Front_Montage_RH.ALS_CLF_GetUp_Front_Montage_RH'" ) );
 	if ( GetupFrontRHAsset.Succeeded() )
 		GetupFront_RH = GetupFrontRHAsset.Object;
 	else
 		ULmLogger::LogError( "Lm_CLF_GetUp_Front_Montage_RH not found." );
 
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	GetupFrontLHAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_CLF_GetUp_Front_Montage_LH.ALS_CLF_GetUp_Front_Montage_LH'" ) );
+	GetupFrontLHAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_CLF_GetUp_Front_Montage_LH.ALS_CLF_GetUp_Front_Montage_LH'" ) );
 	if ( GetupFrontLHAsset.Succeeded() )
 		GetupFront_LH = GetupFrontLHAsset.Object;
 	else
 		ULmLogger::LogError( "Lm_CLF_GetUp_Front_Montage_LH not found." );
 
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	GetupFront2HAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_CLF_GetUp_Front_Montage_2H.ALS_CLF_GetUp_Front_Montage_2H'" ) );
+	GetupFront2HAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_CLF_GetUp_Front_Montage_2H.ALS_CLF_GetUp_Front_Montage_2H'" ) );
 	if ( GetupFront2HAsset.Succeeded() )
 		GetupFront_2H = GetupFront2HAsset.Object;
 	else
@@ -196,32 +196,32 @@ ALmCharacter::ALmCharacter() {
 
 	//Back
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	GetupBackDefaultAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_CLF_GetUp_Back_Montage_Default.ALS_CLF_GetUp_Back_Montage_Default'" ) );
+	GetupBackDefaultAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_CLF_GetUp_Back_Montage_Default.ALS_CLF_GetUp_Back_Montage_Default'" ) );
 	if ( GetupBackDefaultAsset.Succeeded() )
 		GetupBack_Default = GetupBackDefaultAsset.Object;
 	else
 		ULmLogger::LogError( "Lm_CLF_GetUp_Back_Montage_Default not found." );
 
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	GetupBackRHAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_CLF_GetUp_Back_Montage_RH.ALS_CLF_GetUp_Back_Montage_RH'" ) );
+	GetupBackRHAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_CLF_GetUp_Back_Montage_RH.ALS_CLF_GetUp_Back_Montage_RH'" ) );
 	if ( GetupBackRHAsset.Succeeded() )
 		GetupBack_RH = GetupBackRHAsset.Object;
 	else
 		ULmLogger::LogError( "Lm_CLF_GetUp_Back_Montage_RH not found." );
 
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	GetupBackLHAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_CLF_GetUp_Back_Montage_LH.ALS_CLF_GetUp_Back_Montage_LH'" ) );
+	GetupBackLHAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_CLF_GetUp_Back_Montage_LH.ALS_CLF_GetUp_Back_Montage_LH'" ) );
 	if ( GetupBackLHAsset.Succeeded() )
 		GetupBack_LH = GetupBackLHAsset.Object;
 	else
 		ULmLogger::LogError( "Lm_CLF_GetUp_Back_Montage_LH not found." );
 
 	const ConstructorHelpers::FObjectFinder<UAnimMontage>
-	GetupBack2HAsset( TEXT( "AnimMontage'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/AnimationExamples/Actions/ALS_CLF_GetUp_Back_Montage_2H.ALS_CLF_GetUp_Back_Montage_2H'" ) );
+	GetupBack2HAsset( TEXT( "/Script/Engine.AnimMontage'/Locomotion/Character/AnimationExamples/Actions/ALS_CLF_GetUp_Back_Montage_2H.ALS_CLF_GetUp_Back_Montage_2H'" ) );
 	if ( GetupBack2HAsset.Succeeded() )
 		GetupBack_2H = GetupBack2HAsset.Object;
 	else
-		ULmLogger::LogError( "Lm_CLF_GetUp_Back_Montage_LH not found." );
+		ULmLogger::LogError( "ALS_CLF_GetUp_Back_Montage_2H not found." );
 #pragma endregion
 }
 

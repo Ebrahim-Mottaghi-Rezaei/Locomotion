@@ -37,7 +37,7 @@ ALmBaseCharacter::ALmBaseCharacter() {
 	const auto mesh = GetMesh();
 	mesh->SetWorldLocation( FVector( 0.0f , 0.0f , -92.0f ) );
 	mesh->SetWorldRotation( FRotator( 0.0f , -90.0f , 0.0f ) );
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> proxyMesh( TEXT( "SkeletalMesh'/Game/AdvancedLocomotionV4/CharacterAssets/MannequinSkeleton/Meshes/Proxy.Proxy'" ) );
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> proxyMesh( TEXT( "/Script/Engine.SkeletalMesh'/Locomotion/Character/Meshes/Proxy.Proxy'" ) );
 	if ( proxyMesh.Succeeded() )
 		mesh->SetSkeletalMesh( proxyMesh.Object );
 	else
@@ -74,15 +74,6 @@ ALmBaseCharacter::ALmBaseCharacter() {
 	} else
 		ULmLogger::LogError( "MovementModelTable not found." );
 
-	CurrentMovementSettings.WalkSpeed   = 165.0f;
-	CurrentMovementSettings.RunSpeed    = 350.0f;
-	CurrentMovementSettings.SprintSpeed = 600.0f;
-	static ConstructorHelpers::FObjectFinder<UCurveVector> NormalMovementCurve( TEXT( "CurveVector'/Game/AdvancedLocomotionV4/Data/Curves/CharacterMovementCurves/NormalMovement.NormalMovement'" ) );
-	if ( MovementDataModel.Succeeded() ) {
-		CurrentMovementSettings.MovementCurve = NormalMovementCurve.Object;
-	} else
-		ULmLogger::LogError( "Normal Movement Curve not found." );
-
 	GroundedTraceSettings.MaxLedgeHeight      = 250.0f;
 	GroundedTraceSettings.MinLedgeHeight      = 50.0f;
 	GroundedTraceSettings.ReachDistance       = 75.0f;
@@ -104,25 +95,25 @@ ALmBaseCharacter::ALmBaseCharacter() {
 	CurrentMovementSettings.WalkSpeed   = 165.0;
 	CurrentMovementSettings.RunSpeed    = 350.0;
 	CurrentMovementSettings.SprintSpeed = 600.0;
-	static ConstructorHelpers::FObjectFinder<UCurveVector> MovementCurve( TEXT( "CurveVector'/Game/AdvancedLocomotionV4/Data/Curves/CharacterMovementCurves/NormalMovement.NormalMovement'" ) );
+	static ConstructorHelpers::FObjectFinder<UCurveVector> MovementCurve( TEXT( "/Script/Engine.CurveVector'/Locomotion/Data/Curves/CharacterMovementCurves/NormalMovement.NormalMovement'" ) );
 	if ( MovementCurve.Succeeded() )
 		CurrentMovementSettings.MovementCurve = MovementCurve.Object;
 	else
 		ULmLogger::LogError( "Mantle_1m not found." );
 
-	static ConstructorHelpers::FObjectFinder<UCurveVector> HighMantleCurveAsset( TEXT( "CurveVector'/Game/AdvancedLocomotionV4/Data/Curves/MantleCurves/Mantle_1m.Mantle_1m'" ) );
+	static ConstructorHelpers::FObjectFinder<UCurveVector> HighMantleCurveAsset( TEXT( "/Script/Engine.CurveVector'/Locomotion/Data/Curves/MantleCurves/Mantle_1m.Mantle_1m'" ) );
 	if ( HighMantleCurveAsset.Succeeded() )
 		HighMantle = HighMantleCurveAsset.Object;
 	else
 		ULmLogger::LogError( "Mantle_1m not found." );
 
-	static ConstructorHelpers::FObjectFinder<UCurveVector> LowMantleCurveAsset( TEXT( "CurveVector'/Game/AdvancedLocomotionV4/Data/Curves/MantleCurves/Mantle_2m.Mantle_2m'" ) );
+	static ConstructorHelpers::FObjectFinder<UCurveVector> LowMantleCurveAsset( TEXT( "/Script/Engine.CurveVector'/Locomotion/Data/Curves/MantleCurves/Mantle_2m.Mantle_2m'" ) );
 	if ( LowMantleCurveAsset.Succeeded() )
 		LowMantle = LowMantleCurveAsset.Object;
 	else
 		ULmLogger::LogError( "Mantle_2m not found." );
 
-	static ConstructorHelpers::FObjectFinder<UCurveFloat> MantleTimelineCurveAsset( TEXT( "CurveFloat'/Locomotion/Curves/CV_MantleTimeline.CV_MantleTimeline'" ) );
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> MantleTimelineCurveAsset( TEXT( "/Script/Engine.CurveFloat'/Locomotion/Data/Curves/MantleCurves/CV_MantleTimeline.CV_MantleTimeline'" ) );
 	if ( MantleTimelineCurveAsset.Succeeded() )
 		MantleTimelineCurve = MantleTimelineCurveAsset.Object;
 	else
