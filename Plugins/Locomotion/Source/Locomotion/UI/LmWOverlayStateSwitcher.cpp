@@ -1,88 +1,91 @@
 #include "LmWOverlayStateSwitcher.h"
-#include "../LmEnums.h"
-#include "LmWOverlayStateButton.h"
-#include "../Gameplay/LmCameraInterface.h"
-#include "../Gameplay/LmCharacterInterface.h"
-
-#include <Misc/EnumRange.h>
 #include <Blueprint/UserWidget.h>
-#include <Components/TextBlock.h>
-#include <UObject/NoExportTypes.h>
-#include <GameFramework/Character.h>
 #include <Components/CanvasPanelSlot.h>
+#include <Components/TextBlock.h>
+#include <GameFramework/Character.h>
+#include <Misc/EnumRange.h>
+#include "LmWOverlayStateButton.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
+#include "Locomotion/GameplayFramework/Camera/Interfaces/LmCameraInterface.h"
+#include "Locomotion/GameplayFramework/Character/Interfaces/LmCharacterInterface.h"
+
 
 void ULmWOverlayStateSwitcher::NativeOnInitialized() {
-	for (const ELmOverlayState value : TEnumRange<ELmOverlayState>())
-		OverlayStates.Add(value);
+	for ( const ELmOverlayState Value : TEnumRange<ELmOverlayState>() )
+		OverlayStates.Add( Value );
 }
+
 
 void ULmWOverlayStateSwitcher::NativeConstruct() {
 	Super::NativeConstruct();
 
 	auto* Character = GetOwningPlayer()->GetCharacter();
-	if (Character->GetClass()->ImplementsInterface(ULmCharacterInterface::StaticClass())) {
-		NewOverlayState = ILmCharacterInterface::Execute_GetCurrentState(Character).OverlayState;
+	if ( Character->GetClass()->ImplementsInterface( ULmCharacterInterface::StaticClass() ) ) {
+		NewOverlayState = ILmCharacterInterface::Execute_GetCurrentState( Character ).OverlayState;
 
-		if (VerticalBox->GetChildrenCount() == 0)
+		if ( VerticalBox->GetChildrenCount() == 0 )
 			CreateButtons();
 
 		UpdateButtonFocus();
 	}
 }
 
+
 void ULmWOverlayStateSwitcher::NativeTick(const FGeometry& MovieSceneBlends, const float InDeltaTime) {
-	Super::NativeTick(MovieSceneBlends, InDeltaTime);
+	Super::NativeTick( MovieSceneBlends , InDeltaTime );
 
 	//local player controller
-	const auto pc = GetOwningPlayer()->GetPawn();
+	const auto PC = GetOwningPlayer()->GetPawn();
 
-	if (pc->GetClass()->ImplementsInterface(ULmCameraInterface::StaticClass())) {
-		const FTransform transform = ILmCameraInterface::Execute_Get3PPivotTarget(pc);
+	if ( PC->GetClass()->ImplementsInterface( ULmCameraInterface::StaticClass() ) ) {
+		const FTransform Transform = ILmCameraInterface::Execute_Get3PPivotTarget( PC );
 
-		FVector2D screenpos;
-		UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(GetOwningPlayer(), transform.GetLocation() + FVector(0, 0, 100), screenpos, false);
-		UWidgetLayoutLibrary::SlotAsCanvasSlot(MovablePanels)->SetPosition(screenpos);
+		FVector2D ScreenPosition;
+		UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition( GetOwningPlayer() , Transform.GetLocation() + FVector( 0 , 0 , 100 ) , ScreenPosition , false );
+		UWidgetLayoutLibrary::SlotAsCanvasSlot( MovablePanels )->SetPosition( ScreenPosition );
 	}
 }
+
 
 void ULmWOverlayStateSwitcher::SelectOverlayState() const {
-	auto* character = GetOwningPlayer()->GetCharacter();
-	if (character->GetClass()->ImplementsInterface(ULmCharacterInterface::StaticClass())) {
-		ILmCharacterInterface::Execute_SetOverlayState(character, NewOverlayState);
+	auto* Character = GetOwningPlayer()->GetCharacter();
+	if ( Character->GetClass()->ImplementsInterface( ULmCharacterInterface::StaticClass() ) ) {
+		ILmCharacterInterface::Execute_SetOverlayState( Character , NewOverlayState );
 	}
 }
+
 
 void ULmWOverlayStateSwitcher::CreateButtons() {
 	//Lm_Barrel is the last element in the ELmOverlayState enum. if any other states added
-	for ( const ELmOverlayState value : TEnumRange<ELmOverlayState>()) {
-		const auto button = static_cast<ULmWOverlayStateButton*>(CreateWidget(GetOwningPlayer(), OverlayStateButtonTemplate));
-		button->GetText()->SetText(FText::FromString(UEnum::GetDisplayValueAsText(value).ToString()));
-		VerticalBox->AddChildToVerticalBox(button);
-		OverlayStateButtons.Add(FLmOverlayStateParams(button, value));
+	for ( const ELmOverlayState value : TEnumRange<ELmOverlayState>() ) {
+		const auto button = static_cast<ULmWOverlayStateButton*>(CreateWidget( GetOwningPlayer() , OverlayStateButtonTemplate ));
+		button->GetText()->SetText( FText::FromString( UEnum::GetDisplayValueAsText( value ).ToString() ) );
+		VerticalBox->AddChildToVerticalBox( button );
+		OverlayStateButtons.Add( FLmOverlayStateParams( button , value ) );
 	}
 }
+
 
 void ULmWOverlayStateSwitcher::UpdateButtonFocus() {
-	for (const auto element : OverlayStateButtons) {
-		if (IsValid(element.Widget)) {
-			element.Widget->SetVisualParameters(element.State == NewOverlayState);
-		}
-	}
+	for ( const auto Element : OverlayStateButtons )
+		if ( IsValid( Element.Widget ) )
+			Element.Widget->SetVisualParameters( Element.State == NewOverlayState );
 }
 
-void ULmWOverlayStateSwitcher::SetUIElements(UCanvasPanel* movablePanel, UVerticalBox* verticalBox) {
-	MovablePanels = movablePanel;
-	VerticalBox = verticalBox;
+
+void ULmWOverlayStateSwitcher::SetUIElements(UCanvasPanel* MovablePanel, UVerticalBox* VBox) {
+	MovablePanels = MovablePanel;
+	VerticalBox   = VBox;
 }
+
 
 void ULmWOverlayStateSwitcher::CycleState(const bool bUp) {
-	if (bUp)
-		selectedIndex = selectedIndex + 1 < OverlayStates.Num() ? selectedIndex + 1 : 0;
+	if ( bUp )
+		SelectedIndex = SelectedIndex + 1 < OverlayStates.Num() ? SelectedIndex + 1 : 0;
 	else
-		selectedIndex = selectedIndex - 1 >= 0 ? selectedIndex - 1 : OverlayStates.Num() - 1;
+		SelectedIndex = SelectedIndex - 1 >= 0 ? SelectedIndex - 1 : OverlayStates.Num() - 1;
 
-	NewOverlayState = OverlayStates[selectedIndex];
+	NewOverlayState = OverlayStates[SelectedIndex];
 
 	UpdateButtonFocus();
 }
