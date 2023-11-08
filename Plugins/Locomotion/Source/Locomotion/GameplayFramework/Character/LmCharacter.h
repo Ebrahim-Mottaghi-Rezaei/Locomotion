@@ -16,7 +16,7 @@ protected:
 	UChildActorComponent* HoldingObject;
 
 	UPROPERTY( BlueprintReadWrite , EditDefaultsOnly , Category = "Locomotion" )
-	FDataTableRowHandle DT_HoldingActors;
+	FDataTableRowHandle HoldingActorsDataTable;
 
 	UPROPERTY( BlueprintReadWrite , EditDefaultsOnly , Category = "Locomotion|Mantle" )
 	FLmMantleAsset Mantle2mDefault;
@@ -70,7 +70,7 @@ protected:
 	virtual void AttachToHand(const FLmHoldingInstance NewHoldingObject);
 
 	UFUNCTION( BlueprintCallable , Category = "Locomotion|State Changes" )
-	virtual void OnOverlayStateChanged(ELmOverlayState NewOverlayState) override;
+	virtual void SetOverlayState_Implementation(ELmOverlayState NewOverlayState) override;
 
 	virtual FTransform Get3PPivotTarget_Implementation() override;
 

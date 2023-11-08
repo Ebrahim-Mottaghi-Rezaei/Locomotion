@@ -35,6 +35,11 @@ void ILmCharacterInterface::SetGait_Implementation(ELmGait NewGait) {
 }
 
 
+void ILmCharacterInterface::SetStance_Implementation(ELmStance NewStance) {
+	ULmLogger::LogError( TEXT( "Invalid interface method calling. ILmCharacterInterface::SetStance_Implementation" ) );
+}
+
+
 void ILmCharacterInterface::SetRotationMode_Implementation(ELmRotationMode NewRotationMode) {
 	ULmLogger::LogError( TEXT( "Invalid interface method calling. ILmCharacterInterface::SetRotationMode_Implementations" ) );
 }

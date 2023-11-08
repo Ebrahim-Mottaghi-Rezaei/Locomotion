@@ -16,7 +16,7 @@ ULmMovementAction::ULmMovementAction() {
 
 void ULmMovementAction::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference) {
 	Super::NotifyBegin( MeshComp , Animation , TotalDuration , EventReference );
-	if ( !IsValid( MeshComp ) || !IsValid( MeshComp->GetOwner() ) || !MeshComp->GetAnimInstance()->GetClass()->ImplementsInterface( ULmCharacterInterface::StaticClass() ) )
+	if ( !IsValid( MeshComp ) || !IsValid( MeshComp->GetOwner() ) || !MeshComp->GetOwner()->GetClass()->ImplementsInterface( ULmCharacterInterface::StaticClass() ) )
 		return;
 
 	ILmCharacterInterface::Execute_SetMovementAction( MeshComp->GetOwner() , MovementAction );
@@ -26,7 +26,7 @@ void ULmMovementAction::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSeque
 void ULmMovementAction::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) {
 	Super::NotifyEnd( MeshComp , Animation , EventReference );
 
-	if ( !IsValid( MeshComp ) || !IsValid( MeshComp->GetOwner() ) || !MeshComp->GetAnimInstance()->GetClass()->ImplementsInterface( ULmCharacterInterface::StaticClass() ) )
+	if ( !IsValid( MeshComp ) || !IsValid( MeshComp->GetOwner() ) || !MeshComp->GetOwner()->GetClass()->ImplementsInterface( ULmCharacterInterface::StaticClass() ) )
 		return;
 
 	const auto MeshOwner = MeshComp->GetOwner();

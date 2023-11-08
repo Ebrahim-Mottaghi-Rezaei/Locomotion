@@ -6,8 +6,10 @@ ALmHoldingObject::ALmHoldingObject() {
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	Root = CreateDefaultSubobject<USceneComponent>( FName( TEXT( "Root" ) ) );
+
 	Root->AttachToComponent( RootComponent , FAttachmentTransformRules::KeepRelativeTransform );
 	Root->SetComponentTickEnabled( false );
+	RootComponent = Root;
 }
 
 

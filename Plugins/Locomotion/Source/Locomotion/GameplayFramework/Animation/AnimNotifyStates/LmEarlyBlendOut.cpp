@@ -19,7 +19,7 @@ void ULmEarlyBlendOut::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenc
 	const auto OwningActor  = MeshComp->GetOwner();
 	const auto AnimInstance = MeshComp->GetAnimInstance();
 
-	if ( !IsValid( OwningActor ) || !IsValid( AnimInstance ) || !MeshComp->GetAnimInstance()->GetClass()->ImplementsInterface( ULmCharacterInterface::StaticClass() ) )
+	if ( !IsValid( OwningActor ) || !IsValid( AnimInstance ) || !OwningActor->GetClass()->ImplementsInterface( ULmCharacterInterface::StaticClass() ) )
 		return;
 
 	const auto CurrentState    = ILmCharacterInterface::Execute_GetCurrentState( OwningActor );

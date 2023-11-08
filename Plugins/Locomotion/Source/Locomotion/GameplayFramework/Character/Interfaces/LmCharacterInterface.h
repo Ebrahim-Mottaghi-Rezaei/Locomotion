@@ -37,6 +37,11 @@ public:
 	virtual void SetMovementAction_Implementation(ELmMovementAction NewMovementAction);
 
 	UFUNCTION( BlueprintCallable , BlueprintNativeEvent , Category = "Locomotion" )
+	void SetStance(ELmStance NewStance);
+
+	virtual void SetStance_Implementation(ELmStance NewStance);
+
+	UFUNCTION( BlueprintCallable , BlueprintNativeEvent , Category = "Locomotion" )
 	void SetRotationMode(ELmRotationMode NewRotationMode);
 
 	virtual void SetRotationMode_Implementation(ELmRotationMode NewRotationMode);

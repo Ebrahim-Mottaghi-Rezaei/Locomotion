@@ -151,10 +151,11 @@ void ALmBaseCharacter::BeginPlay() {
 	SetMovementModel();
 
 	//Update states to use the initial desired values.
-	OnGaitChanged( DesiredGait );
-	OnRotationModeChanged( DesiredRotationMode );
-	OnViewModeChanged( ViewMode );
-	OnOverlayStateChanged( OverlayState );
+	SetGait( DesiredGait );
+	SetRotationMode( DesiredRotationMode );
+	SetViewMode( ViewMode );
+	SetOverlayState( OverlayState );
+
 	if ( DesiredStance == ELmStance::Lm_Standing ) {
 		UnCrouch();
 	} else {
@@ -287,14 +288,14 @@ void ALmBaseCharacter::OnMovementModeChanged(const EMovementMode PrevMovementMod
 void ALmBaseCharacter::OnStartCrouch(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust) {
 	Super::OnStartCrouch( HalfHeightAdjust , ScaledHalfHeightAdjust );
 
-	OnStanceChanged( ELmStance::Lm_Crouching );
+	SetStance( ELmStance::Lm_Crouching );
 }
 
 
 void ALmBaseCharacter::OnEndCrouch(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust) {
 	Super::OnEndCrouch( HalfHeightAdjust , ScaledHalfHeightAdjust );
 
-	OnStanceChanged( ELmStance::Lm_Standing );
+	SetStance( ELmStance::Lm_Standing );
 }
 
 
@@ -422,9 +423,18 @@ void ALmBaseCharacter::PlayerCameraPitchInput(const float Value) {
 
 
 void ALmBaseCharacter::StartJumping() {
+	if ( MovementAction != ELmMovementAction::Lm_None || MovementState == ELmMovementState::Lm_Mantling )
+		return;
+
+	if ( MovementState == ELmMovementState::Lm_Ragdoll ) {
+		RagdollEnd();
+		return;
+	}
+
 	if ( MovementState == ELmMovementState::Lm_Grounded ) {
 		if ( bHasMovementInput ) {
 			const bool MantleCheckResult = MantleCheck( GroundedTraceSettings , EDrawDebugTrace::ForDuration );
+
 			if ( !MantleCheckResult ) {
 				if ( Stance == ELmStance::Lm_Standing )
 					Jump();
@@ -591,108 +601,11 @@ FVector ALmBaseCharacter::CalculateAcceleration() {
 void ALmBaseCharacter::OnCharacterMovementModeChanged(const EMovementMode PrevMovementMode, const EMovementMode NewMovementMode, const uint8 PrevCustomMode, uint8 NewCustomMode) {
 	Super::OnMovementModeChanged( PrevMovementMode , PrevCustomMode );
 
-	if ( this->GetClass()->ImplementsInterface( ULmCharacterInterface::StaticClass() ) )
-		if ( NewMovementMode == MOVE_Walking || NewMovementMode == MOVE_NavWalking ) {
-			SetMovementState( ELmMovementState::Lm_Grounded );
-		} else if ( NewMovementMode == MOVE_Falling ) {
-			SetMovementState( ELmMovementState::Lm_InAir );
-		}
-}
-
-
-void ALmBaseCharacter::OnMovementStateChanged(const ELmMovementState NewMovementState) {
-	if ( NewMovementState == MovementState ) {
-		return;
+	if ( NewMovementMode == MOVE_Walking || NewMovementMode == MOVE_NavWalking ) {
+		SetMovementState( ELmMovementState::Lm_Grounded );
+	} else if ( NewMovementMode == MOVE_Falling ) {
+		SetMovementState( ELmMovementState::Lm_InAir );
 	}
-
-	PrevMovementState = MovementState;
-	MovementState     = NewMovementState;
-
-	if ( MovementState == ELmMovementState::Lm_InAir ) {
-		//If the character enters the air, set the In Air Rotation and uncrouch if crouched. If the character is currently rolling, enable the Ragdoll.
-		if ( MovementAction == ELmMovementAction::Lm_None ) {
-			InAirRotation = GetActorRotation();
-			if ( Stance == ELmStance::Lm_Crouching )
-				UnCrouch();
-		} else if ( MovementAction == ELmMovementAction::Lm_Rolling ) {
-			RagdollStart();
-		}
-	} else if ( MovementState == ELmMovementState::Lm_Ragdoll ) {
-		//Stop the Mantle Timeline if transitioning to the Ragdoll state while mantling.
-		if ( PrevMovementState == ELmMovementState::Lm_Mantling )
-			MantleTimeline->Stop();
-	}
-}
-
-
-void ALmBaseCharacter::OnMovementActionChanged(const ELmMovementAction NewMovementAction) {
-	if ( NewMovementAction == MovementAction ) {
-		return;
-	}
-
-	PrevMovementAction = MovementAction;
-	MovementAction     = NewMovementAction;
-	//Make the character crouch if performing a roll.
-	if ( MovementAction == ELmMovementAction::Lm_Rolling ) {
-		Crouch();
-	}
-
-	//Upon ending a roll, reset the stance back to its desired value.
-	if ( PrevMovementAction == ELmMovementAction::Lm_Rolling ) {
-		DesiredStance == ELmStance::Lm_Standing ? UnCrouch() : Crouch();
-	}
-}
-
-
-void ALmBaseCharacter::OnStanceChanged(const ELmStance NewStance) {
-	prevStance = Stance;
-	Stance     = NewStance;
-}
-
-
-void ALmBaseCharacter::OnRotationModeChanged(const ELmRotationMode NewRotationMode) {
-	prevRotationMode = RotationMode;
-	RotationMode     = NewRotationMode;
-
-	if ( RotationMode == ELmRotationMode::Lm_VelocityDirection && ViewMode == ELmViewMode::Lm_FPS ) {
-		if ( this->GetClass()->ImplementsInterface( ULmCharacterInterface::StaticClass() ) ) {
-			SetViewMode( ELmViewMode::Lm_TPS );
-		}
-	}
-}
-
-
-void ALmBaseCharacter::OnGaitChanged(const ELmGait NewActualGait) {
-	prevGait = Gait;
-	Gait     = NewActualGait;
-}
-
-
-void ALmBaseCharacter::OnViewModeChanged(const ELmViewMode NewViewMode) {
-	prevViewMode = ViewMode;
-	ViewMode     = NewViewMode;
-
-	if ( ViewMode == ELmViewMode::Lm_TPS ) {
-		//If Third Person, set the rotation mode back to the desired mode.
-		if ( RotationMode != ELmRotationMode::Lm_Aiming ) {
-			if ( this->GetClass()->ImplementsInterface( ULmCharacterInterface::StaticClass() ) ) {
-				SetRotationMode( DesiredRotationMode );
-			}
-		}
-	} else {
-		//If First Person, set the rotation mode to looking direction if currently in the velocity direction mode.
-		if ( RotationMode == ELmRotationMode::Lm_VelocityDirection ) {
-			if ( this->GetClass()->ImplementsInterface( ULmCharacterInterface::StaticClass() ) ) {
-				SetRotationMode( ELmRotationMode::Lm_LookingDirection );
-			}
-		}
-	}
-}
-
-
-void ALmBaseCharacter::OnOverlayStateChanged(const ELmOverlayState NewOverlayState) {
-	prevOverlayState = OverlayState;
-	OverlayState     = NewOverlayState;
 }
 
 
@@ -1352,44 +1265,106 @@ void ALmBaseCharacter::Roll() {
 
 
 void ALmBaseCharacter::SetMovementState_Implementation(const ELmMovementState NewMovementState) {
-	if ( NewMovementState != MovementState ) {
-		OnMovementStateChanged( NewMovementState );
+	if ( NewMovementState == MovementState )
+		return;
+
+	PrevMovementState = MovementState;
+	MovementState     = NewMovementState;
+
+	if ( MovementState == ELmMovementState::Lm_InAir ) {
+		//If the character enters the air, set the In Air Rotation and uncrouch if crouched. If the character is currently rolling, enable the Ragdoll.
+		if ( MovementAction == ELmMovementAction::Lm_None ) {
+			InAirRotation = GetActorRotation();
+			if ( Stance == ELmStance::Lm_Crouching )
+				UnCrouch();
+		} else if ( MovementAction == ELmMovementAction::Lm_Rolling ) {
+			RagdollStart();
+		}
+	} else if ( MovementState == ELmMovementState::Lm_Ragdoll ) {
+		//Stop the Mantle Timeline if transitioning to the Ragdoll state while mantling.
+		if ( PrevMovementState == ELmMovementState::Lm_Mantling )
+			MantleTimeline->Stop();
 	}
+
+	OnMovementStateChanged.Broadcast( MovementState );
 }
 
 
 void ALmBaseCharacter::SetMovementAction_Implementation(const ELmMovementAction NewMovementAction) {
-	if ( NewMovementAction != MovementAction ) {
-		OnMovementActionChanged( NewMovementAction );
-	}
+	if ( NewMovementAction == MovementAction )
+		return;
+
+	//Make the character crouch if performing a roll.
+	if ( MovementAction == ELmMovementAction::Lm_Rolling )
+		Crouch();
+
+	//Upon ending a roll, reset the stance back to its desired value.
+	if ( MovementAction == ELmMovementAction::Lm_Rolling )
+		DesiredStance == ELmStance::Lm_Standing ? UnCrouch() : Crouch();
+
+	MovementAction = NewMovementAction;
+	OnMovementActionChanged.Broadcast( MovementAction );
+}
+
+
+void ALmBaseCharacter::SetStance_Implementation(ELmStance NewStance) {
+	if ( Stance == NewStance )
+		return;
+
+	Stance = NewStance;
+	OnStanceChanged.Broadcast( Stance );
 }
 
 
 void ALmBaseCharacter::SetRotationMode_Implementation(const ELmRotationMode NewRotationMode) {
-	if ( NewRotationMode != RotationMode ) {
-		OnRotationModeChanged( NewRotationMode );
-	}
+	if ( NewRotationMode == RotationMode )
+		return;
+
+	RotationMode = NewRotationMode;
+
+	if ( RotationMode == ELmRotationMode::Lm_VelocityDirection && ViewMode == ELmViewMode::Lm_FPS )
+		SetViewMode( ELmViewMode::Lm_TPS );
+
+	OnRotationModeChanged.Broadcast( RotationMode );
 }
 
 
 void ALmBaseCharacter::SetGait_Implementation(const ELmGait NewGait) {
-	if ( NewGait != Gait ) {
-		OnGaitChanged( NewGait );
-	}
+	if ( NewGait == Gait )
+		return;
+
+	Gait = NewGait;
+
+	OnGaitChanged.Broadcast( Gait );
 }
 
 
 void ALmBaseCharacter::SetViewMode_Implementation(const ELmViewMode NewViewMode) {
-	if ( NewViewMode != ViewMode ) {
-		OnViewModeChanged( NewViewMode );
+	if ( NewViewMode == ViewMode )
+		return;
+
+	ViewMode = NewViewMode;
+
+	if ( ViewMode == ELmViewMode::Lm_TPS ) {
+		//If Third Person, set the rotation mode back to the desired mode.
+		if ( RotationMode != ELmRotationMode::Lm_Aiming )
+			SetRotationMode( DesiredRotationMode );
+	} else {
+		//If First Person, set the rotation mode to looking direction if currently in the velocity direction mode.
+		if ( RotationMode == ELmRotationMode::Lm_VelocityDirection )
+			SetRotationMode( ELmRotationMode::Lm_LookingDirection );
 	}
+
+	OnViewModeChanged.Broadcast( ViewMode );
 }
 
 
 void ALmBaseCharacter::SetOverlayState_Implementation(const ELmOverlayState NewOverlayState) {
-	if ( NewOverlayState != OverlayState ) {
-		OnOverlayStateChanged( NewOverlayState );
-	}
+	if ( NewOverlayState == OverlayState )
+		return;
+
+	OverlayState = NewOverlayState;
+	OnOverlayStateChange.Broadcast( OverlayState );
 }
 
 

@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/LmCharacterInterface.h"
+#include "Locomotion/DataTypes/LmEvents.h"
 #include "Locomotion/EnhancedInput/LmCharacterInputConfiguration.h"
 #include "Locomotion/GameplayFramework/Camera/Interfaces/LmCameraInterface.h"
 #include "LmBaseCharacter.generated.h"
@@ -16,6 +17,25 @@ class LOCOMOTION_API ALmBaseCharacter : public ACharacter, public ILmCharacterIn
 	GENERATED_BODY()
 
 public:
+	UPROPERTY( BlueprintCallable , BlueprintAssignable )
+	FGaitChangedDelegate OnGaitChanged;
+	UPROPERTY( BlueprintCallable , BlueprintAssignable )
+	FMovementActionChangedDelegate OnMovementActionChanged;
+	UPROPERTY( BlueprintCallable , BlueprintAssignable )
+	FMovementStateChangedDelegate OnMovementStateChanged;
+	UPROPERTY( BlueprintCallable , BlueprintAssignable )
+	FOverlayStateChangedDelegate OnOverlayStateChange;
+	UPROPERTY( BlueprintCallable , BlueprintAssignable )
+	FStanceChangedDelegate OnStanceChanged;
+	UPROPERTY( BlueprintCallable , BlueprintAssignable )
+	FViewModeChangedDelegate OnViewModeChanged;
+	UPROPERTY( BlueprintCallable , BlueprintAssignable )
+	FGroundedEntryStateChangedDelegate OnGroundedEntryStateChanged;
+	UPROPERTY( BlueprintCallable , BlueprintAssignable )
+	FRotationModeChangedDelegate OnRotationModeChanged;
+	UPROPERTY( BlueprintCallable , BlueprintAssignable )
+	FUsingHandChangedDelegate OnUsingHandChanged;
+
 	// Sets default values for this character's properties
 	ALmBaseCharacter();
 
@@ -253,20 +273,6 @@ protected:
 	///Category=State Change
 	virtual void OnCharacterMovementModeChanged(EMovementMode PrevMovementMode, EMovementMode NewMovementMode, uint8 PrevCustomMode, uint8 NewCustomMode);
 
-	virtual void OnMovementStateChanged(ELmMovementState NewMovementState);
-
-	virtual void OnMovementActionChanged(ELmMovementAction NewMovementAction);
-
-	virtual void OnStanceChanged(ELmStance NewStance);
-
-	virtual void OnRotationModeChanged(ELmRotationMode NewRotationMode);
-
-	virtual void OnGaitChanged(ELmGait NewActualGait);
-
-	virtual void OnViewModeChanged(ELmViewMode NewViewMode);
-
-	virtual void OnOverlayStateChanged(ELmOverlayState NewOverlayState);
-
 	///Category=Movement System
 	virtual void SetMovementModel();
 
@@ -382,6 +388,11 @@ public:
 
 	virtual void SetMovementAction_Implementation(ELmMovementAction NewMovementAction) override;
 
+	UFUNCTION( BlueprintCallable , BlueprintNativeEvent , Category = "Locomotion" )
+	void SetStance(ELmStance NewStance);
+
+	virtual void SetStance_Implementation(ELmStance NewStance) override;
+
 	UFUNCTION( BlueprintCallable , BlueprintNativeEvent , Category = "Locomotion|Character" )
 	void SetRotationMode(ELmRotationMode NewRotationMode);
 
@@ -451,11 +462,6 @@ private:
 	float rightInputValue;
 
 	//Previous States
-	ELmStance         prevStance;
-	ELmMovementAction PrevMovementAction;
-	ELmRotationMode   prevRotationMode;
-	ELmGait           prevGait;
-	ELmViewMode       prevViewMode;
-	ELmOverlayState   prevOverlayState;
+	ELmStance prevStance;
 	//Previous States
 };

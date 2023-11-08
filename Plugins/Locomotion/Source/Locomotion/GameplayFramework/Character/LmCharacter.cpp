@@ -22,8 +22,8 @@ ALmCharacter::ALmCharacter() {
 
 	const ConstructorHelpers::FObjectFinder<UDataTable> HoldingObjectsDataTableAsset( TEXT( "DataTable'/Locomotion/Data/DT_HoldingActorInstances.DT_HoldingActorInstances'" ) );
 	if ( HoldingObjectsDataTableAsset.Succeeded() ) {
-		DT_HoldingActors.DataTable = HoldingObjectsDataTableAsset.Object;
-		DT_HoldingActors.RowName   = FName( "Empty" );
+		HoldingActorsDataTable.DataTable = HoldingObjectsDataTableAsset.Object;
+		HoldingActorsDataTable.RowName   = FName( "Empty" );
 	} else
 		ULmLogger::LogError( "Holding Objects DataTable not found." );
 #pragma region Setting up Mantles
@@ -244,27 +244,15 @@ void ALmCharacter::UpdateHeldObject() {
 		RowName = FName( TEXT( "Binoculars" ) );
 	}
 
-	const auto& NewHoldingObject = *DT_HoldingActors.DataTable->FindRow<FLmHoldingInstance>( RowName , TEXT( "NONE" ) , true );
+	const auto& NewHoldingObject = *HoldingActorsDataTable.DataTable->FindRow<FLmHoldingInstance>( RowName , TEXT( "NONE" ) , true );
 	SetHeldObject( NewHoldingObject );
 }
 
 
 void ALmCharacter::SetHeldObject(const FLmHoldingInstance NewHoldingObject) {
-	if ( IsValid( NewHoldingObject.Instance ) ) {
-		ClearHeldObject();
-
-		if ( OverlayState == ELmOverlayState::Lm_Pistol1H || OverlayState == ELmOverlayState::Lm_Pistol2H ) {
-			if ( !(NewHoldingObject.OverlayState == ELmOverlayState::Lm_Pistol1H || NewHoldingObject.OverlayState == ELmOverlayState::Lm_Pistol2H) ) {
-				SetOverlayState( NewHoldingObject.OverlayState );
-			}
-		} else {
-			SetOverlayState( NewHoldingObject.OverlayState );
-		}
-
+	ClearHeldObject();
+	if ( IsValid( NewHoldingObject.Instance ) )
 		AttachToHand( NewHoldingObject );
-	} else {
-		ClearHeldObject();
-	}
 }
 
 
@@ -299,8 +287,8 @@ FLmTraceParams ALmCharacter::Get3PTraceParameters_Implementation() {
 }
 
 
-void ALmCharacter::OnOverlayStateChanged(const ELmOverlayState NewOverlayState) {
-	Super::OnOverlayStateChanged( NewOverlayState );
+void ALmCharacter::SetOverlayState_Implementation(const ELmOverlayState NewOverlayState) {
+	Super::SetOverlayState_Implementation( NewOverlayState );
 
 	UpdateHeldObject();
 }
