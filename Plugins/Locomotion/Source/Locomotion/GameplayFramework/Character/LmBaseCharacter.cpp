@@ -524,8 +524,11 @@ void ALmBaseCharacter::AimActionEnd() {
 
 
 void ALmBaseCharacter::ToggleCameraSide() {
-	if ( ViewMode == ELmViewMode::Lm_TPS )
-		bRightShoulder = !bRightShoulder;
+	if ( ViewMode == ELmViewMode::Lm_FPS )
+		return;
+
+	bRightShoulder = !bRightShoulder;
+	OnCameraShoulderChanged.Broadcast( bRightShoulder );
 }
 
 

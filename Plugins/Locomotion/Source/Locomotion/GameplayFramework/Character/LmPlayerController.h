@@ -4,6 +4,7 @@
 #include "InputMappingContext.h"
 #include "GameFramework/PlayerController.h"
 #include "Interfaces/LmControllerInterface.h"
+#include "Locomotion/DataTypes/LmEvents.h"
 #include "Locomotion/EnhancedInput/LmControllerInputConfiguration.h"
 #include "Locomotion/UI/LmWOverlayStateSwitcher.h"
 #include "LmPlayerController.generated.h"
@@ -13,6 +14,9 @@ class LOCOMOTION_API ALmPlayerController : public APlayerController, public ILmC
 	GENERATED_BODY()
 
 public:
+	UPROPERTY( BlueprintCallable , BlueprintAssignable )
+	FDebugViewChangedDelegate OnDebugViewChanged;
+
 	ALmPlayerController();
 
 protected:

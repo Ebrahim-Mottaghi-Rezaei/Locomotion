@@ -14,20 +14,15 @@ class LOCOMOTION_API ULmCameraAnimInstance : public UAnimInstance {
 protected:
 	UPROPERTY( BlueprintReadWrite , EditDefaultsOnly , Category = "Locomotion" )
 	bool bDebugView = false;
-	UPROPERTY( BlueprintReadWrite , EditDefaultsOnly , Category = "Locomotion" )
-	bool bRightShoulder = false;
-
-	UPROPERTY( BlueprintReadOnly , Category = "Locomotion" )
-	APawn* ControlledPawn;
-	UPROPERTY( BlueprintReadOnly , Category = "Locomotion" )
-	APlayerController* PlayerController;
+	UPROPERTY( BlueprintReadOnly , VisibleDefaultsOnly , Category = "Locomotion" )
+	bool bRightShoulder = true;
 
 	UPROPERTY( BlueprintReadWrite , EditDefaultsOnly , Category = "Locomotion" )
 	ELmMovementState MovementState = ELmMovementState::Lm_None;
 	UPROPERTY( BlueprintReadWrite , EditDefaultsOnly , Category = "Locomotion" )
 	ELmMovementAction MovementAction = ELmMovementAction::Lm_None;
 	UPROPERTY( BlueprintReadWrite , EditDefaultsOnly , Category = "Locomotion" )
-	ELmRotationMode RotationMode = ELmRotationMode::Lm_VelocityDirection;
+	ELmRotationMode RotationMode = ELmRotationMode::Lm_LookingDirection;
 	UPROPERTY( BlueprintReadWrite , EditDefaultsOnly , Category = "Locomotion" )
 	ELmGait Gait = ELmGait::Lm_Walking;
 	UPROPERTY( BlueprintReadWrite , EditDefaultsOnly , Category = "Locomotion" )
@@ -35,12 +30,38 @@ protected:
 	UPROPERTY( BlueprintReadWrite , EditDefaultsOnly , Category = "Locomotion" )
 	ELmViewMode ViewMode = ELmViewMode::Lm_TPS;
 
-	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
-
 public:
 	UFUNCTION( BlueprintCallable , Category = "Locomotion" )
 	void SetControlledPawn(APawn* Pawn);
 
 	UFUNCTION( BlueprintCallable , Category = "Locomotion" )
 	void SetPlayerController(APlayerController* Controller);
+
+protected:
+	//~ Event handlers
+	UFUNCTION()
+	void OnGaitChanged(const ELmGait NewGait);
+
+	UFUNCTION()
+	void OnMovementStateChanged(const ELmMovementState NewMovementState);
+
+	UFUNCTION()
+	void OnMovementActionChanged(const ELmMovementAction NewMovementAction);
+
+	UFUNCTION()
+	void OnStanceChanged(const ELmStance NewStance);
+
+	UFUNCTION()
+	void OnRotationModeChanged(const ELmRotationMode NewRotationMode);
+
+	UFUNCTION()
+	void OnViewModeChanged(const ELmViewMode NewViewMode);
+
+	UFUNCTION()
+	void OnCameraShoulderChanged(const bool bRight);
+
+	UFUNCTION()
+	void OnDebugViewChanged(const bool bNewDebugView);
+
+	//~ Event Handlers
 };

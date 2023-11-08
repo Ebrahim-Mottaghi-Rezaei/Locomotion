@@ -124,6 +124,7 @@ void ALmPlayerController::ToggleShowHud() {
 
 void ALmPlayerController::ToggleDebugView() {
 	bDebugView = !bDebugView;
+	OnDebugViewChanged.Broadcast( bDebugView );
 }
 
 

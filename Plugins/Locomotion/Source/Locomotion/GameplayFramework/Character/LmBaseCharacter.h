@@ -35,6 +35,8 @@ public:
 	FRotationModeChangedDelegate OnRotationModeChanged;
 	UPROPERTY( BlueprintCallable , BlueprintAssignable )
 	FUsingHandChangedDelegate OnUsingHandChanged;
+	UPROPERTY( BlueprintCallable , BlueprintAssignable )
+	FCameraShoulderChangedDelegate OnCameraShoulderChanged;
 
 	// Sets default values for this character's properties
 	ALmBaseCharacter();
