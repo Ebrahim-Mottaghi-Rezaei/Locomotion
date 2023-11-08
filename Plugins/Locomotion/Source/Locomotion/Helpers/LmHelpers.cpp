@@ -18,7 +18,13 @@ FTransform ULmHelpers::SubtractTransform(const FTransform A, const FTransform B)
 
 
 FLmComponentAndTransform ULmHelpers::LocalSpaceToWorldSpace(const FLmComponentAndTransform LocalSpace) {
-	return FLmComponentAndTransform( UKismetMathLibrary::ComposeTransforms( LocalSpace.Transform , LocalSpace.Component->GetComponentToWorld() ) , LocalSpace.Component );
+	const auto Component        = LocalSpace.Component;
+	const auto Transform        = LocalSpace.Transform;
+	const auto InverseTransform = Component->GetComponentTransform().Inverse();
+	const auto Location         = InverseTransform.InverseTransformPosition( Transform.GetLocation() );
+	const auto Rotation         = InverseTransform.InverseTransformRotation( Transform.GetRotation() );
+	const auto Scale            = InverseTransform.InverseTransformPosition( Transform.GetScale3D() );
+	return FLmComponentAndTransform( FTransform( Rotation , Location , Scale ) , Component );
 }
 
 
