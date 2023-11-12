@@ -1242,7 +1242,7 @@ void ALmBaseCharacter::DrawDebugShapes() {
 }
 
 
-TEnumAsByte<EDrawDebugTrace::Type> ALmBaseCharacter::GetTraceDebugType(TEnumAsByte<EDrawDebugTrace::Type> ShowTraceType) {
+EDrawDebugTrace::Type ALmBaseCharacter::GetTraceDebugType(EDrawDebugTrace::Type ShowTraceType) {
 	const auto PC = UGameplayStatics::GetPlayerController( this , 0 );
 
 	//Check if the player implements the ILmControllerInterface and Check if bShow debug values is set true;

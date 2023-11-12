@@ -879,7 +879,7 @@ void ULmCharacterAnimInstance::Response_AnimNotifyPivot() {
 }
 
 
-TEnumAsByte<EDrawDebugTrace::Type> ULmCharacterAnimInstance::GetDebugTraceType(TEnumAsByte<EDrawDebugTrace::Type> ShowTraceType) {
+EDrawDebugTrace::Type ULmCharacterAnimInstance::GetDebugTraceType(EDrawDebugTrace::Type ShowTraceType) {
 	const auto PlayerController = static_cast<ALmPlayerController*>(UGameplayStatics::GetPlayerController( this , 0 ));
 	if ( PlayerController && PlayerController->GetClass()->ImplementsInterface( ULmControllerInterface::StaticClass() ) ) {
 		const bool bShowTraces = ILmControllerInterface::Execute_GetDebugInfo( PlayerController ).bShowTraces;

@@ -418,7 +418,7 @@ protected:
 
 	//Debug
 	UFUNCTION( BlueprintPure , Category = "Locomotion|Debug" )
-	virtual TEnumAsByte<EDrawDebugTrace::Type> GetDebugTraceType(TEnumAsByte<EDrawDebugTrace::Type> ShowTraceType);
+	EDrawDebugTrace::Type GetDebugTraceType(EDrawDebugTrace::Type ShowTraceType);
 
 	//Custom Events
 	bool         bDynamicTransitionGate_IsOpen = true;

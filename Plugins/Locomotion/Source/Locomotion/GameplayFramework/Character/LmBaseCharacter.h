@@ -359,7 +359,7 @@ protected:
 	virtual void DrawDebugShapes();
 
 	UFUNCTION( BlueprintGetter , Category = "Locomotion|Debug" )
-	virtual TEnumAsByte<EDrawDebugTrace::Type> GetTraceDebugType(TEnumAsByte<EDrawDebugTrace::Type> ShowTraceType);
+	virtual EDrawDebugTrace::Type GetTraceDebugType(EDrawDebugTrace::Type ShowTraceType);
 
 	///BreakFall CustomEvent
 	virtual void BreakFall();
