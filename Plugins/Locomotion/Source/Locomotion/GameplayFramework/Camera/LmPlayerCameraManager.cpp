@@ -3,8 +3,9 @@
 #include <Kismet/GameplayStatics.h>
 #include <Kismet/KismetMathLibrary.h>
 #include "../Animation/LmCameraAnimInstance.h"
-#include "Interfaces/LmCameraInterface.h"
+#include "Interfaces/LmCameraManagerInterface.h"
 #include "Locomotion/GameplayFramework/Character/LmPlayerController.h"
+#include "Locomotion/GameplayFramework/Character/Interfaces/LmCharacterInterface.h"
 #include "Locomotion/GameplayFramework/Character/Interfaces/LmControllerInterface.h"
 #include "Locomotion/Logging/LMLogger.h"
 
@@ -32,15 +33,15 @@ ALmPlayerCameraManager::ALmPlayerCameraManager() {
 }
 
 
-void ALmPlayerCameraManager::OnPossess(APawn* Pawn) {
+void ALmPlayerCameraManager::SetControlledPawn_Implementation(APawn* Pawn) {
 	//Set "Controlled Pawn" when Player Controller Possesses new character. (called from Player Controller)
-	ControlledPawn = Pawn;
+	ControllingPawn = Pawn;
 
 	//Updated references in the Camera Behavior AnimBP.
 	const auto CameraAnimInstance = Cast<ULmCameraAnimInstance>( CameraBehaviour->GetAnimInstance() );
 
 	CameraAnimInstance->SetPlayerController( GetOwningPlayerController() );
-	CameraAnimInstance->SetControlledPawn( ControlledPawn );
+	CameraAnimInstance->SetControlledPawn( ControllingPawn );
 }
 
 
@@ -97,10 +98,10 @@ FLmCameraResult ALmPlayerCameraManager::CustomCameraBehaviour() {
 	float      FPFOV;
 
 	//Step 1: Get Camera Parameters from CharacterBP via the Camera Interface
-	if ( ControlledPawn && ControlledPawn->GetClass()->ImplementsInterface( ULmCameraInterface::StaticClass() ) ) {
-		PivotTarget             = ILmCameraInterface::Execute_Get3PPivotTarget( ControlledPawn );
-		FPTarget                = ILmCameraInterface::Execute_GetFPCameraTarget( ControlledPawn );
-		const auto CameraParams = ILmCameraInterface::Execute_GetCameraParameters( ControlledPawn );
+	if ( ControllingPawn && ControllingPawn->GetClass()->ImplementsInterface( ULmCharacterInterface::StaticClass() ) ) {
+		PivotTarget             = ILmCharacterInterface::Execute_Get3PPivotTarget( ControllingPawn );
+		FPTarget                = ILmCharacterInterface::Execute_GetFPCameraTarget( ControllingPawn );
+		const auto CameraParams = ILmCharacterInterface::Execute_GetCameraParameters( ControllingPawn );
 		TPFOV                   = CameraParams.TP_FOV;
 		FPFOV                   = CameraParams.FP_FOV;
 	}
@@ -139,9 +140,9 @@ FLmCameraResult ALmPlayerCameraManager::CustomCameraBehaviour() {
 	                                                );
 
 	//Step 6: Trace for an object between the camera and character to apply a corrective offset. Trace origins are set within the Character BP via the Camera Interface. Functions like the normal spring arm, but can allow for different trace origins regardless of the pivot.
-	if ( bDoCollisionTest && IsValid( ControlledPawn ) ) {
-		if ( ControlledPawn->GetClass()->ImplementsInterface( ULmCameraInterface::StaticClass() ) ) {
-			auto TraceParams = ILmCameraInterface::Execute_Get3PTraceParameters( ControlledPawn );
+	if ( bDoCollisionTest && IsValid( ControllingPawn ) ) {
+		if ( ControllingPawn->GetClass()->ImplementsInterface( ULmCameraManagerInterface::StaticClass() ) ) {
+			auto TraceParams = ILmCharacterInterface::Execute_Get3PTraceParameters( ControllingPawn );
 
 			FHitResult HitResult;
 

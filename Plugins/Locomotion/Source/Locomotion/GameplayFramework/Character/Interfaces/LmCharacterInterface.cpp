@@ -48,3 +48,28 @@ void ILmCharacterInterface::SetRotationMode_Implementation(ELmRotationMode NewRo
 void ILmCharacterInterface::SetMovementAction_Implementation(ELmMovementAction NewMovementAction) {
 	ULmLogger::LogError( TEXT( "Invalid interface method calling. ILmCharacterInterface::SetMovementAction_Implementation" ) );
 }
+
+
+//~ Camera methods
+FLmCameraParameters ILmCharacterInterface::GetCameraParameters_Implementation() {
+	ULmLogger::LogError( TEXT( "Invalid interface method calling. ILmCharacterInterface::GetCameraParameters_Implementation" ) );
+	return FLmCameraParameters();
+}
+
+
+FVector ILmCharacterInterface::GetFPCameraTarget_Implementation() {
+	ULmLogger::LogError( TEXT( "Invalid interface method calling. ILmCharacterInterface::GetFPCameraTarget_Implementation" ) );
+	return FVector();
+}
+
+
+FTransform ILmCharacterInterface::Get3PPivotTarget_Implementation() {
+	ULmLogger::LogError( TEXT( "Invalid interface method calling. ILmCharacterInterface::Get3PPivotTarget_Implementation" ) );
+	return FTransform();
+}
+
+
+FLmTraceParams ILmCharacterInterface::Get3PTraceParameters_Implementation() {
+	ULmLogger::LogError( TEXT( "Invalid interface method calling. ILmCharacterInterface::Get3PTraceParameters_Implementation" ) );
+	return FLmTraceParams();
+}

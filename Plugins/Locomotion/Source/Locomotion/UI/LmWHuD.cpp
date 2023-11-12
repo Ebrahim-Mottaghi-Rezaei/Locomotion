@@ -2,15 +2,14 @@
 #include <Blueprint/WidgetLayoutLibrary.h>
 #include <Layout/Geometry.h>
 #include "Components/CanvasPanelSlot.h"
-#include "Locomotion/GameplayFramework/Camera/Interfaces/LmCameraInterface.h"
 #include "Locomotion/GameplayFramework/Character/Interfaces/LmCharacterInterface.h"
 #include "Locomotion/GameplayFramework/Character/Interfaces/LmControllerInterface.h"
 
 
-void ULmWHuD::NativeTick(const FGeometry& MovieSceneBlends, const float InDeltaTime) {
-	Super::NativeTick( MovieSceneBlends , InDeltaTime );
+void ULmWHuD::NativeTick(const FGeometry& MyGeometry, const float InDeltaTime) {
+	Super::NativeTick( MyGeometry , InDeltaTime );
 
-	dt = InDeltaTime;
+	DeltaTime = InDeltaTime;
 
 	const auto PC = GetOwningPlayer();
 	if ( PC->GetClass()->ImplementsInterface( ULmControllerInterface::StaticClass() ) ) {
@@ -25,15 +24,15 @@ void ULmWHuD::NativeTick(const FGeometry& MovieSceneBlends, const float InDeltaT
 		bShowCharacterInfo  = Info.bShowCharacterInfo;
 	}
 
-	if ( GetCharacterInfoVisibility() == ESlateVisibility::Visible ) {
-		if ( IsValid( DebugFocusCharacter ) )
-			if ( DebugFocusCharacter->GetClass()->ImplementsInterface( ULmCameraInterface::StaticClass() ) ) {
-				const auto Transform = ILmCameraInterface::Execute_Get3PPivotTarget( DebugFocusCharacter );
+	if ( GetCharacterInfoVisibility() != ESlateVisibility::Visible || !IsValid( DebugFocusCharacter ) )
+		return;
 
-				FVector2D ScreenPosition;
-				UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition( PC , Transform.GetLocation() + FVector( 0 , 0 , 100 ) , ScreenPosition , false );
-				UWidgetLayoutLibrary::SlotAsCanvasSlot( MovingPanel )->SetPosition( ScreenPosition );
-			}
+	if ( DebugFocusCharacter->GetClass()->ImplementsInterface( ULmCharacterInterface::StaticClass() ) ) {
+		const auto Transform = ILmCharacterInterface::Execute_Get3PPivotTarget( DebugFocusCharacter );
+
+		FVector2D ScreenPosition;
+		UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition( PC , Transform.GetLocation() + FVector( 0 , 0 , 100 ) , ScreenPosition , false );
+		UWidgetLayoutLibrary::SlotAsCanvasSlot( MovingPanel )->SetPosition( ScreenPosition );
 	}
 }
 
@@ -158,5 +157,5 @@ FText ULmWHuD::GetAnimCurvesValues() const {
 
 
 FText ULmWHuD::GetFrameRate() const {
-	return FText::FromString( FString::SanitizeFloat( FMath::Floor( 1.0f / dt ) ) );
+	return FText::FromString( FString::SanitizeFloat( FMath::Floor( 1.0f / DeltaTime ) ) );
 }

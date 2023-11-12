@@ -6,7 +6,7 @@
 #include <Misc/EnumRange.h>
 #include "LmWOverlayStateButton.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
-#include "Locomotion/GameplayFramework/Camera/Interfaces/LmCameraInterface.h"
+#include "Locomotion/GameplayFramework/Camera/Interfaces/LmCameraManagerInterface.h"
 #include "Locomotion/GameplayFramework/Character/Interfaces/LmCharacterInterface.h"
 
 
@@ -35,10 +35,10 @@ void ULmWOverlayStateSwitcher::NativeTick(const FGeometry& MovieSceneBlends, con
 	Super::NativeTick( MovieSceneBlends , InDeltaTime );
 
 	//local player controller
-	const auto PC = GetOwningPlayer()->GetPawn();
+	const auto PlayerController = GetOwningPlayer()->GetPawn();
 
-	if ( PC->GetClass()->ImplementsInterface( ULmCameraInterface::StaticClass() ) ) {
-		const FTransform Transform = ILmCameraInterface::Execute_Get3PPivotTarget( PC );
+	if ( PlayerController->GetClass()->ImplementsInterface( ULmCharacterInterface::StaticClass() ) ) {
+		const FTransform Transform = ILmCharacterInterface::Execute_Get3PPivotTarget( PlayerController );
 
 		FVector2D ScreenPosition;
 		UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition( GetOwningPlayer() , Transform.GetLocation() + FVector( 0 , 0 , 100 ) , ScreenPosition , false );

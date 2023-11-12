@@ -60,4 +60,25 @@ public:
 	void SetOverlayState(ELmOverlayState NewOverlayState);
 
 	virtual void SetOverlayState_Implementation(ELmOverlayState NewOverlayState);
+
+	//~ Camera methods
+	UFUNCTION( BlueprintCallable , BlueprintNativeEvent , Category = "Locomotion" )
+	FLmCameraParameters GetCameraParameters();
+
+	virtual FLmCameraParameters GetCameraParameters_Implementation();
+
+	UFUNCTION( BlueprintCallable , BlueprintNativeEvent , Category = "Locomotion" )
+	FVector GetFPCameraTarget();
+
+	virtual FVector GetFPCameraTarget_Implementation();
+
+	UFUNCTION( BlueprintCallable , BlueprintNativeEvent , Category = "Locomotion" )
+	FTransform Get3PPivotTarget();
+
+	virtual FTransform Get3PPivotTarget_Implementation();
+
+	UFUNCTION( BlueprintCallable , BlueprintNativeEvent , Category = "Locomotion" )
+	FLmTraceParams Get3PTraceParameters();
+
+	virtual FLmTraceParams Get3PTraceParameters_Implementation();
 };

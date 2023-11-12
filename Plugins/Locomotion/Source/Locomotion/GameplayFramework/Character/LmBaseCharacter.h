@@ -9,11 +9,11 @@
 #include "Interfaces/LmCharacterInterface.h"
 #include "Locomotion/DataTypes/LmEvents.h"
 #include "Locomotion/EnhancedInput/LmCharacterInputConfiguration.h"
-#include "Locomotion/GameplayFramework/Camera/Interfaces/LmCameraInterface.h"
+#include "Locomotion/GameplayFramework/Camera/Interfaces/LmCameraManagerInterface.h"
 #include "LmBaseCharacter.generated.h"
 
 UCLASS( Category = "Locomotion" )
-class LOCOMOTION_API ALmBaseCharacter : public ACharacter, public ILmCharacterInterface, public ILmCameraInterface {
+class LOCOMOTION_API ALmBaseCharacter : public ACharacter, public ILmCharacterInterface {
 	GENERATED_BODY()
 
 public:
@@ -390,7 +390,7 @@ public:
 
 	virtual void SetMovementAction_Implementation(ELmMovementAction NewMovementAction) override;
 
-	UFUNCTION( BlueprintCallable , BlueprintNativeEvent , Category = "Locomotion" )
+	UFUNCTION( BlueprintCallable , BlueprintNativeEvent , Category = "Locomotion|Character" )
 	void SetStance(ELmStance NewStance);
 
 	virtual void SetStance_Implementation(ELmStance NewStance) override;
@@ -414,9 +414,7 @@ public:
 	void SetOverlayState(ELmOverlayState NewOverlayState);
 
 	virtual void SetOverlayState_Implementation(ELmOverlayState NewOverlayState) override;
-#pragma endregion
 
-#pragma region ILm_Camera_Interface_Overrides.
 	UFUNCTION( BlueprintCallable , BlueprintNativeEvent , Category = "Locomotion|Camera" )
 	FLmCameraParameters GetCameraParameters();
 

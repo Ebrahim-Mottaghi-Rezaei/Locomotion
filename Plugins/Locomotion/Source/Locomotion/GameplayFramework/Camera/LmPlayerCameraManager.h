@@ -4,17 +4,21 @@
 #include <Kismet/KismetSystemLibrary.h>
 #include "CoreMinimal.h"
 #include "Camera/PlayerCameraManager.h"
+#include "Interfaces/LmCameraManagerInterface.h"
 #include "Locomotion/DataTypes/LmStructs.h"
 #include "LmPlayerCameraManager.generated.h"
 
 UCLASS( Category = "Locomotion" )
-class LOCOMOTION_API ALmPlayerCameraManager : public APlayerCameraManager {
+class LOCOMOTION_API ALmPlayerCameraManager : public APlayerCameraManager, public ILmCameraManagerInterface {
 	GENERATED_BODY()
 
 public:
 	ALmPlayerCameraManager();
 
-	virtual void OnPossess(APawn* ControlledPawn);
+	UFUNCTION( BlueprintCallable , BlueprintNativeEvent )
+	void SetControlledPawn(APawn* ControlledPawn);
+
+	virtual void SetControlledPawn_Implementation(APawn* ControlledPawn) override;
 
 protected:
 	UPROPERTY( BlueprintReadOnly , EditInstanceOnly , Category = "Locomotion" )
@@ -51,7 +55,7 @@ protected:
 	UPROPERTY()
 	TArray<AActor*> ActorsToIgnore;
 	UPROPERTY()
-	APawn* ControlledPawn;
+	APawn* ControllingPawn;
 
 public:
 	UFUNCTION( BlueprintCallable , Category = "Locomotion" )

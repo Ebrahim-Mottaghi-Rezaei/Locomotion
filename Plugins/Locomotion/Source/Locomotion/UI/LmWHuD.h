@@ -69,5 +69,5 @@ protected:
 		FText GetFrameRate() const;
 
 private:
-	float dt;
+	float DeltaTime;
 };

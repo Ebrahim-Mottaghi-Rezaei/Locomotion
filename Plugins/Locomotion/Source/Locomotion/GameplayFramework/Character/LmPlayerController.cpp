@@ -43,8 +43,6 @@ ALmPlayerController::ALmPlayerController() {
 		InputActions = inputActions.Object;
 	else
 		ULmLogger::LogError( "LmControllerInputConfiguration Data Asset not found." );
-
-	PlayerCameraManagerClass = ALmPlayerCameraManager::StaticClass();
 }
 
 
@@ -53,10 +51,11 @@ void ALmPlayerController::BeginPlay() {
 
 	DebugFocusCharacter = UGameplayStatics::GetPlayerCharacter( this , 0 );
 
-	if ( IsValid( HudTemplate ) )
-		CreateWidget( this , HudTemplate )->AddToViewport();
-	else
-		ULmLogger::LogError( TEXT( "Locomotion HUD Template is null. Please set it in BP_LmPlayerController blueprint." ) );
+	/*if ( IsValid( HudTemplate ) ) {
+		if ( IsLocalPlayerController() )
+			CreateWidget( this , HudTemplate )->AddToViewport();
+	} else
+		ULmLogger::LogError( TEXT( "Locomotion HUD Template is null. Please set it in BP_LmPlayerController blueprint." ) );*/
 
 	//Search for all LmCharacters and populate the array.
 	//Used to switch target character when viewing character info in the HUD
@@ -72,12 +71,12 @@ void ALmPlayerController::BeginPlay() {
 void ALmPlayerController::OnPossess(APawn* InPawn) {
 	Super::OnPossess( InPawn );
 
-	auto* cameraManager = static_cast<ALmPlayerCameraManager*>(PlayerCameraManager);
-	if ( IsValid( cameraManager ) ) {
-		cameraManager->OnPossess( InPawn );
-	} else {
-		ULmLogger::LogError( TEXT( "Camera Manager is invalid." ) );
+	if ( !IsValid( PlayerCameraManager ) || !PlayerCameraManager.GetClass()->ImplementsInterface( ULmCameraManagerInterface::StaticClass() ) ) {
+		ULmLogger::LogError( TEXT( "ALmPlayerController, Camera Manager is invalid." ) );
+		return;
 	}
+
+	ILmCameraManagerInterface::Execute_SetControlledPawn( PlayerCameraManager , InPawn );
 }
 
 
