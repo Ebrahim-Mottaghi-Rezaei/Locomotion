@@ -8,7 +8,9 @@ FString ULmEarlyBlendOut::GetNotifyName_Implementation() const {
 
 
 ULmEarlyBlendOut::ULmEarlyBlendOut() {
+#if WITH_EDITORONLY_DATA
 	NotifyColor = FColor::FromHex( TEXT( "24FF25FF" ) );
+#endif
 }
 
 

@@ -2,9 +2,12 @@
 #include <GameFramework/Character.h>
 #include <UObject/UObjectBaseUtility.h>
 #include <Animation/AnimMontage.h>
-
+#include "Engine/EngineTypes.h"
+#include "Components/PrimitiveComponent.h"
 #include "Locomotion/Helpers/LmHelpers.h"
 #include "Locomotion/Logging/LMLogger.h"
+
+FLmStruct::~FLmStruct() {}
 
 
 FString FLmStruct::ToString(bool bPrintToLog) {
@@ -89,7 +92,10 @@ FString FLmLeanAmount::ToString(const bool bPrintToLog) {
 }
 
 
-FLmMantleAsset::FLmMantleAsset() : AnimMontage( nullptr ), PositionCorrectionCurve( nullptr ), LowHeight( 0 ), LowPlayRate( 0 ), LowStartPosition( 0 ), HighHeight( 0 ), HighPlayRate( 0 ), HighStartPosition( 0 ) {}
+FLmMantleAsset::FLmMantleAsset() {
+	LowPlayRate  = 0.f;
+	HighPlayRate = 0.f;
+}
 
 
 FLmMantleAsset::FLmMantleAsset(UAnimMontage*  AnimMontage,
@@ -220,8 +226,7 @@ FString FLmCurrentState::ToString(const bool bPrintToLog) {
 }
 
 
-FLmEssentialValues::FLmEssentialValues() : bIsMoving( false ), bHasMovementInput( false ), Speed( 0 ),
-                                           MovementInputAmount( 0 ), AimYawRate( 0 ) {}
+FLmEssentialValues::FLmEssentialValues() {}
 
 
 FLmEssentialValues::FLmEssentialValues(const FVector&  velocity,
@@ -397,13 +402,16 @@ FString FLmControlVectors::ToString(const bool bPrintToLog) {
 }
 
 
+FLmHitResult::~FLmHitResult() {}
+
+
 FString FLmHitResult::ToString(const bool bPrintToLog) {
 	const auto r = FString::Printf( TEXT( "bHit: %s, bBlockingHit: %s, bStartPenetrating: %s, Hit Component Name: %s, Distance: %s" ) ,
 	                                *ULmHelpers::Bool2String( bHit ) ,
-	                                *ULmHelpers::Bool2String( SweepHitResult.bBlockingHit ) ,
-	                                *ULmHelpers::Bool2String( SweepHitResult.bStartPenetrating ) ,
-	                                *SweepHitResult.Component->GetName() ,
-	                                *FString::SanitizeFloat( SweepHitResult.Distance ) );
+	                                *ULmHelpers::Bool2String( HitResult.bBlockingHit ) ,
+	                                *ULmHelpers::Bool2String( HitResult.bStartPenetrating ) ,
+	                                *HitResult.Component->GetName() ,
+	                                *FString::SanitizeFloat( HitResult.Distance ) );
 
 	if ( bPrintToLog )
 		ULmLogger::LogInfo( r );

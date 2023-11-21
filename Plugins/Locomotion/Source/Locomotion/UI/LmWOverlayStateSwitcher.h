@@ -45,7 +45,7 @@ protected:
 	TSubclassOf<ULmWOverlayStateButton> OverlayStateButtonTemplate;
 	UPROPERTY( BlueprintReadWrite , EditDefaultsOnly , Category = "Locomotion" )
 	TArray<FLmOverlayStateParams> OverlayStateButtons;
-	UPROPERTY( BlueprintReadOnly , meta=(BindWidget) )
+	UPROPERTY( BlueprintReadOnly , meta=(BindWidget) , Category= "Locomotion" )
 	UVerticalBox* VerticalBox;
 
 public:

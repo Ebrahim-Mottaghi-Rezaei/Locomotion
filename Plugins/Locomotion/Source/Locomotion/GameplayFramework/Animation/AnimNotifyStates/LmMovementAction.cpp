@@ -10,7 +10,9 @@ FString ULmMovementAction::GetNotifyName_Implementation() const {
 
 
 ULmMovementAction::ULmMovementAction() {
+#if WITH_EDITORONLY_DATA
 	NotifyColor = FColor::FromHex( TEXT( "FFCC16FF" ) );
+#endif
 }
 
 

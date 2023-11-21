@@ -14,17 +14,17 @@ class LOCOMOTION_API ULmFootStepAnimNotify : public UAnimNotify {
 protected:
 	ULmFootStepAnimNotify();
 
-	UPROPERTY( BlueprintReadWrite , EditAnywhere )
+	UPROPERTY( BlueprintReadWrite , EditAnywhere , Category= "Locomotion" )
 	USoundBase* Sound;
-	UPROPERTY( BlueprintReadWrite , EditInstanceOnly )
+	UPROPERTY( BlueprintReadWrite , EditInstanceOnly , Category= "Locomotion" )
 	FName AttachPointName = FName( TEXT( "root" ) );
-	UPROPERTY( BlueprintReadWrite , EditInstanceOnly )
+	UPROPERTY( BlueprintReadWrite , EditInstanceOnly , Category= "Locomotion" )
 	ELmFootStepType FootStepType = ELmFootStepType::Lm_Step;
-	UPROPERTY( BlueprintReadWrite , EditInstanceOnly )
+	UPROPERTY( BlueprintReadWrite , EditInstanceOnly , Category= "Locomotion" )
 	float VolumeMultiplier = 1.0f;
-	UPROPERTY( BlueprintReadWrite , EditInstanceOnly )
+	UPROPERTY( BlueprintReadWrite , EditInstanceOnly , Category= "Locomotion" )
 	float PitchMultiplier = 1.0f;
-	UPROPERTY( BlueprintReadWrite , EditInstanceOnly )
+	UPROPERTY( BlueprintReadWrite , EditInstanceOnly , Category= "Locomotion" )
 	bool bOverrideMaskCurve;
 
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;

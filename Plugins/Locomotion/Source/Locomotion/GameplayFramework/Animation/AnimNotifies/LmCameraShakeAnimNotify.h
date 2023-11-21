@@ -13,9 +13,9 @@ class LOCOMOTION_API ULmCameraShakeAnimNotify : public UAnimNotify {
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY( EditInstanceOnly , BlueprintReadWrite , meta = (ClampMin = "0" , ClampMax = "3" , UIMin = "0" , UIMax = "3") )
+	UPROPERTY( EditInstanceOnly , BlueprintReadWrite , meta = (ClampMin = "0" , ClampMax = "3" , UIMin = "0" , UIMax = "3") , Category= "Locomotion" )
 	TSubclassOf<UCameraShakeBase> CameraShake;
-	UPROPERTY( EditInstanceOnly , BlueprintReadWrite )
+	UPROPERTY( EditInstanceOnly , BlueprintReadWrite , Category= "Locomotion" )
 	float Scale = 1.f;
 
 public:

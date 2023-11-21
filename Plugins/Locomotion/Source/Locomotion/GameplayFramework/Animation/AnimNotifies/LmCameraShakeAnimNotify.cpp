@@ -5,10 +5,13 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
+#include "Math/Color.h"
 
 
 ULmCameraShakeAnimNotify::ULmCameraShakeAnimNotify() {
+#if WITH_EDITORONLY_DATA
 	NotifyColor = FColor::White;
+#endif
 }
 
 

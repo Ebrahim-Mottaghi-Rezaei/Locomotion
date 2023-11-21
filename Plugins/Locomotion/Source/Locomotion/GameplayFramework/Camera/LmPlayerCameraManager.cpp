@@ -8,6 +8,7 @@
 #include "Locomotion/GameplayFramework/Character/Interfaces/LmCharacterInterface.h"
 #include "Locomotion/GameplayFramework/Character/Interfaces/LmControllerInterface.h"
 #include "Locomotion/Logging/LMLogger.h"
+#include "Engine/SkeletalMesh.h"
 
 
 ALmPlayerCameraManager::ALmPlayerCameraManager() {

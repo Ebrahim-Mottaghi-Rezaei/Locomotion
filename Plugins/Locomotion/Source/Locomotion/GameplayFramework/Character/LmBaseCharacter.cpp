@@ -829,7 +829,7 @@ FLmHitResult ALmBaseCharacter::SetActorLocationRotationUpdateTarget(const FVecto
 
 	FLmHitResult HitResult;
 
-	const bool result = SetActorLocationAndRotation( NewLocation , TargetRotation , bSweep , &HitResult.SweepHitResult );
+	const bool result = SetActorLocationAndRotation( NewLocation , TargetRotation , bSweep , &HitResult.HitResult );
 	HitResult.bHit    = result;
 
 	return HitResult;

@@ -15,7 +15,7 @@ class LOCOMOTION_API ALmPlayerCameraManager : public APlayerCameraManager, publi
 public:
 	ALmPlayerCameraManager();
 
-	UFUNCTION( BlueprintCallable , BlueprintNativeEvent )
+	UFUNCTION( BlueprintCallable , BlueprintNativeEvent , Category= "Locomotion" )
 	void SetControlledPawn(APawn* ControlledPawn);
 
 	virtual void SetControlledPawn_Implementation(APawn* ControlledPawn) override;

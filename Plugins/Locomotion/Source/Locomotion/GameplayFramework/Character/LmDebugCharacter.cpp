@@ -7,6 +7,7 @@
 #include <UObject/UObjectBase.h>
 #include "EnhancedInputComponent.h"
 #include "LmCharacter.h"
+#include "Engine/SkeletalMesh.h"
 #include "Engine/SkinnedAssetCommon.h"
 #include "Interfaces/LmControllerInterface.h"
 #include "Kismet/GameplayStatics.h"

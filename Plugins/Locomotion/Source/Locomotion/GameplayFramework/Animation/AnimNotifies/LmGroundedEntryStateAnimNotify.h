@@ -10,7 +10,7 @@ class LOCOMOTION_API ULmGroundedEntryStateAnimNotify : public UAnimNotify {
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY( BlueprintReadWrite , EditInstanceOnly )
+	UPROPERTY( BlueprintReadWrite , EditInstanceOnly ,Category= "Locomotion")
 	ELmGroundedEntryState GroundedEntryState;
 
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;

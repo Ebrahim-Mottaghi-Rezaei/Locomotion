@@ -3,11 +3,17 @@
 #include "Kismet/GameplayStatics.h"
 #include "Locomotion/Logging/LMLogger.h"
 #include "Sound/SoundCue.h"
+#include "Math/Color.h"
+#include "Animation/AnimInstance.h"
+#include "UObject/ConstructorHelpers.h"
 
 
 ULmFootStepAnimNotify::ULmFootStepAnimNotify() {
 	bOverrideMaskCurve = false;
-	NotifyColor        = FColor::FromHex( TEXT( "E56300FF" ) );
+
+#if WITH_EDITORONLY_DATA
+	NotifyColor = FColor::FromHex( TEXT( "E56300FF" ) );
+#endif
 
 	static ConstructorHelpers::FObjectFinder<USoundCue> FootStepSoundCue( TEXT( "/Script/Engine.SoundCue'/Locomotion/Audio/Footsteps/Footstep_Cue.Footstep_Cue'" ) );
 	if ( FootStepSoundCue.Succeeded() )
@@ -18,7 +24,7 @@ ULmFootStepAnimNotify::ULmFootStepAnimNotify() {
 
 
 void ULmFootStepAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) {
-	if ( !IsValid( MeshComp ) || !IsValid( MeshComp->GetAnimInstance() ) || !IsValid( Sound ) )
+	if ( !MeshComp || !IsValid( MeshComp->GetAnimInstance() ) || !Sound )
 		return;
 
 	if ( !bOverrideMaskCurve ) {

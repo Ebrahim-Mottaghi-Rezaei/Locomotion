@@ -10,6 +10,7 @@
 #include "Locomotion/DataTypes/LmEvents.h"
 #include "Locomotion/EnhancedInput/LmCharacterInputConfiguration.h"
 #include "Locomotion/GameplayFramework/Camera/Interfaces/LmCameraManagerInterface.h"
+#include "Animation/AnimInstance.h"
 #include "LmBaseCharacter.generated.h"
 
 UCLASS( Category = "Locomotion" )
@@ -442,9 +443,9 @@ protected:
 private:
 	TEnumAsByte<ETraceTypeQuery> ETT_Climbable;
 	UPROPERTY()
-	TArray<AActor*> IgnoredActors;
+	TArray<class AActor*> IgnoredActors;
 	UPROPERTY()
-	UAnimInstance* animInstance;
+	class UAnimInstance* animInstance;
 
 	FTimerHandle timerHandle_Landing;
 

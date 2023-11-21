@@ -6,6 +6,7 @@
 #include "Interfaces/LmControllerInterface.h"
 #include "Locomotion/DataTypes/LmEvents.h"
 #include "Locomotion/EnhancedInput/LmControllerInputConfiguration.h"
+#include "Locomotion/GameplayFramework/Camera/LmPlayerCameraManager.h"
 #include "Locomotion/UI/LmWOverlayStateSwitcher.h"
 #include "LmPlayerController.generated.h"
 
@@ -29,7 +30,7 @@ protected:
 	UPROPERTY( BlueprintReadWrite , EditDefaultsOnly , Category = "Locomotion|Enhanced Input" , meta = (EditCondition = "bBindDefaultInputKeys") )
 	ULmControllerInputConfiguration* InputActions;
 	UPROPERTY( BlueprintReadWrite , EditDefaultsOnly , Category = "Locomotion|Enhanced Input" , meta = (EditCondition = "bBindDefaultInputKeys") )
-	USoundWave* ClickSound;
+	class USoundWave* ClickSound;
 	UPROPERTY( BlueprintReadWrite , Category = "Locomotion|HuD" )
 	bool bOverlayMenuOpen;
 	UPROPERTY( BlueprintReadOnly , Category = "Locomotion|HuD" )
@@ -38,6 +39,8 @@ protected:
 	TSubclassOf<ULmWOverlayStateSwitcher> OverlayStateSwitcherTemplate;
 	UPROPERTY( BlueprintReadWrite , EditDefaultsOnly , Category = "Locomotion|HuD" )
 	TSubclassOf<UUserWidget> HudTemplate;
+	UPROPERTY( BlueprintReadWrite , EditDefaultsOnly , Category = "Locomotion|Camera Manager" )
+	TSubclassOf<ALmPlayerCameraManager> CameraManagerTemplate;
 
 	UPROPERTY( BlueprintReadOnly , VisibleInstanceOnly , Category = "Locomotion|Debug" )
 	ACharacter* DebugFocusCharacter;

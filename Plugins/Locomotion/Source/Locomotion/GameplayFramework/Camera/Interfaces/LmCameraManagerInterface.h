@@ -16,6 +16,6 @@ class LOCOMOTION_API ILmCameraManagerInterface {
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	UFUNCTION( BlueprintCallable , BlueprintNativeEvent )
+	UFUNCTION( BlueprintCallable , BlueprintNativeEvent , Category= "Locomotion" )
 	void SetControlledPawn(APawn* ControlledPawn);
 };

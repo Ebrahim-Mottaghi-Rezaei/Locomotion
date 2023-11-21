@@ -13,7 +13,7 @@ public:
 	ULmMovementAction();
 
 protected:
-	UPROPERTY( EditInstanceOnly , BlueprintReadWrite )
+	UPROPERTY( EditInstanceOnly , BlueprintReadWrite , Category= "Locomotion" )
 	ELmMovementAction MovementAction = ELmMovementAction::Lm_None;
 
 	virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference) override;

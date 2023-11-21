@@ -71,12 +71,12 @@ void ALmPlayerController::BeginPlay() {
 void ALmPlayerController::OnPossess(APawn* InPawn) {
 	Super::OnPossess( InPawn );
 
-	if ( !IsValid( PlayerCameraManager ) || !PlayerCameraManager.GetClass()->ImplementsInterface( ULmCameraManagerInterface::StaticClass() ) ) {
+	/*if ( !IsValid( PlayerCameraManager ) || !PlayerCameraManager.GetClass()->ImplementsInterface( ULmCameraManagerInterface::StaticClass() ) ) {
 		ULmLogger::LogError( TEXT( "ALmPlayerController, Camera Manager is invalid." ) );
 		return;
 	}
 
-	ILmCameraManagerInterface::Execute_SetControlledPawn( PlayerCameraManager , InPawn );
+	ILmCameraManagerInterface::Execute_SetControlledPawn( PlayerCameraManager , InPawn );*/
 }
 
 

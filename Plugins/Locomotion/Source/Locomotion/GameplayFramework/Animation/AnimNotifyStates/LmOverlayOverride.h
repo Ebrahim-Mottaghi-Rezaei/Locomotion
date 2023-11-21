@@ -12,7 +12,7 @@ public:
 	ULmOverlayOverride();
 
 protected:
-	UPROPERTY( EditInstanceOnly , BlueprintReadWrite )
+	UPROPERTY( EditInstanceOnly , BlueprintReadWrite , Category= "Locomotion" )
 	int OverlayOverriderState = 0;
 
 	virtual FString GetNotifyName_Implementation() const override;

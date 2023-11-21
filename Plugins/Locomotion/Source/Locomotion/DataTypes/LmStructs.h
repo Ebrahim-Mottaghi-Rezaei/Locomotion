@@ -4,21 +4,18 @@
 #include <Curves/CurveVector.h>
 #include "CoreMinimal.h"
 #include "LmEnums.h"
+#include "Curves/CurveFloat.h"
+#include "Curves/CurveVector.h"
 #include "Engine/DataTable.h"
 #include "Engine/EngineTypes.h"
+#include "Engine/HitResult.h"
+#include "GameFramework/Character.h"
 #include "LmStructs.generated.h"
-
-class UPrimitiveComponent;
-class UCurveVector;
-class UCurveFloat;
-class UAnimMontage;
-class UAnimSequenceBase;
-class ACharacter;
 
 USTRUCT( Category = "Locomotion|DataTypes" )
 struct FLmStruct {
 	GENERATED_BODY()
-	virtual ~FLmStruct() = default;
+	virtual ~FLmStruct();
 
 	virtual FString ToString(bool bPrintToLog = false);
 };
@@ -474,10 +471,10 @@ struct FLmControlVectors : public FLmStruct {
 };
 
 struct FLmHitResult {
-	virtual ~FLmHitResult() = default;
+	virtual ~FLmHitResult();
 
 	bool       bHit;
-	FHitResult SweepHitResult;
+	FHitResult HitResult;
 
 	virtual FString ToString(bool bPrintToLog = false);
 };

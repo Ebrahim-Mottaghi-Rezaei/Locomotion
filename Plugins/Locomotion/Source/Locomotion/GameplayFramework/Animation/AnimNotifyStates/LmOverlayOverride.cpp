@@ -3,7 +3,9 @@
 
 
 ULmOverlayOverride::ULmOverlayOverride() {
+#if WITH_EDITORONLY_DATA
 	NotifyColor = FColor::FromHex( TEXT( "00BCFFFF" ) );
+#endif
 }
 
 
