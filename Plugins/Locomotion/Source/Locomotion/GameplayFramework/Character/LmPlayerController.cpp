@@ -51,11 +51,11 @@ void ALmPlayerController::BeginPlay() {
 
 	DebugFocusCharacter = UGameplayStatics::GetPlayerCharacter( this , 0 );
 
-	/*if ( IsValid( HudTemplate ) ) {
+	if ( IsValid( HudTemplate ) ) {
 		if ( IsLocalPlayerController() )
 			CreateWidget( this , HudTemplate )->AddToViewport();
 	} else
-		ULmLogger::LogError( TEXT( "Locomotion HUD Template is null. Please set it in BP_LmPlayerController blueprint." ) );*/
+		ULmLogger::LogError( TEXT( "Locomotion HUD Template is null. Please set it in BP_LmPlayerController blueprint." ) );
 
 	//Search for all LmCharacters and populate the array.
 	//Used to switch target character when viewing character info in the HUD
@@ -71,12 +71,12 @@ void ALmPlayerController::BeginPlay() {
 void ALmPlayerController::OnPossess(APawn* InPawn) {
 	Super::OnPossess( InPawn );
 
-	/*if ( !IsValid( PlayerCameraManager ) || !PlayerCameraManager.GetClass()->ImplementsInterface( ULmCameraManagerInterface::StaticClass() ) ) {
+	if ( !IsValid( PlayerCameraManager ) || !PlayerCameraManager.GetClass()->ImplementsInterface( ULmCameraManagerInterface::StaticClass() ) ) {
 		ULmLogger::LogError( TEXT( "ALmPlayerController, Camera Manager is invalid." ) );
 		return;
 	}
 
-	ILmCameraManagerInterface::Execute_SetControlledPawn( PlayerCameraManager , InPawn );*/
+	ILmCameraManagerInterface::Execute_SetControlledPawn( PlayerCameraManager , InPawn );
 }
 
 

@@ -22,7 +22,7 @@ ALmBaseCharacter::ALmBaseCharacter() {
 	PrimaryActorTick.bCanEverTick = true;
 	bUseControllerRotationYaw     = false;
 
-	Tags.Add( TEXT( "ALS_Character" ) );
+	Tags.Add( TEXT( "Locomotion" ) );
 
 	MantleTimeline = CreateDefaultSubobject<UTimelineComponent>( FName( "MantleTimeline" ) );
 	MantleTimeline->SetTimelineLengthMode( TL_TimelineLength );
@@ -1201,7 +1201,9 @@ void ALmBaseCharacter::DrawDebugShapes() {
 	                                                                                                     0.0f ,
 	                                                                                                     1.0f ,
 	                                                                                                     50.0f ,
-	                                                                                                     75.0f ) * (bIsAccelerationZero ? LastMovementInputRotation.Vector() : MovementComponent->GetCurrentAcceleration()).
+	                                                                                                     75.0f ) * (bIsAccelerationZero ?
+		                                                                                                                LastMovementInputRotation.Vector() :
+		                                                                                                                MovementComponent->GetCurrentAcceleration()).
 	                                      GetUnsafeNormal();
 
 	UKismetSystemLibrary::DrawDebugArrow( this ,

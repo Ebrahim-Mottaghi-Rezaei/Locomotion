@@ -39,8 +39,6 @@ protected:
 	TSubclassOf<ULmWOverlayStateSwitcher> OverlayStateSwitcherTemplate;
 	UPROPERTY( BlueprintReadWrite , EditDefaultsOnly , Category = "Locomotion|HuD" )
 	TSubclassOf<UUserWidget> HudTemplate;
-	UPROPERTY( BlueprintReadWrite , EditDefaultsOnly , Category = "Locomotion|Camera Manager" )
-	TSubclassOf<ALmPlayerCameraManager> CameraManagerTemplate;
 
 	UPROPERTY( BlueprintReadOnly , VisibleInstanceOnly , Category = "Locomotion|Debug" )
 	ACharacter* DebugFocusCharacter;
